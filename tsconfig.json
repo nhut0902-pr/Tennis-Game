@@ -22,10 +22,11 @@
       ]
     },
     "allowImportingTsExtensions": true,
+    "noImplicitAny": false,
+    "strict": false,
     "noEmit": true
   },
   "include": [
-    "vite.config.ts",
     "src/**/*"
   ]
 }

@@ -1,1 +1,1565 @@
-export class MotionController{constructor(e={}){this.onSwing=typeof e.onSwing=="function"?e.onSwing:null,this.onToss=typeof e.onToss=="function"?e.onToss:null,this.onP2Swing=typeof e.onP2Swing=="function"?e.onP2Swing:null,this.onP2Toss=typeof e.onP2Toss=="function"?e.onP2Toss:null,this.onRoomState=typeof e.onRoomState=="function"?e.onRoomState:null,this.onStatusChange=typeof e.onStatusChange=="function"?e.onStatusChange:null,this.onOrientation=typeof e.onOrientation=="function"?e.onOrientation:null,this.roomId=(e.roomId||"default").trim().toLowerCase()||"default",this.role=(e.role||"p1").toLowerCase()==="p2"?"p2":"p1",this.webcamCanvasId=e.webcamCanvasId||"webcam-canvas",this.webcamCanvas=e.webcamCanvas||null,this.webcamCtx=null,this.flowWidth=64,this.flowHeight=48,this.offscreenCanvas=document.createElement("canvas"),this.offscreenCanvas.width=this.flowWidth,this.offscreenCanvas.height=this.flowHeight,this.offscreenCtx=this.offscreenCanvas.getContext("2d",{willReadFrequently:!0}),this.prevLuma=new Float32Array(this.flowWidth*this.flowHeight),this.motionEnergyMap=new Float32Array(this.flowWidth*this.flowHeight),this.hasPrevFrame=!1,this.videoElem=null,this.webcamStream=null,this.webcamActive=!1,this.smoothedCentroid={x:.5,y:.5},this.motionVector={vx:0,vy:0,mag:0},this.lastWebcamTriggerMs=0,this.phonePollIntervalMs=e.phonePollIntervalMs||50,this.phonePollTimer=null,this.phoneState={connected:!1,p2Connected:!1,lastSeenMs:-1,orientation:{pitch:0,roll:0,yaw:0,accelMag:0,buttonB:!1},lastSwing:null},this.p2PhoneState={connected:!1,lastSeenMs:-1,orientation:{pitch:0,roll:0,yaw:0,accelMag:0,buttonB:!1},lastSwing:null},this.lastProcessedPhoneSeq=0,this.phonePollInitialized=!1,this.lastProcessedP2PhoneSeq=0,this.p2PhonePollInitialized=!1,this.aimBiasX=0,this.selectedShotType="topspin",this.keysDown=new Set,this.pointerDrag=null,this.mouseTrail=[],this.lastVisualSwing={timestamp:0,dirX:0,dirY:-.5,speed:0,shotType:"topspin",source:"ready"},this._listeners={swing:[],toss:[],status:[],orientation:[]},this._rafId=null,this._disposed=!1,this._initDOMBindings(),this.startPhonePolling(),this._startHudRenderLoop()}setRoomConfig({roomId:e,role:t}={}){e&&(this.roomId=String(e).trim().toLowerCase()||"default",this.phonePollInitialized=!1,this.p2PhonePollInitialized=!1,this.lastProcessedPhoneSeq=0,this.lastProcessedP2PhoneSeq=0),t&&(this.role=String(t).toLowerCase()==="p2"?"p2":"p1")}on(e,t){return this._listeners[e]&&typeof t=="function"&&this._listeners[e].push(t),()=>{this._listeners[e]&&(this._listeners[e]=this._listeners[e].filter(i=>i!==t))}}setShotType(e){["topspin","slice","lob","smash","flat"].includes(e)&&(this.selectedShotType=e,this._updateHudShotPills(e))}_resolveSwingSide(e,t=0){return e==="backhand"||e==="forehand"||e==="overhead"?e:t>.12?"backhand":t<-.12?"forehand":null}_inferShotTypeFromKinematics({shotType:e,dirY:t=-.4,pitch:i=0,roll:a=0,speed:n=1.1}={}){return e&&["topspin","slice","lob","smash","flat"].includes(e)?e:t>.35&&n>1.22||n>=1.46||i<-18&&n>=1.25?"smash":t>.14||Math.abs(a)>26&&t>-.15?"slice":t<-.65||i>26?"lob":"topspin"}_emitSwing(e={}){const t=performance.now(),i=Math.max(.5,Math.min(2,Number(e.speed??1.1))),a=Math.max(-1,Math.min(1,Number(e.dirX??e.angleX??this.aimBiasX??0))),n=Math.max(-1,Math.min(1,Number(e.dirY??-.4))),h=Number(e.pitch??this.phoneState.orientation.pitch??0),p=Number(e.roll??this.phoneState.orientation.roll??0),f=this._resolveSwingSide(e.side,a),s=this._inferShotTypeFromKinematics({shotType:e.shotType,dirY:n,pitch:h,roll:p,speed:i}),l={type:"swing",role:e.role||this.role,source:e.source||"manual",side:f,shotType:s,speed:i,dirX:a,dirY:n,angleX:a,pitch:h,roll:p,timing:e.timing||null,timestamp:e.timestamp||Date.now()};if(this.lastVisualSwing={timestamp:t,side:f,dirX:a,dirY:n,speed:i,shotType:s,source:l.source},this.role==="p2"&&e.role!=="p1")return l.source!=="phone"&&!e._fromPoll&&fetch(`/api/racket/swing?room=${encodeURIComponent(this.roomId)}&role=p2`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room:this.roomId,role:"p2",type:"swing",side:f,shotType:s,speed:i,angleX:a,dirX:a,dirY:n,pitch:h,roll:p,source:l.source})}).then(r=>r.ok?r.json():null).then(r=>{r&&r.swing&&typeof r.swing.seq=="number"&&(this.p2PhonePollInitialized=!0,this.lastProcessedP2PhoneSeq=Math.max(this.lastProcessedP2PhoneSeq,r.swing.seq))}).catch(()=>{}),this._emitP2Swing(l);typeof this.onSwing=="function"&&this.onSwing(l);for(const r of this._listeners.swing)try{r(l)}catch(o){console.error(o)}return l}_emitToss(e={}){const t=performance.now(),i=Number(e.dirX??e.angleX??0),a=Number(e.dirY??-.9),n=this._resolveSwingSide(e.side,i),h=e.shotType||"lob",p=Number(e.pitch??this.phoneState.orientation.pitch??0),f=Number(e.roll??this.phoneState.orientation.roll??0),s={type:"toss",role:e.role||this.role,source:e.source||"manual",side:n,shotType:h,speed:Number(e.speed??1),dirX:i,dirY:a,angleX:i,pitch:p,roll:f,timestamp:e.timestamp||Date.now()};if(this.lastVisualSwing={timestamp:t,side:n,dirX:i,dirY:-.95,speed:1.1,shotType:"toss",source:s.source},this.role==="p2"&&e.role!=="p1")return s.source!=="phone"&&!e._fromPoll&&fetch(`/api/racket/swing?room=${encodeURIComponent(this.roomId)}&role=p2`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room:this.roomId,role:"p2",type:"toss",side:s.side,shotType:s.shotType,speed:s.speed,angleX:s.dirX,dirX:s.dirX,dirY:s.dirY,pitch:s.pitch,roll:s.roll,source:s.source})}).then(r=>r.ok?r.json():null).then(r=>{r&&r.swing&&typeof r.swing.seq=="number"&&(this.p2PhonePollInitialized=!0,this.lastProcessedP2PhoneSeq=Math.max(this.lastProcessedP2PhoneSeq,r.swing.seq))}).catch(()=>{}),this._emitP2Toss(s);let l=!1;typeof this.onToss=="function"&&(l=this.onToss(s)!==!1);for(const r of this._listeners.toss)try{r(s)!==!1&&(l=!0)}catch(o){console.error(o)}return!l&&typeof this.onSwing=="function"&&this.onSwing(s),s}_emitP2Swing(e={}){const t=Math.max(.5,Math.min(2,Number(e.speed??1.15))),i=Math.max(-1,Math.min(1,Number(e.dirX??e.angleX??0))),a=Math.max(-1,Math.min(1,Number(e.dirY??-.45))),n=Number(e.pitch??0),h=Number(e.roll??0),p=this._resolveSwingSide(e.side,i),f=this._inferShotTypeFromKinematics({shotType:e.shotType,dirY:a,pitch:n,roll:h,speed:t}),s={type:"swing",role:"p2",source:e.source||"phone",side:p,shotType:f,speed:t,dirX:i,dirY:a,angleX:i,pitch:n,roll:h,timestamp:e.timestamp||Date.now()};return typeof this.onP2Swing=="function"&&this.onP2Swing(s),s}_emitP2Toss(e={}){const t=Number(e.dirX??e.angleX??0),i=Number(e.dirY??-.9),a=this._resolveSwingSide(e.side,t),n={type:"toss",role:"p2",source:e.source||"phone",side:a,shotType:e.shotType||"lob",speed:Number(e.speed??1.1),dirX:t,dirY:i,angleX:t,pitch:Number(e.pitch??0),roll:Number(e.roll??0),timestamp:e.timestamp||Date.now()};let h=!1;return typeof this.onP2Toss=="function"&&(h=this.onP2Toss(n)!==!1),!h&&typeof this.onP2Swing=="function"&&this.onP2Swing(n),n}triggerSyntheticSwing(e={}){return(e.type||"swing")==="toss"?this._emitToss({source:e.source||"synthetic",side:e.side||null,shotType:e.shotType||"lob",speed:e.speed??1.05,dirX:e.dirX??e.angleX??0,dirY:e.dirY??-.9}):this._emitSwing({source:e.source||"synthetic",side:e.side||null,shotType:e.shotType,speed:e.speed??(e.shotType==="smash"?1.48:1.18),dirX:e.dirX??e.angleX??this.aimBiasX??0,dirY:e.dirY??-.45,pitch:e.pitch,roll:e.roll,timing:e.timing||null})}async _ensureMediaPipeHands(){if(this.mpHands||this._mpLoading)return;this._mpLoading=!0;const e=t=>new Promise((i,a)=>{if(document.querySelector(`script[src="${t}"]`)){i();return}const n=document.createElement("script");n.src=t,n.crossOrigin="anonymous",n.onload=()=>i(),n.onerror=h=>a(h),document.head.appendChild(n)});try{if(window.Hands||await e("https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"),window.Hands){const t=new window.Hands({locateFile:i=>i.endsWith(".js")?`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${i}`:`/assets/mediapipe/hands/${i}`});t.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:.4,minTrackingConfidence:.4}),t.onResults(i=>{this._mpBusy=!1,i&&i.multiHandLandmarks&&i.multiHandLandmarks.length>0?(this.latestHandLandmarks=i.multiHandLandmarks[0],this.latestHandSeenAt=performance.now(),this._hasNewHandResult=!0):this.latestHandLandmarks=null}),await t.initialize(),this.mpHands=t}}catch(t){console.warn("[MotionController] MediaPipe Hands CDN fallback to Optical Flow:",t)}finally{this._mpLoading=!1}}async enableWebcam(){if(this.webcamActive)return!0;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return this._notifyStatus({webcam:!1,error:"HTTPS required for browser camera access"}),window.location.protocol==="http:"&&window.location.hostname!=="localhost"&&window.location.hostname!=="127.0.0.1"&&window.open("https://argon-tennis-sandbox-170440.uc.r.appspot.com/?webcam=1","_blank"),!1;try{const e=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:"user"},audio:!1});return this.webcamStream=e,this.videoElem||(this.videoElem=document.createElement("video"),this.videoElem.playsInline=!0,this.videoElem.muted=!0),this.videoElem.srcObject=e,await this.videoElem.play(),this.webcamActive=!0,this.hasPrevFrame=!1,this.latestHandLandmarks=null,this._mpBusy=!1,this._ensureMediaPipeHands(),this._notifyStatus({webcam:!0,phone:this.phoneState.connected}),this._updateWebcamBadgeUI(!0),!0}catch(e){return console.warn("[MotionController] Webcam access denied or unavailable:",e),this.webcamActive=!1,this._notifyStatus({webcam:!1,error:e.message||"Camera permission denied"}),this._updateWebcamBadgeUI(!1),!1}}disableWebcam(){this.webcamStream&&(this.webcamStream.getTracks().forEach(e=>e.stop()),this.webcamStream=null),this.videoElem&&(this.videoElem.srcObject=null),this.webcamActive=!1,this.hasPrevFrame=!1,this.latestHandLandmarks=null,this._notifyStatus({webcam:!1,phone:this.phoneState.connected}),this._updateWebcamBadgeUI(!1)}async toggleWebcam(){return this.webcamActive?(this.disableWebcam(),!1):this.enableWebcam()}_processWebcamFrame(){if(!this.webcamActive||!this.videoElem||this.videoElem.readyState<2)return;const e=performance.now(),t=this.videoElem.currentTime!==this._lastVideoTime;if(t&&(this._lastVideoTime=this.videoElem.currentTime,this.mpHands&&!this._mpBusy&&(this._mpBusy=!0,this.mpHands.send({image:this.videoElem}).catch(()=>{this._mpBusy=!1}))),this.latestHandLandmarks&&e-(this.latestHandSeenAt||0)<240){if(!this._hasNewHandResult)return;this._hasNewHandResult=!1;const c=this.latestHandLandmarks,b=c[0],w=c[9],S=1-(b.x*.45+w.x*.55),_=b.y*.45+w.y*.55;for(this.smoothedCentroid.x=S,this.smoothedCentroid.y=_,(!this._webcamTrail||this._lastWebcamSource!=="mediapipe")&&(this._webcamTrail=[]),this._lastWebcamSource="mediapipe",this._webcamTrail.push({x:S,y:_,t:e});this._webcamTrail.length>5||this._webcamTrail.length>2&&e-this._webcamTrail[0].t>160;)this._webcamTrail.shift();this._evaluateHandTrail(e,!0);return}if(!t)return;const a=this.flowWidth,n=this.flowHeight,h=this.offscreenCtx;h.save(),h.scale(-1,1),h.drawImage(this.videoElem,-a,0,a,n),h.restore();const p=h.getImageData(0,0,a,n).data;let f=0;const s=8,l=6,r=a/s,o=n/l,y=new Float32Array(s*l),P=new Float32Array(s*l),d=new Float32Array(s*l);for(let c=0;c<n;c++){const b=Math.min(l-1,Math.floor(c/o));for(let w=0;w<a;w++){const S=c*a+w,_=S*4,C=(p[_]*.299+p[_+1]*.587+p[_+2]*.114)/255;if(this.hasPrevFrame){const X=Math.abs(C-this.prevLuma[S]),M=X>.11?X:0;if(this.motionEnergyMap[S]=this.motionEnergyMap[S]*.45+M*.55,M>.13){const v=M;f+=v;const I=Math.min(s-1,Math.floor(w/r)),k=b*s+I;y[k]+=v,P[k]+=w/a*v,d[k]+=c/n*v}}this.prevLuma[S]=C}}if(!this.hasPrevFrame){this.hasPrevFrame=!0,this._webcamTrail=[];return}let m=0,g=0,T=0;for(let c=0;c<l;c++)for(let b=0;b<s;b++){let w=0,S=0,_=0;for(let C=-1;C<=1;C++){const X=c+C;if(!(X<0||X>=l))for(let M=-1;M<=1;M++){const v=b+M;if(v<0||v>=s)continue;const I=X*s+v;w+=y[I],S+=P[I],_+=d[I]}}w>m&&(m=w,g=S,T=_)}const u=f>.001?m/f:0;if(m>3.2&&u>=.45){const c=g/m,b=T/m;for(this.smoothedCentroid.x=this.smoothedCentroid.x*.35+c*.65,this.smoothedCentroid.y=this.smoothedCentroid.y*.35+b*.65,(!this._webcamTrail||this._lastWebcamSource!=="flow")&&(this._webcamTrail=[]),this._lastWebcamSource="flow",this._webcamTrail.push({x:this.smoothedCentroid.x,y:this.smoothedCentroid.y,t:e});this._webcamTrail.length>5||this._webcamTrail.length>2&&e-this._webcamTrail[0].t>160;)this._webcamTrail.shift();this._evaluateHandTrail(e,!1)}else this.motionVector.vx*=.72,this.motionVector.vy*=.72,this.motionVector.mag*=.72,this._webcamTrail&&this._webcamTrail.length>0&&e-this._webcamTrail[this._webcamTrail.length-1].t>150&&(this._webcamTrail=[])}_evaluateHandTrail(e,t){if(!this._webcamTrail||this._webcamTrail.length<2)return;const i=this._webcamTrail[0],a=this._webcamTrail[this._webcamTrail.length-1],n=Math.max(.025,(a.t-i.t)/1e3),h=a.x-i.x,p=a.y-i.y,f=Math.hypot(h,p);let s=0;for(let m=1;m<this._webcamTrail.length;m++)s+=Math.hypot(this._webcamTrail[m].x-this._webcamTrail[m-1].x,this._webcamTrail[m].y-this._webcamTrail[m-1].y);const l=s>.001?f/s:0,r=t?.065:.1,o=t?.62:.7,y=t?.62:.85,P=h/n,d=p/n;if(this.motionVector.vx=P*.65,this.motionVector.vy=d*.65,this.motionVector.mag=l>=o?Math.hypot(this.motionVector.vx,this.motionVector.vy):0,f>=r&&l>=o&&this.motionVector.mag>=y&&e-this.lastWebcamTriggerMs>320){this.lastWebcamTriggerMs=e,this._webcamTrail=[a];const m=Math.min(1.65,Math.max(.85,.75+this.motionVector.mag*.45)),g=Math.max(-1,Math.min(1,this.motionVector.vx*.85)),T=Math.max(-1,Math.min(1,this.motionVector.vy*.85));let u=null;if(P>.15?u="backhand":P<-.15&&(u="forehand"),a.y<.35&&p<-.045&&d<-.45||d<-.85&&Math.abs(d)>Math.abs(P)*1.15)this._emitToss({source:"webcam",side:u,shotType:"lob",speed:m,dirX:g,dirY:-.9});else{let c="topspin";d>.85&&m>1.18||m>=1.46?c="smash":d>.32?c="slice":d<-.58&&(c="lob"),this._emitSwing({source:"webcam",side:u,shotType:c,speed:m,dirX:g,dirY:T})}}}startPhonePolling(){if(this.phonePollTimer)return;const e=async()=>{if(!this._disposed)try{const t=`?room=${encodeURIComponent(this.roomId||"default")}&role=${encodeURIComponent(this.role||"p1")}&touch=1`,i=await fetch(`/api/match/state${t}`,{cache:"no-store"});if(i.ok){const a=await i.json();typeof this.onRoomState=="function"&&this.onRoomState(a);const n=a.p1||a,h=a.p2||null,p=this.phoneState.connected,f=this.p2PhoneState.connected;this.phoneState.connected=!!n.connected,this.phoneState.lastSeenMs=Number(n.lastSeenMs??-1),h&&(this.p2PhoneState.connected=!!h.connected,this.p2PhoneState.lastSeenMs=Number(h.lastSeenMs??-1));const s=this.role==="p2"&&h?h:n;s&&s.orientation&&(this.phoneState.orientation={pitch:Number(s.orientation.pitch||0),roll:Number(s.orientation.roll||0),yaw:Number(s.orientation.yaw||0),accelMag:Number(s.orientation.accelMag||0),buttonB:!!s.orientation.buttonB},typeof this.onOrientation=="function"&&this.onOrientation(this.phoneState.orientation));const l=this.phoneState.connected||this.p2PhoneState.connected;if((p!==this.phoneState.connected||f!==this.p2PhoneState.connected)&&(this._notifyStatus({webcam:this.webcamActive,phone:l,p1Phone:this.phoneState.connected,p2Phone:this.p2PhoneState.connected}),this._updatePhoneBadgeUI(l)),n&&n.lastSwing&&typeof n.lastSwing.seq=="number"){const r=n.lastSwing.seq;if(!this.phonePollInitialized){this.phonePollInitialized=!0;const o=Date.now()-Number(n.lastSwing.serverTimeMs||0);this.lastProcessedPhoneSeq=o<1200?r-1:r}if(r>this.lastProcessedPhoneSeq){this.lastProcessedPhoneSeq=r,this.phoneState.lastSwing=n.lastSwing;const o=n.lastSwing;o.type==="toss"?this._emitToss({source:"phone",role:"p1",side:o.side,shotType:o.shotType||"lob",speed:o.speed||1.1,dirX:o.angleX??o.dirX??0,dirY:o.dirY??-.9,pitch:o.pitch,roll:o.roll}):this._emitSwing({source:"phone",role:"p1",side:o.side,shotType:o.shotType,speed:o.speed||1.15,dirX:o.angleX??o.dirX??0,dirY:o.dirY??-.45,pitch:o.pitch,roll:o.roll})}}else this.phonePollInitialized||(this.phonePollInitialized=!0,this.lastProcessedPhoneSeq=0);if(h&&h.lastSwing&&typeof h.lastSwing.seq=="number"){const r=h.lastSwing.seq;if(!this.p2PhonePollInitialized){this.p2PhonePollInitialized=!0;const o=Date.now()-Number(h.lastSwing.serverTimeMs||0);this.lastProcessedP2PhoneSeq=o<1200?r-1:r}if(r>this.lastProcessedP2PhoneSeq){this.lastProcessedP2PhoneSeq=r,this.p2PhoneState.lastSwing=h.lastSwing;const o=h.lastSwing;o.type==="toss"?this._emitP2Toss({source:"phone",role:"p2",side:o.side,shotType:o.shotType||"lob",speed:o.speed||1.1,dirX:o.angleX??o.dirX??0,dirY:o.dirY??-.9,pitch:o.pitch,roll:o.roll}):this._emitP2Swing({source:"phone",role:"p2",side:o.side,shotType:o.shotType,speed:o.speed||1.15,dirX:o.angleX??o.dirX??0,dirY:o.dirY??-.45,pitch:o.pitch,roll:o.roll})}}else this.p2PhonePollInitialized||(this.p2PhonePollInitialized=!0,this.lastProcessedP2PhoneSeq=0)}}catch{}};e(),this.phonePollTimer=setInterval(e,this.phonePollIntervalMs)}stopPhonePolling(){this.phonePollTimer&&(clearInterval(this.phonePollTimer),this.phonePollTimer=null)}triggerHapticFeedback({kind:e="hit",grade:t="PERFECT",shotType:i="TOPSPIN",speedKmh:a=165,intensity:n=1,role:h=null}={}){const p=h||this.role||"p1";if(typeof navigator<"u"&&navigator.vibrate)try{e==="whiff"||e==="fault"?navigator.vibrate([18,35,18]):n>=1.25||/PERFECT|POWER|SMASH/i.test(t)?navigator.vibrate([45,28,65]):navigator.vibrate([32])}catch{}fetch("/api/racket/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room:this.roomId||"default",role:p,kind:e,grade:t,shotType:i,speedKmh:Math.round(Number(a||150)),intensity:Number(n||1)})}).catch(()=>{})}_initDOMBindings(){this._onKeyDown=e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const t=e.code;this.keysDown.add(t),t==="KeyQ"||t==="ArrowLeft"||t==="KeyA"?this.aimBiasX=Math.max(-1,this.aimBiasX-.55):t==="KeyE"||t==="ArrowRight"||t==="KeyD"?this.aimBiasX=Math.min(1,this.aimBiasX+.55):t==="Digit1"?(this.setShotType("topspin"),this._emitSwing({source:"keyboard",shotType:"topspin",speed:1.18,dirX:this.aimBiasX,dirY:-.45})):t==="Digit2"?(this.setShotType("slice"),this._emitSwing({source:"keyboard",shotType:"slice",speed:1.05,dirX:this.aimBiasX,dirY:.45})):t==="Digit3"?(this.setShotType("lob"),this._emitSwing({source:"keyboard",shotType:"lob",speed:1.08,dirX:this.aimBiasX,dirY:-.85})):t==="Digit4"?(this.setShotType("smash"),this._emitSwing({source:"keyboard",shotType:"smash",speed:1.48,dirX:this.aimBiasX,dirY:.65})):t==="KeyT"||t==="ArrowUp"||t==="KeyW"?this._emitToss({source:"keyboard",shotType:"lob",speed:1.1,dirX:this.aimBiasX,dirY:-.9}):(t==="Space"||t==="Enter")&&(e.preventDefault(),this._emitSwing({source:"keyboard",speed:1.2,dirX:this.aimBiasX,dirY:-.45}))},this._onKeyUp=e=>{const t=e.code;this.keysDown.delete(t),!this.keysDown.has("KeyQ")&&!this.keysDown.has("ArrowLeft")&&!this.keysDown.has("KeyA")&&!this.keysDown.has("KeyE")&&!this.keysDown.has("ArrowRight")&&!this.keysDown.has("KeyD")&&(this.aimBiasX=0)},this._onPointerDown=e=>{e.target&&e.target.closest("button, a, input, select, .hud-interactive, .control-btn")||(this.pointerDrag={startX:e.clientX,startY:e.clientY,startTime:performance.now(),lastX:e.clientX,lastY:e.clientY},this.mouseTrail=[{x:e.clientX,y:e.clientY,t:performance.now()}])},this._onPointerMove=e=>{this.pointerDrag&&(this.pointerDrag.lastX=e.clientX,this.pointerDrag.lastY=e.clientY,this.mouseTrail.push({x:e.clientX,y:e.clientY,t:performance.now()}),this.mouseTrail.length>20&&this.mouseTrail.shift())},this._onPointerUp=e=>{if(!this.pointerDrag)return;const t=this.pointerDrag;this.pointerDrag=null;const i=(e.clientX??t.lastX)-t.startX,a=(e.clientY??t.lastY)-t.startY,n=Math.max(16,performance.now()-t.startTime),h=Math.hypot(i,a);if(h<18)return;const p=h/n,f=Math.min(1.65,Math.max(.82,.78+p*.42));let s=null;i>14?s="backhand":i<-14&&(s="forehand");const l=Math.max(-1,Math.min(1,i/180)),r=s==="backhand"?Math.max(.22,l):s==="forehand"?Math.min(-.22,l):l,o=Math.max(-1,Math.min(1,a/150));if(a<-55&&Math.abs(a)>Math.abs(i)*1.3)this._emitToss({source:"mouse",side:s,shotType:"lob",speed:f,dirX:r,dirY:-.9});else{let y="topspin";a>38&&f>1.22||f>1.46?y="smash":a>14?y="slice":a<-32?y="lob":y="topspin",this._emitSwing({source:"mouse",side:s,shotType:y,speed:f,dirX:r,dirY:o})}},window.addEventListener("keydown",this._onKeyDown),window.addEventListener("keyup",this._onKeyUp),window.addEventListener("pointerdown",this._onPointerDown),window.addEventListener("pointermove",this._onPointerMove),window.addEventListener("pointerup",this._onPointerUp)}_startHudRenderLoop(){const e=()=>{this._disposed||(this.webcamActive&&this._processWebcamFrame(),this.webcamCanvas||(this.webcamCanvas=document.getElementById(this.webcamCanvasId),this.webcamCanvas&&(this.webcamCtx=this.webcamCanvas.getContext("2d"))),this.webcamCanvas&&this.webcamCtx&&this._drawHudCanvas(this.webcamCtx,this.webcamCanvas.width,this.webcamCanvas.height),this._rafId=requestAnimationFrame(e))};this._rafId=requestAnimationFrame(e)}_drawHudCanvas(e,t,i){if(e.clearRect(0,0,t,i),this.webcamActive&&this.videoElem&&this.videoElem.readyState>=2){e.save(),e.scale(-1,1),e.drawImage(this.videoElem,-t,0,t,i),e.restore();const d=performance.now();if(this.latestHandLandmarks&&d-(this.latestHandSeenAt||0)<240){const g=this.latestHandLandmarks,T=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];e.strokeStyle="#00e436",e.lineWidth=2;for(const[u,c]of T){const b=g[u],w=g[c];e.beginPath(),e.moveTo((1-b.x)*t,b.y*i),e.lineTo((1-w.x)*t,w.y*i),e.stroke()}for(let u=0;u<g.length;u++){const c=g[u];e.fillStyle=u===0||u===8||u===9?"#dfff00":"#ffffff",e.beginPath(),e.arc((1-c.x)*t,c.y*i,u===0||u===9?3.5:2,0,Math.PI*2),e.fill()}}else{const g=t/this.flowWidth,T=i/this.flowHeight;e.fillStyle="rgba(223, 255, 0, 0.35)";for(let u=0;u<this.flowHeight;u+=2)for(let c=0;c<this.flowWidth;c+=2)this.motionEnergyMap[u*this.flowWidth+c]>.14&&e.fillRect(c*g,u*T,g*1.8,T*1.8)}}else{const d=e.createRadialGradient(t*.5,i*.5,6,t*.5,i*.5,t*.65);d.addColorStop(0,"rgba(24, 68, 42, 0.92)"),d.addColorStop(1,"rgba(10, 24, 36, 0.96)"),e.fillStyle=d,e.fillRect(0,0,t,i),e.strokeStyle="rgba(255, 255, 255, 0.14)",e.lineWidth=1,e.beginPath(),e.moveTo(0,i*.5),e.lineTo(t,i*.5),e.moveTo(t*.5,0),e.lineTo(t*.5,i),e.arc(t*.5,i*.5,Math.min(t,i)*.32,0,Math.PI*2),e.stroke()}const n=performance.now()-this.lastVisualSwing.timestamp,h=n<550,p=this.webcamActive?this.smoothedCentroid.x*t:t*.5,f=this.webcamActive?this.smoothedCentroid.y*i:i*.52;e.save();const s=(this.phoneState.orientation.roll||this.aimBiasX*28)*Math.PI/180;e.translate(p,f),e.rotate(s),e.strokeStyle=h?"#dfff00":"#00c8ff",e.lineWidth=2.2,e.beginPath(),e.ellipse(0,0,14,18,0,0,Math.PI*2),e.stroke(),e.beginPath(),e.moveTo(0,18),e.lineTo(0,28),e.stroke(),e.restore();let l=this.webcamActive?this.motionVector.vx*26:0,r=this.webcamActive?this.motionVector.vy*26:0;if(h){const d=1-n/550;l=this.lastVisualSwing.dirX*36*d,r=this.lastVisualSwing.dirY*32*d}if(Math.hypot(l,r)>3){const d=p+l,m=f+r,g=Math.atan2(r,l);e.save(),e.strokeStyle="#dfff00",e.fillStyle="#dfff00",e.lineWidth=2.5,e.beginPath(),e.moveTo(p,f),e.lineTo(d,m),e.stroke(),e.beginPath(),e.moveTo(d,m),e.lineTo(d-7*Math.cos(g-.5),m-7*Math.sin(g-.5)),e.lineTo(d-7*Math.cos(g+.5),m-7*Math.sin(g+.5)),e.closePath(),e.fill(),e.restore()}const o=h?Math.min(1,this.lastVisualSwing.speed/1.6*(1-n/650)):Math.min(1,this.motionVector.mag/1.4),y=5;e.fillStyle="rgba(0, 0, 0, 0.55)",e.fillRect(6,i-y-5,t-12,y),e.fillStyle=o>.75?"#dfff00":"#00d2ff",e.fillRect(6,i-y-5,(t-12)*o,y),e.fillStyle=h?"#dfff00":"rgba(255, 255, 255, 0.9)",e.font="bold 9px sans-serif";let P=this.webcamActive?"CAM OPTICAL FLOW":this.phoneState.connected?"POCKET RACKET LIVE":"MOTION RADAR";if(h){const d=this.lastVisualSwing.side==="backhand"?"BH":this.lastVisualSwing.side==="forehand"?"FH":"",m=(this.lastVisualSwing.shotType||"topspin").toUpperCase();P=d?`${d} \u2022 ${m}`:m}e.fillText(P,6,12)}_updateWebcamBadgeUI(e){const t=document.getElementById("webcam-status-badge")||document.getElementById("btn-webcam");t&&t.classList.toggle("active",e)}_updatePhoneBadgeUI(e){const t=document.getElementById("phone-status-badge")||document.getElementById("phone-racket-status");t&&(t.classList.toggle("connected",e),t.textContent=e?"Pocket Racket: Connected":"Pocket Racket: Ready")}_updateHudShotPills(e){if(typeof document>"u")return;const t=document.querySelectorAll("[data-shot-type]");!t||t.length===0||t.forEach(i=>{i.classList.toggle("active",i.dataset.shotType===e)})}_notifyStatus(e){typeof this.onStatusChange=="function"&&this.onStatusChange(e);for(const t of this._listeners.status)try{t(e)}catch(i){console.error(i)}}dispose(){this._disposed=!0,this.disableWebcam(),this.stopPhonePolling(),this._rafId&&cancelAnimationFrame(this._rafId),window.removeEventListener("keydown",this._onKeyDown),window.removeEventListener("keyup",this._onKeyUp),window.removeEventListener("pointerdown",this._onPointerDown),window.removeEventListener("pointermove",this._onPointerMove),window.removeEventListener("pointerup",this._onPointerUp)}}export default MotionController;
+export class MotionController {
+  constructor(opts = {}) {
+    this.onSwing = typeof opts.onSwing === "function" ? opts.onSwing : null;
+    this.onToss = typeof opts.onToss === "function" ? opts.onToss : null;
+    this.onP2Swing = typeof opts.onP2Swing === "function" ? opts.onP2Swing : null;
+    this.onP2Toss = typeof opts.onP2Toss === "function" ? opts.onP2Toss : null;
+    this.onRoomState = typeof opts.onRoomState === "function" ? opts.onRoomState : null;
+    this.onStatusChange = typeof opts.onStatusChange === "function" ? opts.onStatusChange : null;
+    this.onOrientation = typeof opts.onOrientation === "function" ? opts.onOrientation : null;
+
+    this.roomId = (opts.roomId || "default").trim().toLowerCase() || "default";
+    this.role = (opts.role || "p1").toLowerCase() === "p2" ? "p2" : "p1";
+
+    // Webcam config & state
+    this.webcamCanvasId = opts.webcamCanvasId || "webcam-canvas";
+    this.webcamCanvas = opts.webcamCanvas || null;
+    this.webcamCtx = null;
+    this.flowWidth = 64;
+    this.flowHeight = 48;
+    this.offscreenCanvas = document.createElement("canvas");
+    this.offscreenCanvas.width = this.flowWidth;
+    this.offscreenCanvas.height = this.flowHeight;
+    this.offscreenCtx = this.offscreenCanvas.getContext("2d", { willReadFrequently: true });
+    this.prevLuma = new Float32Array(this.flowWidth * this.flowHeight);
+    this.motionEnergyMap = new Float32Array(this.flowWidth * this.flowHeight);
+    this.hasPrevFrame = false;
+    this.videoElem = null;
+    this.webcamStream = null;
+    this.webcamActive = false;
+    this.smoothedCentroid = { x: 0.5, y: 0.5 };
+    this.motionVector = { vx: 0, vy: 0, mag: 0 };
+    this.lastWebcamTriggerMs = 0;
+
+    // Remote phone polling state
+    this.phonePollIntervalMs = opts.phonePollIntervalMs || 50;
+    this.phonePollTimer = null;
+    this.phoneState = {
+      connected: false,
+      p2Connected: false,
+      lastSeenMs: -1,
+      orientation: { pitch: 0, roll: 0, yaw: 0, accelMag: 0, buttonB: false },
+      lastSwing: null
+    };
+    this.p2PhoneState = {
+      connected: false,
+      lastSeenMs: -1,
+      orientation: { pitch: 0, roll: 0, yaw: 0, accelMag: 0, buttonB: false },
+      lastSwing: null
+    };
+    this.lastProcessedPhoneSeq = 0;
+    this.phonePollInitialized = false;
+    this.lastProcessedP2PhoneSeq = 0;
+    this.p2PhonePollInitialized = false;
+
+    // Movement & Aiming Inputs (PC Keyboard + Mobile Joystick)
+    this.aimBiasX = 0;
+    this.moveInput = { x: 0, z: 0 }; // x: -1 (left) to 1 (right), z: -1 (net/forward) to 1 (baseline/back)
+    this.selectedShotType = "topspin";
+    this.keysDown = new Set();
+    this.pointerDrag = null;
+    this.mouseTrail = [];
+    this.lastVisualSwing = { timestamp: 0, dirX: 0, dirY: -0.5, speed: 0, shotType: "topspin", source: "ready" };
+
+    // Mobile On-Screen Virtual Controls
+    this.joystickState = {
+      active: false,
+      touchId: null,
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0,
+      dx: 0,
+      dy: 0,
+      maxRadius: 44
+    };
+
+    // Device Motion (Mobile Gyroscope / Accelerometer Shake)
+    this.deviceMotionActive = false;
+    this.lastDeviceMotionSwingMs = 0;
+    this.lastDeviceMotionAccel = { x: 0, y: 0, z: 0 };
+    this.deviceOrientation = { gamma: 0, beta: 0, alpha: 0 };
+
+    // User settings (persisted in localStorage)
+    this.settings = this._loadSettings();
+
+    this._listeners = { swing: [], toss: [], status: [], orientation: [] };
+    this._rafId = null;
+    this._disposed = false;
+
+    this._initDOMBindings();
+    this._initTouchGamepad();
+    this.startPhonePolling();
+    this._startHudRenderLoop();
+
+    // Auto-enable touch controls if touch device or narrow screen
+    const isTouch = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 1024);
+    if (isTouch && this.settings.touchGamepadEnabled !== false) {
+      this.setTouchControlsVisible(true);
+    }
+  }
+
+  _loadSettings() {
+    try {
+      const saved = localStorage.getItem("argon_tennis_controls_settings");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      touchGamepadEnabled: true,
+      deviceMotionEnabled: false,
+      hapticsEnabled: true,
+      manualMovement: true,
+      moveSpeedRatio: 1.0,
+      moveSensitivity: 1.0
+    };
+  }
+
+  saveSettings() {
+    try {
+      localStorage.setItem("argon_tennis_controls_settings", JSON.stringify(this.settings));
+    } catch {}
+  }
+
+  getMoveInput() {
+    return { ...this.moveInput };
+  }
+
+  setRoomConfig({ roomId, role } = {}) {
+    if (roomId) {
+      this.roomId = String(roomId).trim().toLowerCase() || "default";
+      this.phonePollInitialized = false;
+      this.p2PhonePollInitialized = false;
+      this.lastProcessedPhoneSeq = 0;
+      this.lastProcessedP2PhoneSeq = 0;
+    }
+    if (role) {
+      this.role = String(role).toLowerCase() === "p2" ? "p2" : "p1";
+    }
+  }
+
+  on(event, handler) {
+    if (this._listeners[event] && typeof handler === "function") {
+      this._listeners[event].push(handler);
+    }
+    return () => {
+      if (this._listeners[event]) {
+        this._listeners[event] = this._listeners[event].filter(h => h !== handler);
+      }
+    };
+  }
+
+  setShotType(type) {
+    if (["topspin", "slice", "lob", "smash", "flat"].includes(type)) {
+      this.selectedShotType = type;
+      this._updateHudShotPills(type);
+    }
+  }
+
+  _resolveSwingSide(side, dirX = 0) {
+    if (side === "backhand" || side === "forehand" || side === "overhead") return side;
+    return dirX > 0.12 ? "backhand" : dirX < -0.12 ? "forehand" : null;
+  }
+
+  _inferShotTypeFromKinematics({ shotType, dirY = -0.4, pitch = 0, roll = 0, speed = 1.1 } = {}) {
+    if (shotType && ["topspin", "slice", "lob", "smash", "flat"].includes(shotType)) {
+      return shotType;
+    }
+    if ((dirY > 0.35 && speed > 1.22) || speed >= 1.46 || (pitch < -18 && speed >= 1.25)) {
+      return "smash";
+    }
+    if (dirY > 0.14 || (Math.abs(roll) > 26 && dirY > -0.15)) {
+      return "slice";
+    }
+    if (dirY < -0.65 || pitch > 26) {
+      return "lob";
+    }
+    return "topspin";
+  }
+
+  _emitSwing(raw = {}) {
+    const now = performance.now();
+    const speed = Math.max(0.5, Math.min(2.0, Number(raw.speed ?? 1.18)));
+    const dirX = Math.max(-1.0, Math.min(1.0, Number(raw.dirX ?? raw.angleX ?? this.aimBiasX ?? 0)));
+    const dirY = Math.max(-1.0, Math.min(1.0, Number(raw.dirY ?? -0.4)));
+    const pitch = Number(raw.pitch ?? this.phoneState.orientation.pitch ?? 0);
+    const roll = Number(raw.roll ?? this.phoneState.orientation.roll ?? 0);
+    const side = this._resolveSwingSide(raw.side, dirX);
+    const shotType = this._inferShotTypeFromKinematics({
+      shotType: raw.shotType || this.selectedShotType,
+      dirY,
+      pitch,
+      roll,
+      speed
+    });
+
+    const evt = {
+      type: "swing",
+      role: raw.role || this.role,
+      source: raw.source || "manual",
+      side,
+      shotType,
+      speed,
+      dirX,
+      dirY,
+      angleX: dirX,
+      pitch,
+      roll,
+      timing: raw.timing || null,
+      timestamp: raw.timestamp || Date.now()
+    };
+
+    this.lastVisualSwing = {
+      timestamp: now,
+      side,
+      dirX,
+      dirY,
+      speed,
+      shotType,
+      source: evt.source
+    };
+
+    if (this.settings.hapticsEnabled && (evt.source === "touch_button" || evt.source === "device_motion")) {
+      this.triggerHapticFeedback({ kind: "swing", intensity: 0.8 });
+    }
+
+    if (this.role === "p2" && raw.role !== "p1") {
+      if (evt.source !== "phone" && !raw._fromPoll) {
+        fetch(`/api/racket/swing?room=${encodeURIComponent(this.roomId)}&role=p2`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            room: this.roomId,
+            role: "p2",
+            type: "swing",
+            side,
+            shotType,
+            speed,
+            angleX: dirX,
+            dirX,
+            dirY,
+            pitch,
+            roll,
+            source: evt.source
+          })
+        }).then(r => r.ok ? r.json() : null).then(r => {
+          if (r?.swing && typeof r.swing.seq === "number") {
+            this.p2PhonePollInitialized = true;
+            this.lastProcessedP2PhoneSeq = Math.max(this.lastProcessedP2PhoneSeq, r.swing.seq);
+          }
+        }).catch(() => {});
+      }
+      return this._emitP2Swing(evt);
+    }
+
+    if (typeof this.onSwing === "function") this.onSwing(evt);
+    for (const h of this._listeners.swing) {
+      try { h(evt); } catch (e) { console.error(e); }
+    }
+    return evt;
+  }
+
+  _emitToss(raw = {}) {
+    const now = performance.now();
+    const dirX = Number(raw.dirX ?? raw.angleX ?? this.aimBiasX ?? 0);
+    const dirY = Number(raw.dirY ?? -0.9);
+    const side = this._resolveSwingSide(raw.side, dirX);
+    const shotType = raw.shotType || "lob";
+    const pitch = Number(raw.pitch ?? this.phoneState.orientation.pitch ?? 0);
+    const roll = Number(raw.roll ?? this.phoneState.orientation.roll ?? 0);
+
+    const evt = {
+      type: "toss",
+      role: raw.role || this.role,
+      source: raw.source || "manual",
+      side,
+      shotType,
+      speed: Number(raw.speed ?? 1.1),
+      dirX,
+      dirY,
+      angleX: dirX,
+      pitch,
+      roll,
+      timestamp: raw.timestamp || Date.now()
+    };
+
+    this.lastVisualSwing = {
+      timestamp: now,
+      side,
+      dirX,
+      dirY: -0.95,
+      speed: 1.1,
+      shotType: "toss",
+      source: evt.source
+    };
+
+    if (this.settings.hapticsEnabled && (evt.source === "touch_button" || evt.source === "device_motion")) {
+      this.triggerHapticFeedback({ kind: "toss", intensity: 0.6 });
+    }
+
+    if (this.role === "p2" && raw.role !== "p1") {
+      if (evt.source !== "phone" && !raw._fromPoll) {
+        fetch(`/api/racket/swing?room=${encodeURIComponent(this.roomId)}&role=p2`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            room: this.roomId,
+            role: "p2",
+            type: "toss",
+            side: evt.side,
+            shotType: evt.shotType,
+            speed: evt.speed,
+            angleX: evt.dirX,
+            dirX: evt.dirX,
+            dirY: evt.dirY,
+            pitch: evt.pitch,
+            roll: evt.roll,
+            source: evt.source
+          })
+        }).then(r => r.ok ? r.json() : null).then(r => {
+          if (r?.swing && typeof r.swing.seq === "number") {
+            this.p2PhonePollInitialized = true;
+            this.lastProcessedP2PhoneSeq = Math.max(this.lastProcessedP2PhoneSeq, r.swing.seq);
+          }
+        }).catch(() => {});
+      }
+      return this._emitP2Toss(evt);
+    }
+
+    let handled = false;
+    if (typeof this.onToss === "function") {
+      handled = this.onToss(evt) !== false;
+    }
+    for (const h of this._listeners.toss) {
+      try { if (h(evt) !== false) handled = true; } catch (e) { console.error(e); }
+    }
+    if (!handled && typeof this.onSwing === "function") {
+      this.onSwing(evt);
+    }
+    return evt;
+  }
+
+  _emitP2Swing(evt = {}) {
+    const speed = Math.max(0.5, Math.min(2.0, Number(evt.speed ?? 1.15)));
+    const dirX = Math.max(-1.0, Math.min(1.0, Number(evt.dirX ?? evt.angleX ?? 0)));
+    const dirY = Math.max(-1.0, Math.min(1.0, Number(evt.dirY ?? -0.45)));
+    const pitch = Number(evt.pitch ?? 0);
+    const roll = Number(evt.roll ?? 0);
+    const side = this._resolveSwingSide(evt.side, dirX);
+    const shotType = this._inferShotTypeFromKinematics({
+      shotType: evt.shotType,
+      dirY,
+      pitch,
+      roll,
+      speed
+    });
+
+    const s = {
+      type: "swing",
+      role: "p2",
+      source: evt.source || "phone",
+      side,
+      shotType,
+      speed,
+      dirX,
+      dirY,
+      angleX: dirX,
+      pitch,
+      roll,
+      timestamp: evt.timestamp || Date.now()
+    };
+    if (typeof this.onP2Swing === "function") this.onP2Swing(s);
+    return s;
+  }
+
+  _emitP2Toss(evt = {}) {
+    const dirX = Number(evt.dirX ?? evt.angleX ?? 0);
+    const dirY = Number(evt.dirY ?? -0.9);
+    const side = this._resolveSwingSide(evt.side, dirX);
+    const s = {
+      type: "toss",
+      role: "p2",
+      source: evt.source || "phone",
+      side,
+      shotType: evt.shotType || "lob",
+      speed: Number(evt.speed ?? 1.1),
+      dirX,
+      dirY,
+      angleX: dirX,
+      pitch: Number(evt.pitch ?? 0),
+      roll: Number(evt.roll ?? 0),
+      timestamp: evt.timestamp || Date.now()
+    };
+    let handled = false;
+    if (typeof this.onP2Toss === "function") {
+      handled = this.onP2Toss(s) !== false;
+    }
+    if (!handled && typeof this.onP2Swing === "function") {
+      this.onP2Swing(s);
+    }
+    return s;
+  }
+
+  triggerSyntheticSwing(opts = {}) {
+    if ((opts.type || "swing") === "toss") {
+      return this._emitToss({
+        source: opts.source || "synthetic",
+        side: opts.side || null,
+        shotType: opts.shotType || "lob",
+        speed: opts.speed ?? 1.05,
+        dirX: opts.dirX ?? opts.angleX ?? 0,
+        dirY: opts.dirY ?? -0.9
+      });
+    }
+    return this._emitSwing({
+      source: opts.source || "synthetic",
+      side: opts.side || null,
+      shotType: opts.shotType,
+      speed: opts.speed ?? (opts.shotType === "smash" ? 1.48 : 1.18),
+      dirX: opts.dirX ?? opts.angleX ?? this.aimBiasX ?? 0,
+      dirY: opts.dirY ?? -0.45,
+      pitch: opts.pitch,
+      roll: opts.roll,
+      timing: opts.timing || null
+    });
+  }
+
+  // --- Mobile On-Screen Virtual Controls ---
+  _initTouchGamepad() {
+    const layer = document.getElementById("touch-gamepad-layer");
+    if (!layer) return;
+
+    const stickBase = document.getElementById("touch-joystick-base");
+    const stickThumb = document.getElementById("touch-joystick-thumb");
+
+    // Virtual Joystick Touch Handlers
+    const handleJoystickStart = (e) => {
+      const touch = e.changedTouches ? e.changedTouches[0] : e;
+      const rect = stickBase.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      this.joystickState.active = true;
+      this.joystickState.touchId = touch.identifier ?? "mouse";
+      this.joystickState.startX = centerX;
+      this.joystickState.startY = centerY;
+
+      updateJoystickPos(touch.clientX, touch.clientY);
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleJoystickMove = (e) => {
+      if (!this.joystickState.active) return;
+      const touch = e.changedTouches
+        ? Array.from(e.changedTouches).find(t => t.identifier === this.joystickState.touchId)
+        : e;
+      if (!touch) return;
+
+      updateJoystickPos(touch.clientX, touch.clientY);
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleJoystickEnd = (e) => {
+      if (!this.joystickState.active) return;
+      if (e.changedTouches) {
+        const found = Array.from(e.changedTouches).some(t => t.identifier === this.joystickState.touchId);
+        if (!found) return;
+      }
+      this.joystickState.active = false;
+      this.joystickState.touchId = null;
+      this.joystickState.dx = 0;
+      this.joystickState.dy = 0;
+
+      // Re-evaluate movement based on keyboard keys if joystick was released
+      this._updateKeyboardMovement();
+
+      if (stickThumb) {
+        stickThumb.style.transform = `translate(0px, 0px)`;
+        stickThumb.classList.remove("active");
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const updateJoystickPos = (clientX, clientY) => {
+      const dx = clientX - this.joystickState.startX;
+      const dy = clientY - this.joystickState.startY;
+      const dist = Math.hypot(dx, dy);
+      const maxR = this.joystickState.maxRadius;
+      const clampedDist = Math.min(dist, maxR);
+      const angle = Math.atan2(dy, dx);
+
+      const thumbX = Math.cos(angle) * clampedDist;
+      const thumbY = Math.sin(angle) * clampedDist;
+
+      if (stickThumb) {
+        stickThumb.style.transform = `translate(${thumbX.toFixed(1)}px, ${thumbY.toFixed(1)}px)`;
+        stickThumb.classList.add("active");
+      }
+
+      const normX = thumbX / maxR;
+      const normY = thumbY / maxR;
+
+      this.joystickState.dx = normX;
+      this.joystickState.dy = normY;
+
+      // Update movement and aimBias
+      this.moveInput.x = normX;
+      this.moveInput.z = normY; // drag up (negative Y) = run to net (negative Z in ThreeJS)
+      this.aimBiasX = Math.max(-1, Math.min(1, normX * 1.15));
+    };
+
+    if (stickBase) {
+      stickBase.addEventListener("touchstart", handleJoystickStart, { passive: false });
+      window.addEventListener("touchmove", handleJoystickMove, { passive: false });
+      window.addEventListener("touchend", handleJoystickEnd, { passive: false });
+      window.addEventListener("touchcancel", handleJoystickEnd, { passive: false });
+
+      // Support mouse test for joystick
+      stickBase.addEventListener("mousedown", (e) => {
+        handleJoystickStart(e);
+        const onMouseMove = (ev) => handleJoystickMove(ev);
+        const onMouseUp = (ev) => {
+          handleJoystickEnd(ev);
+          window.removeEventListener("mousemove", onMouseMove);
+          window.removeEventListener("mouseup", onMouseUp);
+        };
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+      });
+    }
+
+    // Touch Action Buttons
+    const bindTouchAction = (btnId, callback) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const trigger = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        btn.classList.add("btn-pressed");
+        setTimeout(() => btn.classList.remove("btn-pressed"), 180);
+        callback();
+      };
+      btn.addEventListener("touchstart", trigger, { passive: false });
+      btn.addEventListener("click", trigger);
+    };
+
+    // Main Swing (Đánh bóng)
+    bindTouchAction("btn-touch-swing", () => {
+      this._emitSwing({
+        source: "touch_button",
+        shotType: this.selectedShotType,
+        speed: 1.25,
+        dirX: this.aimBiasX,
+        dirY: -0.45
+      });
+    });
+
+    // Toss / Serve (Tung bóng / Giao bóng)
+    bindTouchAction("btn-touch-toss", () => {
+      this._emitToss({
+        source: "touch_button",
+        dirX: this.aimBiasX,
+        dirY: -0.9,
+        speed: 1.1
+      });
+    });
+
+    // Shot Modifiers
+    bindTouchAction("btn-touch-topspin", () => {
+      this.setShotType("topspin");
+      this._emitSwing({
+        source: "touch_button",
+        shotType: "topspin",
+        speed: 1.22,
+        dirX: this.aimBiasX,
+        dirY: -0.45
+      });
+    });
+
+    bindTouchAction("btn-touch-slice", () => {
+      this.setShotType("slice");
+      this._emitSwing({
+        source: "touch_button",
+        shotType: "slice",
+        speed: 1.05,
+        dirX: this.aimBiasX,
+        dirY: 0.45
+      });
+    });
+
+    bindTouchAction("btn-touch-lob", () => {
+      this.setShotType("lob");
+      this._emitSwing({
+        source: "touch_button",
+        shotType: "lob",
+        speed: 1.1,
+        dirX: this.aimBiasX,
+        dirY: -0.85
+      });
+    });
+
+    bindTouchAction("btn-touch-smash", () => {
+      this.setShotType("smash");
+      this._emitSwing({
+        source: "touch_button",
+        shotType: "smash",
+        speed: 1.5,
+        dirX: this.aimBiasX,
+        dirY: 0.65
+      });
+    });
+  }
+
+  setTouchControlsVisible(visible) {
+    this.settings.touchGamepadEnabled = visible;
+    this.saveSettings();
+    const layer = document.getElementById("touch-gamepad-layer");
+    if (layer) {
+      layer.classList.toggle("visible-override", visible);
+      layer.classList.toggle("hidden-override", !visible);
+    }
+    const toggleBtn = document.getElementById("btn-touch-toggle");
+    if (toggleBtn) {
+      toggleBtn.classList.toggle("active", visible);
+    }
+  }
+
+  toggleTouchControls() {
+    const isVisible = this.settings.touchGamepadEnabled;
+    this.setTouchControlsVisible(!isVisible);
+    return !isVisible;
+  }
+
+  // --- Mobile Device Motion (Gyro / Accelerometer Shake) ---
+  async enableDeviceMotion() {
+    if (this.deviceMotionActive) return true;
+
+    // Check iOS 13+ permission request
+    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+      try {
+        const response = await DeviceMotionEvent.requestPermission();
+        if (response !== "granted") {
+          console.warn("[MotionController] DeviceMotion permission not granted:", response);
+          return false;
+        }
+      } catch (err) {
+        console.warn("[MotionController] DeviceMotionEvent permission error:", err);
+        return false;
+      }
+    }
+
+    this._onDeviceMotion = (e) => {
+      if (this._disposed || !this.deviceMotionActive) return;
+      const acc = e.acceleration || e.accelerationIncludingGravity;
+      if (!acc) return;
+
+      const ax = acc.x || 0;
+      const ay = acc.y || 0;
+      const az = acc.z || 0;
+      const totalMag = Math.hypot(ax, ay, az);
+
+      const now = performance.now();
+      // Detect strong swing forward/down (accel > 17 m/s² and cooldown > 380ms)
+      if (totalMag > 17 && now - this.lastDeviceMotionSwingMs > 380) {
+        this.lastDeviceMotionSwingMs = now;
+        const speed = Math.min(1.85, Math.max(0.95, totalMag / 14));
+        const dirX = Math.max(-1, Math.min(1, -ax / 10 + this.aimBiasX));
+        let shotType = this.selectedShotType;
+        if (ay > 14) shotType = "smash";
+        else if (ay < -8) shotType = "lob";
+
+        this._emitSwing({
+          source: "device_motion",
+          shotType,
+          speed,
+          dirX,
+          dirY: -0.45
+        });
+      }
+      this.lastDeviceMotionAccel = { x: ax, y: ay, z: az };
+    };
+
+    this._onDeviceOrientation = (e) => {
+      if (this._disposed || !this.deviceMotionActive) return;
+      const gamma = e.gamma || 0; // tilt left/right (-90 to 90)
+      const beta = e.beta || 0;
+      this.deviceOrientation = { gamma, beta, alpha: e.alpha || 0 };
+
+      // Gentle tilt biases the aim
+      this.aimBiasX = Math.max(-1, Math.min(1, gamma / 35));
+    };
+
+    window.addEventListener("devicemotion", this._onDeviceMotion);
+    window.addEventListener("deviceorientation", this._onDeviceOrientation);
+    this.deviceMotionActive = true;
+    this.settings.deviceMotionEnabled = true;
+    this.saveSettings();
+
+    const gyroBtn = document.getElementById("btn-gyro-toggle");
+    if (gyroBtn) gyroBtn.classList.add("active");
+    return true;
+  }
+
+  disableDeviceMotion() {
+    if (this._onDeviceMotion) window.removeEventListener("devicemotion", this._onDeviceMotion);
+    if (this._onDeviceOrientation) window.removeEventListener("deviceorientation", this._onDeviceOrientation);
+    this.deviceMotionActive = false;
+    this.settings.deviceMotionEnabled = false;
+    this.saveSettings();
+
+    const gyroBtn = document.getElementById("btn-gyro-toggle");
+    if (gyroBtn) gyroBtn.classList.remove("active");
+  }
+
+  async toggleDeviceMotion() {
+    return this.deviceMotionActive ? (this.disableDeviceMotion(), false) : this.enableDeviceMotion();
+  }
+
+  // --- Webcam Motion & MediaPipe ---
+  async _ensureMediaPipeHands() {
+    if (this.mpHands || this._mpLoading) return;
+    this._mpLoading = true;
+    const loadScript = src => new Promise((res, rej) => {
+      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+      const s = document.createElement("script");
+      s.src = src;
+      s.crossOrigin = "anonymous";
+      s.onload = () => res();
+      s.onerror = e => rej(e);
+      document.head.appendChild(s);
+    });
+
+    try {
+      if (!window.Hands) {
+        await loadScript("https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js");
+      }
+      if (window.Hands) {
+        const hands = new window.Hands({
+          locateFile: file => file.endsWith(".js")
+            ? `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            : `/assets/mediapipe/hands/${file}`
+        });
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.4,
+          minTrackingConfidence: 0.4
+        });
+        hands.onResults(results => {
+          this._mpBusy = false;
+          if (results?.multiHandLandmarks?.length > 0) {
+            this.latestHandLandmarks = results.multiHandLandmarks[0];
+            this.latestHandSeenAt = performance.now();
+            this._hasNewHandResult = true;
+          } else {
+            this.latestHandLandmarks = null;
+          }
+        });
+        await hands.initialize();
+        this.mpHands = hands;
+      }
+    } catch (err) {
+      console.warn("[MotionController] MediaPipe Hands CDN fallback to Optical Flow:", err);
+    } finally {
+      this._mpLoading = false;
+    }
+  }
+
+  async enableWebcam() {
+    if (this.webcamActive) return true;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      this._notifyStatus({ webcam: false, error: "HTTPS required for browser camera access" });
+      return false;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+        audio: false
+      });
+      this.webcamStream = stream;
+      if (!this.videoElem) {
+        this.videoElem = document.createElement("video");
+        this.videoElem.playsInline = true;
+        this.videoElem.muted = true;
+      }
+      this.videoElem.srcObject = stream;
+      await this.videoElem.play();
+      this.webcamActive = true;
+      this.hasPrevFrame = false;
+      this.latestHandLandmarks = null;
+      this._mpBusy = false;
+      this._ensureMediaPipeHands();
+      this._notifyStatus({ webcam: true, phone: this.phoneState.connected });
+      this._updateWebcamBadgeUI(true);
+      return true;
+    } catch (err) {
+      console.warn("[MotionController] Webcam access denied or unavailable:", err);
+      this.webcamActive = false;
+      this._notifyStatus({ webcam: false, error: err.message || "Camera permission denied" });
+      this._updateWebcamBadgeUI(false);
+      return false;
+    }
+  }
+
+  disableWebcam() {
+    if (this.webcamStream) {
+      this.webcamStream.getTracks().forEach(t => t.stop());
+      this.webcamStream = null;
+    }
+    if (this.videoElem) this.videoElem.srcObject = null;
+    this.webcamActive = false;
+    this.hasPrevFrame = false;
+    this.latestHandLandmarks = null;
+    this._notifyStatus({ webcam: false, phone: this.phoneState.connected });
+    this._updateWebcamBadgeUI(false);
+  }
+
+  async toggleWebcam() {
+    return this.webcamActive ? (this.disableWebcam(), false) : this.enableWebcam();
+  }
+
+  _processWebcamFrame() {
+    if (!this.webcamActive || !this.videoElem || this.videoElem.readyState < 2) return;
+    const now = performance.now();
+    const frameChanged = this.videoElem.currentTime !== this._lastVideoTime;
+    if (frameChanged) {
+      this._lastVideoTime = this.videoElem.currentTime;
+      if (this.mpHands && !this._mpBusy) {
+        this._mpBusy = true;
+        this.mpHands.send({ image: this.videoElem }).catch(() => { this._mpBusy = false; });
+      }
+    }
+
+    if (this.latestHandLandmarks && (now - (this.latestHandSeenAt || 0) < 240)) {
+      if (!this._hasNewHandResult) return;
+      this._hasNewHandResult = false;
+      const lm = this.latestHandLandmarks;
+      const wrist = lm[0];
+      const middleMcp = lm[9];
+      const cx = 1 - (wrist.x * 0.45 + middleMcp.x * 0.55);
+      const cy = wrist.y * 0.45 + middleMcp.y * 0.55;
+      this.smoothedCentroid.x = cx;
+      this.smoothedCentroid.y = cy;
+
+      if (!this._webcamTrail || this._lastWebcamSource !== "mediapipe") this._webcamTrail = [];
+      this._lastWebcamSource = "mediapipe";
+      this._webcamTrail.push({ x: cx, y: cy, t: now });
+      while (this._webcamTrail.length > 5 || (this._webcamTrail.length > 2 && (now - this._webcamTrail[0].t > 160))) {
+        this._webcamTrail.shift();
+      }
+      this._evaluateHandTrail(now, true);
+      return;
+    }
+
+    if (!frameChanged) return;
+    const w = this.flowWidth;
+    const h = this.flowHeight;
+    const ctx = this.offscreenCtx;
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(this.videoElem, -w, 0, w, h);
+    ctx.restore();
+
+    const imgData = ctx.getImageData(0, 0, w, h).data;
+    let totalE = 0;
+    const numCols = 8;
+    const numRows = 6;
+    const cellW = w / numCols;
+    const cellH = h / numRows;
+    const cellEnergy = new Float32Array(numCols * numRows);
+    const cellPosX = new Float32Array(numCols * numRows);
+    const cellPosY = new Float32Array(numCols * numRows);
+
+    for (let r = 0; r < h; r++) {
+      const cr = Math.min(numRows - 1, Math.floor(r / cellH));
+      for (let c = 0; c < w; c++) {
+        const idx = r * w + c;
+        const p = idx * 4;
+        const lum = (imgData[p] * 0.299 + imgData[p + 1] * 0.587 + imgData[p + 2] * 0.114) / 255;
+        if (this.hasPrevFrame) {
+          const diff = Math.abs(lum - this.prevLuma[idx]);
+          const mot = diff > 0.11 ? diff : 0;
+          this.motionEnergyMap[idx] = this.motionEnergyMap[idx] * 0.45 + mot * 0.55;
+          if (mot > 0.13) {
+            totalE += mot;
+            const cc = Math.min(numCols - 1, Math.floor(c / cellW));
+            const cIdx = cr * numCols + cc;
+            cellEnergy[cIdx] += mot;
+            cellPosX[cIdx] += (c / w) * mot;
+            cellPosY[cIdx] += (r / h) * mot;
+          }
+        }
+        this.prevLuma[idx] = lum;
+      }
+    }
+
+    if (!this.hasPrevFrame) {
+      this.hasPrevFrame = true;
+      this._webcamTrail = [];
+      return;
+    }
+
+    let maxE = 0, bestX = 0, bestY = 0;
+    for (let cr = 0; cr < numRows; cr++) {
+      for (let cc = 0; cc < numCols; cc++) {
+        let eSum = 0, xSum = 0, ySum = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+          const nr = cr + dr;
+          if (nr < 0 || nr >= numRows) continue;
+          for (let dc = -1; dc <= 1; dc++) {
+            const nc = cc + dc;
+            if (nc < 0 || nc >= numCols) continue;
+            const nIdx = nr * numCols + nc;
+            eSum += cellEnergy[nIdx];
+            xSum += cellPosX[nIdx];
+            ySum += cellPosY[nIdx];
+          }
+        }
+        if (eSum > maxE) {
+          maxE = eSum;
+          bestX = xSum;
+          bestY = ySum;
+        }
+      }
+    }
+
+    const peakRatio = totalE > 0.001 ? maxE / totalE : 0;
+    if (maxE > 3.2 && peakRatio >= 0.45) {
+      const cx = bestX / maxE;
+      const cy = bestY / maxE;
+      this.smoothedCentroid.x = this.smoothedCentroid.x * 0.35 + cx * 0.65;
+      this.smoothedCentroid.y = this.smoothedCentroid.y * 0.35 + cy * 0.65;
+
+      if (!this._webcamTrail || this._lastWebcamSource !== "flow") this._webcamTrail = [];
+      this._lastWebcamSource = "flow";
+      this._webcamTrail.push({ x: this.smoothedCentroid.x, y: this.smoothedCentroid.y, t: now });
+      while (this._webcamTrail.length > 5 || (this._webcamTrail.length > 2 && (now - this._webcamTrail[0].t > 160))) {
+        this._webcamTrail.shift();
+      }
+      this._evaluateHandTrail(now, false);
+    } else {
+      this.motionVector.vx *= 0.72;
+      this.motionVector.vy *= 0.72;
+      this.motionVector.mag *= 0.72;
+      if (this._webcamTrail?.length > 0 && (now - this._webcamTrail[this._webcamTrail.length - 1].t > 150)) {
+        this._webcamTrail = [];
+      }
+    }
+  }
+
+  _evaluateHandTrail(now, isMediaPipe) {
+    if (!this._webcamTrail || this._webcamTrail.length < 2) return;
+    const first = this._webcamTrail[0];
+    const last = this._webcamTrail[this._webcamTrail.length - 1];
+    const dt = Math.max(0.025, (last.t - first.t) / 1000);
+    const dx = last.x - first.x;
+    const dy = last.y - first.y;
+    const disp = Math.hypot(dx, dy);
+
+    let pathLen = 0;
+    for (let i = 1; i < this._webcamTrail.length; i++) {
+      pathLen += Math.hypot(this._webcamTrail[i].x - this._webcamTrail[i - 1].x, this._webcamTrail[i].y - this._webcamTrail[i - 1].y);
+    }
+    const linearity = pathLen > 0.001 ? disp / pathLen : 0;
+    const minDisp = isMediaPipe ? 0.065 : 0.10;
+    const minLinear = isMediaPipe ? 0.62 : 0.70;
+    const minSpeed = isMediaPipe ? 0.62 : 0.85;
+
+    const vx = dx / dt;
+    const vy = dy / dt;
+    this.motionVector.vx = vx * 0.65;
+    this.motionVector.vy = vy * 0.65;
+    this.motionVector.mag = linearity >= minLinear ? Math.hypot(this.motionVector.vx, this.motionVector.vy) : 0;
+
+    if (disp >= minDisp && linearity >= minLinear && this.motionVector.mag >= minSpeed && (now - this.lastWebcamTriggerMs > 320)) {
+      this.lastWebcamTriggerMs = now;
+      this._webcamTrail = [last];
+
+      const swingSpeed = Math.min(1.65, Math.max(0.85, 0.75 + this.motionVector.mag * 0.45));
+      const swingDirX = Math.max(-1, Math.min(1, this.motionVector.vx * 0.85));
+      const swingDirY = Math.max(-1, Math.min(1, this.motionVector.vy * 0.85));
+
+      let side = null;
+      if (vx > 0.15) side = "backhand";
+      else if (vx < -0.15) side = "forehand";
+
+      if ((last.y < 0.35 && dy < -0.045 && vy < -0.45) || (vy < -0.85 && Math.abs(vy) > Math.abs(vx) * 1.15)) {
+        this._emitToss({ source: "webcam", side, shotType: "lob", speed: swingSpeed, dirX: swingDirX, dirY: -0.9 });
+      } else {
+        let shot = "topspin";
+        if ((vy > 0.85 && swingSpeed > 1.18) || swingSpeed >= 1.46) shot = "smash";
+        else if (vy > 0.32) shot = "slice";
+        else if (vy < -0.58) shot = "lob";
+
+        this._emitSwing({ source: "webcam", side, shotType: shot, speed: swingSpeed, dirX: swingDirX, dirY: swingDirY });
+      }
+    }
+  }
+
+  // --- Remote Phone Companion Polling ---
+  startPhonePolling() {
+    if (this.phonePollTimer) return;
+    const poll = async () => {
+      if (this._disposed) return;
+      try {
+        const query = `?room=${encodeURIComponent(this.roomId || "default")}&role=${encodeURIComponent(this.role || "p1")}&touch=1`;
+        const res = await fetch(`/api/match/state${query}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof this.onRoomState === "function") this.onRoomState(data);
+
+          const p1 = data.p1 || data;
+          const p2 = data.p2 || null;
+          const wasConnected = this.phoneState.connected;
+          const wasP2Connected = this.p2PhoneState.connected;
+
+          this.phoneState.connected = !!p1.connected;
+          this.phoneState.lastSeenMs = Number(p1.lastSeenMs ?? -1);
+          if (p2) {
+            this.p2PhoneState.connected = !!p2.connected;
+            this.p2PhoneState.lastSeenMs = Number(p2.lastSeenMs ?? -1);
+          }
+
+          const myPhone = this.role === "p2" && p2 ? p2 : p1;
+          if (myPhone?.orientation) {
+            this.phoneState.orientation = {
+              pitch: Number(myPhone.orientation.pitch || 0),
+              roll: Number(myPhone.orientation.roll || 0),
+              yaw: Number(myPhone.orientation.yaw || 0),
+              accelMag: Number(myPhone.orientation.accelMag || 0),
+              buttonB: !!myPhone.orientation.buttonB
+            };
+            if (typeof this.onOrientation === "function") this.onOrientation(this.phoneState.orientation);
+          }
+
+          const anyPhone = this.phoneState.connected || this.p2PhoneState.connected;
+          if (wasConnected !== this.phoneState.connected || wasP2Connected !== this.p2PhoneState.connected) {
+            this._notifyStatus({
+              webcam: this.webcamActive,
+              phone: anyPhone,
+              p1Phone: this.phoneState.connected,
+              p2Phone: this.p2PhoneState.connected
+            });
+            this._updatePhoneBadgeUI(anyPhone);
+          }
+
+          if (p1?.lastSwing && typeof p1.lastSwing.seq === "number") {
+            const seq = p1.lastSwing.seq;
+            if (!this.phonePollInitialized) {
+              this.phonePollInitialized = true;
+              const age = Date.now() - Number(p1.lastSwing.serverTimeMs || 0);
+              this.lastProcessedPhoneSeq = age < 1200 ? seq - 1 : seq;
+            }
+            if (seq > this.lastProcessedPhoneSeq) {
+              this.lastProcessedPhoneSeq = seq;
+              this.phoneState.lastSwing = p1.lastSwing;
+              const sw = p1.lastSwing;
+              if (sw.type === "toss") {
+                this._emitToss({
+                  source: "phone",
+                  role: "p1",
+                  side: sw.side,
+                  shotType: sw.shotType || "lob",
+                  speed: sw.speed || 1.1,
+                  dirX: sw.angleX ?? sw.dirX ?? 0,
+                  dirY: sw.dirY ?? -0.9,
+                  pitch: sw.pitch,
+                  roll: sw.roll
+                });
+              } else {
+                this._emitSwing({
+                  source: "phone",
+                  role: "p1",
+                  side: sw.side,
+                  shotType: sw.shotType,
+                  speed: sw.speed || 1.15,
+                  dirX: sw.angleX ?? sw.dirX ?? 0,
+                  dirY: sw.dirY ?? -0.45,
+                  pitch: sw.pitch,
+                  roll: sw.roll
+                });
+              }
+            }
+          }
+
+          if (p2?.lastSwing && typeof p2.lastSwing.seq === "number") {
+            const seq = p2.lastSwing.seq;
+            if (!this.p2PhonePollInitialized) {
+              this.p2PhonePollInitialized = true;
+              const age = Date.now() - Number(p2.lastSwing.serverTimeMs || 0);
+              this.lastProcessedP2PhoneSeq = age < 1200 ? seq - 1 : seq;
+            }
+            if (seq > this.lastProcessedP2PhoneSeq) {
+              this.lastProcessedP2PhoneSeq = seq;
+              this.p2PhoneState.lastSwing = p2.lastSwing;
+              const sw = p2.lastSwing;
+              if (sw.type === "toss") {
+                this._emitP2Toss({
+                  source: "phone",
+                  role: "p2",
+                  side: sw.side,
+                  shotType: sw.shotType || "lob",
+                  speed: sw.speed || 1.1,
+                  dirX: sw.angleX ?? sw.dirX ?? 0,
+                  dirY: sw.dirY ?? -0.9,
+                  pitch: sw.pitch,
+                  roll: sw.roll
+                });
+              } else {
+                this._emitP2Swing({
+                  source: "phone",
+                  role: "p2",
+                  side: sw.side,
+                  shotType: sw.shotType,
+                  speed: sw.speed || 1.15,
+                  dirX: sw.angleX ?? sw.dirX ?? 0,
+                  dirY: sw.dirY ?? -0.45,
+                  pitch: sw.pitch,
+                  roll: sw.roll
+                });
+              }
+            }
+          }
+        }
+      } catch {}
+    };
+    poll();
+    this.phonePollTimer = setInterval(poll, this.phonePollIntervalMs);
+  }
+
+  stopPhonePolling() {
+    if (this.phonePollTimer) {
+      clearInterval(this.phonePollTimer);
+      this.phonePollTimer = null;
+    }
+  }
+
+  triggerHapticFeedback({ kind = "hit", grade = "PERFECT", shotType = "TOPSPIN", speedKmh = 165, intensity = 1, role = null } = {}) {
+    const targetRole = role || this.role || "p1";
+    if (this.settings.hapticsEnabled && typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        if (kind === "whiff" || kind === "fault") navigator.vibrate([18, 35, 18]);
+        else if (intensity >= 1.25 || /PERFECT|POWER|SMASH/i.test(grade)) navigator.vibrate([45, 28, 65]);
+        else navigator.vibrate([28]);
+      } catch {}
+    }
+    fetch("/api/racket/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        room: this.roomId || "default",
+        role: targetRole,
+        kind,
+        grade,
+        shotType,
+        speedKmh: Math.round(Number(speedKmh || 150)),
+        intensity: Number(intensity || 1)
+      })
+    }).catch(() => {});
+  }
+
+  // --- PC Keyboard, Mouse & Screen Swipe ---
+  _updateKeyboardMovement() {
+    // If joystick is active, joystick takes priority for movement
+    if (this.joystickState.active) return;
+
+    let mx = 0;
+    let mz = 0;
+
+    // Left / Right (A / D or ArrowLeft / ArrowRight)
+    if (this.keysDown.has("KeyA") || this.keysDown.has("ArrowLeft") || this.keysDown.has("KeyQ")) mx -= 1;
+    if (this.keysDown.has("KeyD") || this.keysDown.has("ArrowRight") || this.keysDown.has("KeyE")) mx += 1;
+
+    // Forward / Backward (W / S or ArrowUp / ArrowDown)
+    // Forward to net = -Z in Three.js court coordinates
+    if (this.keysDown.has("KeyW") || this.keysDown.has("ArrowUp")) mz -= 1;
+    if (this.keysDown.has("KeyS") || this.keysDown.has("ArrowDown")) mz += 1;
+
+    const len = Math.hypot(mx, mz);
+    if (len > 1) {
+      mx /= len;
+      mz /= len;
+    }
+
+    this.moveInput.x = mx;
+    this.moveInput.z = mz;
+
+    if (mx !== 0) {
+      this.aimBiasX = mx * 0.65;
+    } else {
+      this.aimBiasX = 0;
+    }
+  }
+
+  _initDOMBindings() {
+    this._onKeyDown = (e) => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      const code = e.code;
+      this.keysDown.add(code);
+
+      // Movement & Aiming update
+      this._updateKeyboardMovement();
+
+      // Number keys 1-4 for shot types
+      if (code === "Digit1") {
+        this.setShotType("topspin");
+        this._emitSwing({ source: "keyboard", shotType: "topspin", speed: 1.18, dirX: this.aimBiasX, dirY: -0.45 });
+      } else if (code === "Digit2") {
+        this.setShotType("slice");
+        this._emitSwing({ source: "keyboard", shotType: "slice", speed: 1.05, dirX: this.aimBiasX, dirY: 0.45 });
+      } else if (code === "Digit3") {
+        this.setShotType("lob");
+        this._emitSwing({ source: "keyboard", shotType: "lob", speed: 1.08, dirX: this.aimBiasX, dirY: -0.85 });
+      } else if (code === "Digit4") {
+        this.setShotType("smash");
+        this._emitSwing({ source: "keyboard", shotType: "smash", speed: 1.48, dirX: this.aimBiasX, dirY: 0.65 });
+      }
+      // Action shortcut keys: J/Z (Topspin), K/X (Slice), L/C (Lob), I/V (Smash)
+      else if (code === "KeyJ" || code === "KeyZ") {
+        this.setShotType("topspin");
+        this._emitSwing({ source: "keyboard", shotType: "topspin", speed: 1.2, dirX: this.aimBiasX, dirY: -0.45 });
+      } else if (code === "KeyK" || code === "KeyX") {
+        this.setShotType("slice");
+        this._emitSwing({ source: "keyboard", shotType: "slice", speed: 1.08, dirX: this.aimBiasX, dirY: 0.45 });
+      } else if (code === "KeyL") {
+        this.setShotType("lob");
+        this._emitSwing({ source: "keyboard", shotType: "lob", speed: 1.12, dirX: this.aimBiasX, dirY: -0.85 });
+      } else if (code === "KeyI" || code === "KeyV") {
+        this.setShotType("smash");
+        this._emitSwing({ source: "keyboard", shotType: "smash", speed: 1.48, dirX: this.aimBiasX, dirY: 0.65 });
+      }
+      // Toss / Serve with W / T / ArrowUp
+      else if (code === "KeyT") {
+        this._emitToss({ source: "keyboard", shotType: "lob", speed: 1.1, dirX: this.aimBiasX, dirY: -0.9 });
+      }
+      // Universal Swing with Space or Enter
+      else if (code === "Space" || code === "Enter") {
+        e.preventDefault();
+        this._emitSwing({ source: "keyboard", shotType: this.selectedShotType, speed: 1.22, dirX: this.aimBiasX, dirY: -0.45 });
+      }
+    };
+
+    this._onKeyUp = (e) => {
+      const code = e.code;
+      this.keysDown.delete(code);
+      this._updateKeyboardMovement();
+    };
+
+    // Mouse Right Click for Toss / Serve
+    this._onContextMenu = (e) => {
+      // If clicking inside game canvas or main viewport, prevent default menu and trigger toss!
+      if (!e.target.closest("button, a, input, select, .wii-modal-backdrop, .hud-corner-dock")) {
+        e.preventDefault();
+        this._emitToss({ source: "mouse_right_click", dirX: this.aimBiasX, dirY: -0.9, speed: 1.1 });
+      }
+    };
+
+    // Mouse Wheel to cycle shot types
+    this._onWheel = (e) => {
+      if (e.target.closest(".wii-modal-backdrop, .touch-gamepad-layer")) return;
+      const shots = ["topspin", "slice", "lob", "smash"];
+      const currIdx = shots.indexOf(this.selectedShotType);
+      const nextIdx = e.deltaY > 0 ? (currIdx + 1) % shots.length : (currIdx - 1 + shots.length) % shots.length;
+      this.setShotType(shots[nextIdx]);
+    };
+
+    // Pointer (Mouse / Touch Swipe) on court
+    this._onPointerDown = (e) => {
+      if (e.target && e.target.closest("button, a, input, select, .hud-interactive, .control-btn, .touch-gamepad-layer, .touch-shot-btn, .touch-action-btn, #touch-joystick-base")) {
+        return;
+      }
+      this.pointerDrag = {
+        startX: e.clientX,
+        startY: e.clientY,
+        startTime: performance.now(),
+        lastX: e.clientX,
+        lastY: e.clientY
+      };
+      this.mouseTrail = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
+    };
+
+    this._onPointerMove = (e) => {
+      if (!this.pointerDrag) return;
+      this.pointerDrag.lastX = e.clientX;
+      this.pointerDrag.lastY = e.clientY;
+      this.mouseTrail.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (this.mouseTrail.length > 20) this.mouseTrail.shift();
+    };
+
+    this._onPointerUp = (e) => {
+      if (!this.pointerDrag) return;
+      const drag = this.pointerDrag;
+      this.pointerDrag = null;
+
+      const clientX = e.clientX ?? drag.lastX;
+      const clientY = e.clientY ?? drag.lastY;
+      const dx = clientX - drag.startX;
+      const dy = clientY - drag.startY;
+      const dt = Math.max(16, performance.now() - drag.startTime);
+      const dist = Math.hypot(dx, dy);
+
+      // Tap on screen (distance < 18px): Quick Swing!
+      if (dist < 18) {
+        if (e.button === 2) return; // Right click handled by contextmenu
+        this._emitSwing({
+          source: "mouse_tap",
+          shotType: this.selectedShotType,
+          speed: 1.18,
+          dirX: this.aimBiasX,
+          dirY: -0.45
+        });
+        return;
+      }
+
+      // Drag / Flick gesture
+      const speedNorm = dist / dt;
+      const swingSpeed = Math.min(1.7, Math.max(0.85, 0.78 + speedNorm * 0.45));
+
+      let side = null;
+      if (dx > 14) side = "backhand";
+      else if (dx < -14) side = "forehand";
+
+      const dirX = Math.max(-1, Math.min(1, dx / 180));
+      const finalDirX = side === "backhand" ? Math.max(0.2, dirX) : side === "forehand" ? Math.min(-0.2, dirX) : dirX;
+      const dirY = Math.max(-1, Math.min(1, dy / 150));
+
+      // Fast upward flick: Toss or Lob
+      if (dy < -55 && Math.abs(dy) > Math.abs(dx) * 1.3) {
+        this._emitToss({
+          source: "mouse_flick",
+          side,
+          shotType: "lob",
+          speed: swingSpeed,
+          dirX: finalDirX,
+          dirY: -0.9
+        });
+      } else {
+        let shot = this.selectedShotType;
+        if ((dy > 38 && swingSpeed > 1.22) || swingSpeed > 1.48) shot = "smash";
+        else if (dy > 14) shot = "slice";
+        else if (dy < -32) shot = "lob";
+
+        this._emitSwing({
+          source: "mouse_flick",
+          side,
+          shotType: shot,
+          speed: swingSpeed,
+          dirX: finalDirX,
+          dirY
+        });
+      }
+    };
+
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
+    window.addEventListener("contextmenu", this._onContextMenu);
+    window.addEventListener("wheel", this._onWheel, { passive: true });
+    window.addEventListener("pointerdown", this._onPointerDown);
+    window.addEventListener("pointermove", this._onPointerMove);
+    window.addEventListener("pointerup", this._onPointerUp);
+  }
+
+  // --- HUD Canvas & Renders ---
+  _startHudRenderLoop() {
+    const loop = () => {
+      if (this._disposed) return;
+      if (this.webcamActive) this._processWebcamFrame();
+      if (!this.webcamCanvas) {
+        this.webcamCanvas = document.getElementById(this.webcamCanvasId);
+        if (this.webcamCanvas) this.webcamCtx = this.webcamCanvas.getContext("2d");
+      }
+      if (this.webcamCanvas && this.webcamCtx) {
+        this._drawHudCanvas(this.webcamCtx, this.webcamCanvas.width, this.webcamCanvas.height);
+      }
+      this._rafId = requestAnimationFrame(loop);
+    };
+    this._rafId = requestAnimationFrame(loop);
+  }
+
+  _drawHudCanvas(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    if (this.webcamActive && this.videoElem && this.videoElem.readyState >= 2) {
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.drawImage(this.videoElem, -w, 0, w, h);
+      ctx.restore();
+
+      const now = performance.now();
+      if (this.latestHandLandmarks && (now - (this.latestHandSeenAt || 0) < 240)) {
+        const lm = this.latestHandLandmarks;
+        const conns = [
+          [0,1],[1,2],[2,3],[3,4],
+          [0,5],[5,6],[6,7],[7,8],
+          [0,9],[9,10],[10,11],[11,12],
+          [0,13],[13,14],[14,15],[15,16],
+          [0,17],[17,18],[18,19],[19,20],
+          [5,9],[9,13],[13,17]
+        ];
+        ctx.strokeStyle = "#00e436";
+        ctx.lineWidth = 2;
+        for (const [a, b] of conns) {
+          const p1 = lm[a], p2 = lm[b];
+          ctx.beginPath();
+          ctx.moveTo((1 - p1.x) * w, p1.y * h);
+          ctx.lineTo((1 - p2.x) * w, p2.y * h);
+          ctx.stroke();
+        }
+        for (let i = 0; i < lm.length; i++) {
+          const p = lm[i];
+          ctx.fillStyle = (i === 0 || i === 8 || i === 9) ? "#dfff00" : "#ffffff";
+          ctx.beginPath();
+          ctx.arc((1 - p.x) * w, p.y * h, (i === 0 || i === 9) ? 3.5 : 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else {
+        const cw = w / this.flowWidth;
+        const ch = h / this.flowHeight;
+        ctx.fillStyle = "rgba(223, 255, 0, 0.35)";
+        for (let r = 0; r < this.flowHeight; r += 2) {
+          for (let c = 0; c < this.flowWidth; c += 2) {
+            if (this.motionEnergyMap[r * this.flowWidth + c] > 0.14) {
+              ctx.fillRect(c * cw, r * ch, cw * 1.8, ch * 1.8);
+            }
+          }
+        }
+      }
+    } else {
+      const grad = ctx.createRadialGradient(w * 0.5, h * 0.5, 6, w * 0.5, h * 0.5, w * 0.65);
+      grad.addColorStop(0, "rgba(24, 68, 42, 0.92)");
+      grad.addColorStop(1, "rgba(10, 24, 36, 0.96)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.5);
+      ctx.lineTo(w, h * 0.5);
+      ctx.moveTo(w * 0.5, 0);
+      ctx.lineTo(w * 0.5, h);
+      ctx.arc(w * 0.5, h * 0.5, Math.min(w, h) * 0.32, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    const elapsed = performance.now() - this.lastVisualSwing.timestamp;
+    const isRecent = elapsed < 550;
+    const cx = this.webcamActive ? this.smoothedCentroid.x * w : w * 0.5;
+    const cy = this.webcamActive ? this.smoothedCentroid.y * h : h * 0.52;
+
+    ctx.save();
+    const rot = ((this.phoneState.orientation.roll || this.aimBiasX * 28) * Math.PI) / 180;
+    ctx.translate(cx, cy);
+    ctx.rotate(rot);
+    ctx.strokeStyle = isRecent ? "#dfff00" : "#00c8ff";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 14, 18, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, 18);
+    ctx.lineTo(0, 28);
+    ctx.stroke();
+    ctx.restore();
+
+    let vx = this.webcamActive ? this.motionVector.vx * 26 : 0;
+    let vy = this.webcamActive ? this.motionVector.vy * 26 : 0;
+    if (isRecent) {
+      const decay = 1 - elapsed / 550;
+      vx = this.lastVisualSwing.dirX * 36 * decay;
+      vy = this.lastVisualSwing.dirY * 32 * decay;
+    }
+    if (Math.hypot(vx, vy) > 3) {
+      const tx = cx + vx;
+      const ty = cy + vy;
+      const ang = Math.atan2(vy, vx);
+      ctx.save();
+      ctx.strokeStyle = "#dfff00";
+      ctx.fillStyle = "#dfff00";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(tx - 7 * Math.cos(ang - 0.5), ty - 7 * Math.sin(ang - 0.5));
+      ctx.lineTo(tx - 7 * Math.cos(ang + 0.5), ty - 7 * Math.sin(ang + 0.5));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const magNorm = isRecent
+      ? Math.min(1, (this.lastVisualSwing.speed / 1.6) * (1 - elapsed / 650))
+      : Math.min(1, this.motionVector.mag / 1.4);
+    const barH = 5;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+    ctx.fillRect(6, h - barH - 5, w - 12, barH);
+    ctx.fillStyle = magNorm > 0.75 ? "#dfff00" : "#00d2ff";
+    ctx.fillRect(6, h - barH - 5, (w - 12) * magNorm, barH);
+
+    ctx.fillStyle = isRecent ? "#dfff00" : "rgba(255, 255, 255, 0.9)";
+    ctx.font = "bold 9px sans-serif";
+    let statusLabel = this.webcamActive
+      ? "CAM OPTICAL FLOW"
+      : this.deviceMotionActive
+      ? "PHONE GYRO ACTIVE"
+      : this.phoneState.connected
+      ? "POCKET RACKET LIVE"
+      : "MOTION RADAR";
+
+    if (isRecent) {
+      const sidePrefix = this.lastVisualSwing.side === "backhand" ? "BH" : this.lastVisualSwing.side === "forehand" ? "FH" : "";
+      const shotLabel = (this.lastVisualSwing.shotType || "topspin").toUpperCase();
+      statusLabel = sidePrefix ? `${sidePrefix} • ${shotLabel}` : shotLabel;
+    }
+    ctx.fillText(statusLabel, 6, 12);
+  }
+
+  _updateWebcamBadgeUI(active) {
+    const b = document.getElementById("webcam-status-badge") || document.getElementById("btn-webcam");
+    if (b) b.classList.toggle("active", active);
+  }
+
+  _updatePhoneBadgeUI(connected) {
+    const b = document.getElementById("phone-status-badge") || document.getElementById("phone-racket-status");
+    if (b) {
+      b.classList.toggle("connected", connected);
+      b.textContent = connected ? "Pocket Racket: Connected" : "Pocket Racket: Ready";
+    }
+  }
+
+  _updateHudShotPills(shotType) {
+    if (typeof document === "undefined") return;
+    const pills = document.querySelectorAll("[data-shot-type]");
+    if (!pills || pills.length === 0) return;
+    pills.forEach(p => {
+      p.classList.toggle("active", p.dataset.shotType === shotType);
+    });
+  }
+
+  _notifyStatus(status) {
+    if (typeof this.onStatusChange === "function") this.onStatusChange(status);
+    for (const h of this._listeners.status) {
+      try { h(status); } catch (e) { console.error(e); }
+    }
+  }
+
+  dispose() {
+    this._disposed = true;
+    this.disableWebcam();
+    this.disableDeviceMotion();
+    this.stopPhonePolling();
+    if (this._rafId) cancelAnimationFrame(this._rafId);
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
+    window.removeEventListener("contextmenu", this._onContextMenu);
+    window.removeEventListener("wheel", this._onWheel);
+    window.removeEventListener("pointerdown", this._onPointerDown);
+    window.removeEventListener("pointermove", this._onPointerMove);
+    window.removeEventListener("pointerup", this._onPointerUp);
+  }
+}
+
+export default MotionController;

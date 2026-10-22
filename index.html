@@ -1,4 +1,13 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /><meta name="description" content="Wii Sports-inspired 3D arcade tennis game with frantic racket kinematics, expressive Mii characters, webcam &amp; phone motion controls, and Lyria 3 audio." /><title>Argon Tennis</title><script>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Argon Tennis - Game quần vợt 3D phong cách Wii Sports với hệ thống điều khiển đa nền tảng tối ưu cho cả Điện thoại (Mobile) và Máy tính (PC)." />
+  <meta property="og:title" content="Argon Tennis - Điều khiển Mobile & PC" />
+  <meta property="og:description" content="Trải nghiệm game tennis 3D đỉnh cao với cần gạt ảo & nút bấm trên Mobile, lắc máy Gyroscope, hoặc bàn phím & chuột trên PC." />
+  <title>Argon Tennis - Điều Khiển Mobile & PC</title>
+  <script>
     (function () {
       const params = new URLSearchParams(window.location.search);
       if (params.has('play') || params.has('state')) {
@@ -9,7 +18,601 @@
         document.documentElement.setAttribute('data-url-state', stateParam);
       }
     })();
-  </script><link rel="stylesheet" href="./styles.css" /></head><body><div id="root" class="hidden" aria-hidden="true"></div><div id="canvas-container" aria-label="Argon Tennis 3D Stadium Viewport"><canvas id="game-canvas"></canvas></div><div id="hud-root"><header id="top-hud-bar"><div id="games-pill-player" class="wii-games-pill" title="Player Games Won"><span class="game-bubble" data-slot="0"></span><span class="game-bubble" data-slot="1"></span><span class="game-bubble extra-slot hidden" data-slot="2"></span></div><div id="scoreboard-pill" class="wii-scoreboard-pill"><div class="mii-side mii-side-player"><div class="mii-avatar-badge player-tint"><canvas id="mii-icon-player" width="192" height="192"></canvas></div><div class="mii-avatar-badge player-tint secondary-mii"><canvas id="mii-icon-player-2" width="192" height="192"></canvas></div></div><div id="score-center-display" class="score-center-display"><span id="score-player-text" class="score-digits">00</span><span id="score-separator" class="score-dash">-</span><span id="score-opponent-text" class="score-digits">00</span></div><div class="mii-side mii-side-opponent"><div class="mii-avatar-badge opponent-tint secondary-mii"><canvas id="mii-icon-opponent-2" width="192" height="192"></canvas></div><div class="mii-avatar-badge opponent-tint"><canvas id="mii-icon-opponent" width="192" height="192"></canvas></div></div></div><div id="games-pill-opponent" class="wii-games-pill" title="Opponent Games Won"><span class="game-bubble" data-slot="0"></span><span class="game-bubble" data-slot="1"></span><span class="game-bubble extra-slot hidden" data-slot="2"></span></div></header><div id="opponent-presence-pill" class="opponent-presence-pill hidden" aria-live="polite"><span id="opponent-presence-dot" class="presence-dot"></span><span id="opponent-presence-text">Waiting for Player 2…</span></div><div id="world-labels-layer"><div id="server-tag" class="wii-server-tag hidden"><span class="server-tag-text">Server</span></div><div id="player-nameplate" class="wii-court-nameplate player-plate hidden"><canvas id="plate-mii-player" width="192" height="192"></canvas><div class="plate-info"><div class="plate-name">Ammaar</div><div class="plate-skill">Skill Level 1050</div></div></div><div id="timing-popup" class="wii-timing-popup hidden"><span id="timing-popup-grade" class="timing-grade">PERFECT</span><span id="timing-popup-detail" class="timing-detail">POWER TOPSPIN • 178 KM/H</span></div></div><div id="center-banner-layer" class="center-banner-layer hidden"><div id="center-banner-streak" class="center-banner-streak"></div><div id="center-banner-text" class="center-banner-text style-gold">Game Point</div><div id="center-banner-sub" class="center-banner-sub hidden"></div></div><div id="replay-badge" class="wii-replay-badge hidden"><span class="replay-dots"><i class="dot dot-1"></i><i class="dot dot-2"></i><i class="dot dot-3"></i></span><span class="replay-label">Replay</span></div><div id="bottom-right-dock" class="hud-corner-dock bottom-right-dock"><div id="timing-gauge-card" class="timing-gauge-card"><div class="gauge-header"><span id="gauge-mode-title">SWING TIMING</span><span id="gauge-speed-readout">READY</span></div><div class="timing-bar-track"><div class="timing-zone zone-early">EARLY (Cross)</div><div class="timing-zone zone-sweet">SWEET SPOT</div><div class="timing-zone zone-late">LATE (Line)</div><div id="timing-cursor" class="timing-cursor" style="left: 50%;"></div></div></div><div class="motion-controls-row"><div id="webcam-pip-card" class="webcam-pip-card hidden"><video id="webcam-video" autoplay playsinline muted></video><canvas id="webcam-canvas" width="160" height="120"></canvas><div class="pip-badge"><span class="pip-live-dot"></span><span id="pip-motion-label">Webcam Swing</span></div></div><div class="motion-buttons-col"><button id="btn-webcam-toggle" class="hud-mini-btn motion-btn" type="button"><span class="btn-dot" id="webcam-status-dot"></span><span>Webcam Motion</span></button><button id="btn-phone-racket" class="hud-mini-btn motion-btn hidden" type="button"><span class="btn-dot" id="phone-status-dot"></span><span id="phone-status-label">Pocket Racket</span></button><div id="bottom-left-dock" class="hud-corner-dock bottom-left-dock"><div class="dock-pill-row"><button id="btn-audio-toggle" class="hud-mini-btn" type="button" title="Toggle Lyria 3 Soundtrack & SFX"><span class="btn-dot music-on" id="audio-status-dot"></span><span id="audio-track-label">Lyria: Sunny Rally</span></button><button id="btn-camera-cycle" class="hud-mini-btn" type="button" title="Cycle Camera Angle (C)"><span>Cam:</span><strong id="camera-mode-label">Rally</strong></button><button id="btn-replay-trigger" class="hud-mini-btn" type="button" title="Toggle Instant Replay (R)"><span>Replay</span></button><button id="btn-multiplayer-modal" class="hud-mini-btn hidden" type="button" title="Open /argontennis 1v1 Multiplayer & Cloudflare Companion Links"><span>💬 /argontennis 1v1</span></button></div></div></div></div></div></div><div id="title-modal" class="wii-modal-backdrop"><div class="wii-title-card"><div class="wii-logo-header"><h1 class="argon-logo-title"><span class="logo-word-argon">Argon</span><span class="logo-word-tennis">Tennis</span></h1></div><div class="court-preview-diagram"><div class="mini-court-turf"><div class="mini-court-lines"><div class="mini-net-line"></div><div class="mini-service-box top"></div><div class="mini-service-box bottom"></div></div><div class="court-slot-marker opponent-marker"><canvas id="setup-mii-opponent" width="192" height="192"></canvas><div id="setup-opponent-label" class="slot-tag cpu-tag">Club AI</div></div><div class="court-slot-marker player-marker"><canvas id="setup-mii-player" width="192" height="192"></canvas><div class="slot-tag you-tag">You</div></div></div></div><div class="setup-section"><div class="wii-green-btn-row" id="difficulty-mode-group"><button type="button" class="wii-green-choice selected" data-difficulty="casual"><span class="choice-main">Casual AI</span></button><button type="button" class="wii-green-choice" data-difficulty="pro"><span class="choice-main">Pro AI</span></button><button type="button" class="wii-green-choice" data-difficulty="1v1"><span class="choice-main">1v1 Match</span></button></div></div><div class="setup-section" id="match-length-section"><div class="wii-green-btn-row" id="match-length-group"><button type="button" class="wii-green-choice" data-games="1"><span class="choice-main">1 Game</span></button><button type="button" class="wii-green-choice selected" data-games="3"><span class="choice-main">Best of 3</span></button><button type="button" class="wii-green-choice" data-games="5"><span class="choice-main">Best of 5</span></button></div></div><div class="wii-modal-actions"><button id="btn-start-match" type="button" class="wii-ok-btn"><span class="hand-cursor-icon">🎾</span><span>Start Match</span></button></div></div></div><div id="companion-modal" class="wii-modal-backdrop hidden"><div class="wii-dialog-box wii-companion-clean-dialog"><div class="mp-dialog-header"><h2 class="dialog-title">📱 Phone Controller</h2><span id="mp-active-status" class="mp-conn-tag">Scan QR</span></div><p class="dialog-desc">Scan with your phone camera</p><div id="mp-card-p1" class="mp-clean-qr-wrap"><span id="mp-p1-status" class="hidden"></span><img id="companion-qr" src="https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player1_qr.png" alt="Phone Controller QR" width="200" height="200" class="mp-qr-img" /><a id="companion-link" href="/companion.html?room=default&role=p1" target="_blank" rel="noopener" class="mp-subtle-link">Open controller link ↗</a></div><div id="mp-card-p2" class="mp-clean-qr-wrap hidden"><span id="mp-p2-status" class="hidden"></span><img id="companion-qr-p2" src="https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player2_qr.png" alt="Phone Controller QR" width="200" height="200" class="mp-qr-img" /><a id="companion-link-p2" href="/companion.html?room=default&role=p2" target="_blank" rel="noopener" class="mp-subtle-link">Open controller link ↗</a></div><div class="dialog-actions"><button id="btn-close-companion" type="button" class="wii-pill-btn">Back to Court</button></div></div></div><div id="victory-modal" class="wii-modal-backdrop hidden"><div class="wii-skill-card"><div class="skill-card-header">Club Skill Rating</div><div class="skill-card-body"><div class="skill-chart-frame"><canvas id="skill-graph-canvas" width="280" height="200"></canvas></div><div class="skill-mii-summary"><div id="victory-result-banner" class="victory-result-banner">YOU WIN!</div><div class="skill-score-pill"><canvas id="victory-mii-icon" width="192" height="192"></canvas><div class="skill-score-meta"><div class="skill-rating-number" id="skill-rating-value">1120</div><div class="skill-player-name">Ammaar (+120)</div></div></div><div id="victory-match-score" class="victory-match-score">Final Games: 2 - 0</div></div></div><div class="skill-card-footer"><button id="btn-play-again" type="button" class="wii-footer-btn primary">Play again</button><button id="btn-return-title" type="button" class="wii-footer-btn secondary">Menu</button></div></div></div><script type="module">
+  </script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="root" class="hidden" aria-hidden="true"></div>
+
+  <!-- 3D Court Viewport -->
+  <div id="canvas-container" aria-label="Argon Tennis 3D Stadium Viewport">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- Main HUD Layer -->
+  <div id="hud-root">
+    <!-- Top HUD Bar: Score & Games Won -->
+    <header id="top-hud-bar">
+      <div id="games-pill-player" class="wii-games-pill" title="Player Games Won">
+        <span class="game-bubble" data-slot="0"></span>
+        <span class="game-bubble" data-slot="1"></span>
+        <span class="game-bubble extra-slot hidden" data-slot="2"></span>
+      </div>
+
+      <div id="scoreboard-pill" class="wii-scoreboard-pill">
+        <div class="mii-side mii-side-player">
+          <div class="mii-avatar-badge player-tint">
+            <canvas id="mii-icon-player" width="192" height="192"></canvas>
+          </div>
+          <div class="mii-avatar-badge player-tint secondary-mii">
+            <canvas id="mii-icon-player-2" width="192" height="192"></canvas>
+          </div>
+        </div>
+        <div id="score-center-display" class="score-center-display">
+          <span id="score-player-text" class="score-digits">00</span>
+          <span id="score-separator" class="score-dash">-</span>
+          <span id="score-opponent-text" class="score-digits">00</span>
+        </div>
+        <div class="mii-side mii-side-opponent">
+          <div class="mii-avatar-badge opponent-tint secondary-mii">
+            <canvas id="mii-icon-opponent-2" width="192" height="192"></canvas>
+          </div>
+          <div class="mii-avatar-badge opponent-tint">
+            <canvas id="mii-icon-opponent" width="192" height="192"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="games-pill-opponent" class="wii-games-pill" title="Opponent Games Won">
+        <span class="game-bubble" data-slot="0"></span>
+        <span class="game-bubble" data-slot="1"></span>
+        <span class="game-bubble extra-slot hidden" data-slot="2"></span>
+      </div>
+    </header>
+
+    <!-- Opponent Presence Tag -->
+    <div id="opponent-presence-pill" class="opponent-presence-pill hidden" aria-live="polite">
+      <span id="opponent-presence-dot" class="presence-dot"></span>
+      <span id="opponent-presence-text">Waiting for Player 2…</span>
+    </div>
+
+    <!-- Projected 3D Labels -->
+    <div id="world-labels-layer">
+      <div id="server-tag" class="wii-server-tag hidden">
+        <span class="server-tag-text">Server</span>
+      </div>
+      <div id="player-nameplate" class="wii-court-nameplate player-plate hidden">
+        <canvas id="plate-mii-player" width="192" height="192"></canvas>
+        <div class="plate-info">
+          <div class="plate-name">Ammaar</div>
+          <div class="plate-skill">Skill Level 1050</div>
+        </div>
+      </div>
+      <div id="timing-popup" class="wii-timing-popup hidden">
+        <span id="timing-popup-grade" class="timing-grade">PERFECT</span>
+        <span id="timing-popup-detail" class="timing-detail">POWER TOPSPIN • 178 KM/H</span>
+      </div>
+    </div>
+
+    <!-- Center Banner Notification -->
+    <div id="center-banner-layer" class="center-banner-layer hidden">
+      <div id="center-banner-streak" class="center-banner-streak"></div>
+      <div id="center-banner-text" class="center-banner-text style-gold">Game Point</div>
+      <div id="center-banner-sub" class="center-banner-sub hidden"></div>
+    </div>
+
+    <!-- Replay Badge -->
+    <div id="replay-badge" class="wii-replay-badge hidden">
+      <span class="replay-dots">
+        <i class="dot dot-1"></i>
+        <i class="dot dot-2"></i>
+        <i class="dot dot-3"></i>
+      </span>
+      <span class="replay-label">Replay</span>
+    </div>
+
+    <!-- Mobile On-Screen Touch Gamepad (Gamepad ảo cho Điện thoại & Tablet) -->
+    <div id="touch-gamepad-layer" class="touch-gamepad-layer" aria-label="Touch Controls">
+      <!-- Left: Virtual Analog Joystick -->
+      <div id="touch-joystick-zone" class="touch-joystick-zone">
+        <div id="touch-joystick-base" class="touch-joystick-base">
+          <div class="joystick-arrow arrow-up">▲<span class="arrow-sub">Lên lưới</span></div>
+          <div class="joystick-arrow arrow-down">▼<span class="arrow-sub">Cuối sân</span></div>
+          <div class="joystick-arrow arrow-left">◀<span class="arrow-sub">Trái</span></div>
+          <div class="joystick-arrow arrow-right">▶<span class="arrow-sub">Phải</span></div>
+          <div id="touch-joystick-thumb" class="touch-joystick-thumb">
+            <div class="thumb-center-dot"></div>
+          </div>
+        </div>
+        <div class="joystick-label">🕹️ CẦN GẠT DI CHUYỂN</div>
+      </div>
+
+      <!-- Right: Action Buttons Cluster -->
+      <div id="touch-actions-zone" class="touch-actions-zone">
+        <!-- Shot Modifier Buttons Row -->
+        <div class="touch-shot-row">
+          <button id="btn-touch-lob" class="touch-shot-btn" type="button" title="Lốp bóng cao qua đầu">
+            <span class="shot-icon">🎈</span>
+            <span class="shot-name">LOB</span>
+          </button>
+          <button id="btn-touch-slice" class="touch-shot-btn" type="button" title="Cắt bóng xoáy chìm">
+            <span class="shot-icon">🌀</span>
+            <span class="shot-name">SLICE</span>
+          </button>
+          <button id="btn-touch-smash" class="touch-shot-btn" type="button" title="Đập bóng cực mạnh">
+            <span class="shot-icon">⚡</span>
+            <span class="shot-name">SMASH</span>
+          </button>
+        </div>
+
+        <!-- Main Action Buttons (Giao & Đánh) -->
+        <div class="touch-main-row">
+          <button id="btn-touch-toss" class="touch-action-btn btn-toss" type="button" title="Tung bóng giao / Lốp bóng">
+            <span class="action-icon">🚀</span>
+            <span class="action-label">GIAO</span>
+            <span class="action-sub">TOSS</span>
+          </button>
+          <button id="btn-touch-swing" class="touch-action-btn btn-swing" type="button" title="Vung vợt đánh bóng">
+            <span class="action-icon">🎾</span>
+            <span class="action-label">ĐÁNH</span>
+            <span class="action-sub">SWING</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PC Desktop Controls Hint Bar (Hiển thị gợi ý phím trên Máy tính) -->
+    <div id="pc-hint-bar" class="pc-hint-bar">
+      <div class="pc-hint-pill">
+        <span class="hint-kbd-group"><kbd>A</kbd><kbd>D</kbd> / <kbd>◀</kbd><kbd>▶</kbd></span>
+        <span class="hint-desc">Di chuyển & Đổi góc</span>
+      </div>
+      <div class="pc-hint-pill">
+        <span class="hint-kbd-group"><kbd>W</kbd><kbd>S</kbd> / <kbd>▲</kbd><kbd>▼</kbd></span>
+        <span class="hint-desc">Lên lưới / Lùi sân</span>
+      </div>
+      <div class="pc-hint-pill pc-hint-highlight">
+        <span class="hint-kbd-group"><kbd>Space</kbd> / <kbd>Chuột Trái</kbd></span>
+        <span class="hint-desc">Đánh bóng</span>
+      </div>
+      <div class="pc-hint-pill">
+        <span class="hint-kbd-group"><kbd>W</kbd> / <kbd>T</kbd> / <kbd>Chuột Phải</kbd></span>
+        <span class="hint-desc">Tung bóng giao</span>
+      </div>
+      <div class="pc-hint-pill">
+        <span class="hint-kbd-group"><kbd>1-4</kbd> / <kbd>J,K,L,I</kbd></span>
+        <span class="hint-desc">Topspin / Slice / Lob / Smash</span>
+      </div>
+    </div>
+
+    <!-- Bottom Right Dock: Timing Gauge & Motion Controls -->
+    <div id="bottom-right-dock" class="hud-corner-dock bottom-right-dock">
+      <div id="timing-gauge-card" class="timing-gauge-card">
+        <div class="gauge-header">
+          <span id="gauge-mode-title">SWING TIMING</span>
+          <span id="gauge-speed-readout">READY</span>
+        </div>
+        <div class="timing-bar-track">
+          <div class="timing-zone zone-early">EARLY (Cross)</div>
+          <div class="timing-zone zone-sweet">SWEET SPOT</div>
+          <div class="timing-zone zone-late">LATE (Line)</div>
+          <div id="timing-cursor" class="timing-cursor" style="left: 50%;"></div>
+        </div>
+      </div>
+
+      <div class="motion-controls-row">
+        <!-- Webcam PIP View -->
+        <div id="webcam-pip-card" class="webcam-pip-card hidden">
+          <video id="webcam-video" autoplay playsinline muted></video>
+          <canvas id="webcam-canvas" width="160" height="120"></canvas>
+          <div class="pip-badge">
+            <span class="pip-live-dot"></span>
+            <span id="pip-motion-label">Webcam Swing</span>
+          </div>
+        </div>
+
+        <!-- Controls Dock Buttons -->
+        <div class="motion-buttons-col">
+          <button id="btn-webcam-toggle" class="hud-mini-btn motion-btn" type="button">
+            <span class="btn-dot" id="webcam-status-dot"></span>
+            <span>Webcam Motion</span>
+          </button>
+          <button id="btn-phone-racket" class="hud-mini-btn motion-btn hidden" type="button">
+            <span class="btn-dot" id="phone-status-dot"></span>
+            <span id="phone-status-label">Pocket Racket</span>
+          </button>
+
+          <!-- Bottom Left Dock (Buttons Pill Row) -->
+          <div id="bottom-left-dock" class="hud-corner-dock bottom-left-dock">
+            <div class="dock-pill-row">
+              <button id="btn-controls-guide" class="hud-mini-btn highlight-btn" type="button" title="Mở bảng hướng dẫn & cài đặt điều khiển PC & Mobile">
+                <span>🎮</span>
+                <span>Điều khiển</span>
+              </button>
+              <button id="btn-touch-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt phím cảm ứng trên màn hình">
+                <span class="btn-dot" id="touch-status-dot"></span>
+                <span>Phím ảo</span>
+              </button>
+              <button id="btn-gyro-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt cảm biến lắc máy trên điện thoại">
+                <span class="btn-dot" id="gyro-status-dot"></span>
+                <span>Lắc máy</span>
+              </button>
+              <button id="btn-audio-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt âm nhạc & âm thanh">
+                <span class="btn-dot music-on" id="audio-status-dot"></span>
+                <span id="audio-track-label">Lyria: Sunny Rally</span>
+              </button>
+              <button id="btn-camera-cycle" class="hud-mini-btn" type="button" title="Đổi góc máy quay (C)">
+                <span>Cam:</span>
+                <strong id="camera-mode-label">Rally</strong>
+              </button>
+              <button id="btn-replay-trigger" class="hud-mini-btn" type="button" title="Xem lại pha bóng vừa rồi (R)">
+                <span>Replay</span>
+              </button>
+              <button id="btn-multiplayer-modal" class="hud-mini-btn hidden" type="button" title="Chơi 1v1 Nhiều Người">
+                <span>💬 1v1</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Title / Menu Modal -->
+  <div id="title-modal" class="wii-modal-backdrop">
+    <div class="wii-title-card">
+      <div class="wii-logo-header">
+        <h1 class="argon-logo-title">
+          <span class="logo-word-argon">Argon</span>
+          <span class="logo-word-tennis">Tennis</span>
+        </h1>
+        <div class="title-sub-badge">Hỗ trợ đầy đủ Mobile 📱 & Máy tính 💻</div>
+      </div>
+
+      <div class="court-preview-diagram">
+        <div class="mini-court-turf">
+          <div class="mini-court-lines">
+            <div class="mini-net-line"></div>
+            <div class="mini-service-box top"></div>
+            <div class="mini-service-box bottom"></div>
+          </div>
+          <div class="court-slot-marker opponent-marker">
+            <canvas id="setup-mii-opponent" width="192" height="192"></canvas>
+            <div id="setup-opponent-label" class="slot-tag cpu-tag">Club AI</div>
+          </div>
+          <div class="court-slot-marker player-marker">
+            <canvas id="setup-mii-player" width="192" height="192"></canvas>
+            <div class="slot-tag you-tag">You</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <div class="setup-label">Độ khó đối thủ:</div>
+        <div class="wii-green-btn-row" id="difficulty-mode-group">
+          <button type="button" class="wii-green-choice selected" data-difficulty="casual">
+            <span class="choice-main">Casual AI</span>
+          </button>
+          <button type="button" class="wii-green-choice" data-difficulty="pro">
+            <span class="choice-main">Pro AI</span>
+          </button>
+          <button type="button" class="wii-green-choice" data-difficulty="1v1">
+            <span class="choice-main">1v1 Match</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-section" id="match-length-section">
+        <div class="setup-label">Số Game thắng:</div>
+        <div class="wii-green-btn-row" id="match-length-group">
+          <button type="button" class="wii-green-choice" data-games="1">
+            <span class="choice-main">1 Game</span>
+          </button>
+          <button type="button" class="wii-green-choice selected" data-games="3">
+            <span class="choice-main">Best of 3</span>
+          </button>
+          <button type="button" class="wii-green-choice" data-games="5">
+            <span class="choice-main">Best of 5</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="title-controls-cta">
+        <button id="btn-title-controls" type="button" class="wii-subtle-pill-btn">
+          <span>🎮 Xem hướng dẫn điều khiển (PC & Mobile)</span>
+        </button>
+      </div>
+
+      <div class="wii-modal-actions">
+        <button id="btn-start-match" type="button" class="wii-ok-btn">
+          <span class="hand-cursor-icon">🎾</span>
+          <span>Bắt đầu trận đấu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Guide & Settings Modal -->
+  <div id="controls-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="controls-modal-title">
+    <div class="wii-controls-card">
+      <div class="controls-card-header">
+        <h2 id="controls-modal-title" class="controls-card-title">🎮 Hướng Dẫn & Cài Đặt Điều Khiển</h2>
+        <button id="btn-close-controls-x" type="button" class="controls-close-x" aria-label="Đóng">✕</button>
+      </div>
+
+      <!-- Controls Tabs Header -->
+      <div class="controls-tab-bar">
+        <button id="tab-btn-pc" class="controls-tab-btn active" type="button" data-tab="pc">
+          <span>💻 Máy Tính (PC / Laptop)</span>
+        </button>
+        <button id="tab-btn-mobile" class="controls-tab-btn" type="button" data-tab="mobile">
+          <span>📱 Điện Thoại (Mobile)</span>
+        </button>
+        <button id="tab-btn-settings" class="controls-tab-btn" type="button" data-tab="settings">
+          <span>⚙️ Cài Đặt</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: PC Controls -->
+      <div id="tab-pane-pc" class="controls-tab-pane active">
+        <div class="controls-grid">
+          <!-- Keyboard Movement -->
+          <div class="control-feature-card">
+            <div class="feature-card-header">
+              <span class="feature-icon">🏃</span>
+              <h3>Di chuyển nhân vật & Chỉnh góc</h3>
+            </div>
+            <div class="feature-keys-row">
+              <div class="kbd-badge-group">
+                <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                <span class="kbd-alt">hoặc</span>
+                <kbd>▲</kbd><kbd>◀</kbd><kbd>▼</kbd><kbd>▶</kbd>
+              </div>
+            </div>
+            <ul class="feature-notes">
+              <li><strong>A / D (hoặc ◀ / ▶):</strong> Di chuyển sang trái/phải và chỉnh hướng bóng đánh chéo sân.</li>
+              <li><strong>W (hoặc ▲):</strong> Lao nhanh lên lưới để bắt volley uy lực.</li>
+              <li><strong>S (hoặc ▼):</strong> Lùi sâu về vạch cuối sân để phòng thủ bóng xoáy.</li>
+            </ul>
+          </div>
+
+          <!-- Racket Swing & Serve -->
+          <div class="control-feature-card">
+            <div class="feature-card-header">
+              <span class="feature-icon">🎾</span>
+              <h3>Đánh bóng & Giao bóng (Serve)</h3>
+            </div>
+            <div class="feature-keys-row">
+              <div class="kbd-badge-group">
+                <kbd class="key-wide">Space</kbd> / <kbd class="key-wide">Enter</kbd>
+                <span class="kbd-alt">hoặc</span>
+                <kbd>Chuột Trái</kbd>
+              </div>
+            </div>
+            <ul class="feature-notes">
+              <li><strong>Tung bóng giao:</strong> Bấm <kbd>W</kbd>, <kbd>T</kbd> hoặc <kbd>Chuột Phải</kbd> khi đứng vạch giao bóng.</li>
+              <li><strong>Giao uy lực (Power Serve):</strong> Đánh bóng ngay đỉnh cao nhất (<kbd>Space</kbd> hoặc <kbd>Click</kbd>) khi đạt Sweet Spot!</li>
+              <li><strong>Chuột:</strong> Nhấp hoặc kéo/flick chuột trên sân để vung vợt theo hướng kéo. Lăn chuột để đổi kiểu bóng!</li>
+            </ul>
+          </div>
+
+          <!-- Shot Types -->
+          <div class="control-feature-card full-width">
+            <div class="feature-card-header">
+              <span class="feature-icon">⚡</span>
+              <h3>Các kiểu đánh bóng kỹ thuật</h3>
+            </div>
+            <div class="shot-types-grid">
+              <div class="shot-chip">
+                <div class="shot-chip-keys"><kbd>1</kbd> hoặc <kbd>J</kbd> / <kbd>Z</kbd></div>
+                <div class="shot-chip-title">🌀 Topspin</div>
+                <div class="shot-chip-desc">Bóng xoáy cuộn mạnh, tốc độ cao và quỹ đạo cong chìm.</div>
+              </div>
+              <div class="shot-chip">
+                <div class="shot-chip-keys"><kbd>2</kbd> hoặc <kbd>K</kbd> / <kbd>X</kbd></div>
+                <div class="shot-chip-title">✂️ Slice</div>
+                <div class="shot-chip-desc">Cắt bóng xoáy ngược, nảy thấp và lướt là là mặt cỏ.</div>
+              </div>
+              <div class="shot-chip">
+                <div class="shot-chip-keys"><kbd>3</kbd> hoặc <kbd>L</kbd> / <kbd>C</kbd></div>
+                <div class="shot-chip-title">🎈 Lob</div>
+                <div class="shot-chip-desc">Lốp bóng bổng hình cầu vồng qua đầu đối thủ lên lưới.</div>
+              </div>
+              <div class="shot-chip">
+                <div class="shot-chip-keys"><kbd>4</kbd> hoặc <kbd>I</kbd> / <kbd>V</kbd></div>
+                <div class="shot-chip-title">⚡ Smash</div>
+                <div class="shot-chip-desc">Cú đập búa bổ cực mạnh từ trên cao không thể cản phá!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Mobile Controls -->
+      <div id="tab-pane-mobile" class="controls-tab-pane">
+        <div class="controls-grid">
+          <!-- Joystick Guide -->
+          <div class="control-feature-card">
+            <div class="feature-card-header">
+              <span class="feature-icon">🕹️</span>
+              <h3>Cần gạt ảo (Virtual Joystick)</h3>
+            </div>
+            <div class="feature-visual-demo">
+              <div class="demo-joystick-mock">
+                <div class="demo-knob"></div>
+              </div>
+            </div>
+            <ul class="feature-notes">
+              <li>Đặt ngón tay cái bên trái màn hình để kích hoạt cần gạt.</li>
+              <li>Kéo sang trái/phải để di chuyển và định hướng cú đánh sang góc sân.</li>
+              <li>Đẩy lên để dâng cao bắt lưới, kéo xuống để lùi về bảo vệ vạch đáy.</li>
+            </ul>
+          </div>
+
+          <!-- Touch Buttons Guide -->
+          <div class="control-feature-card">
+            <div class="feature-card-header">
+              <span class="feature-icon">📱</span>
+              <h3>Cụm nút bấm cảm ứng (Action Buttons)</h3>
+            </div>
+            <div class="feature-visual-demo">
+              <div class="demo-btns-row">
+                <span class="demo-btn-pill btn-toss-demo">🚀 GIAO</span>
+                <span class="demo-btn-pill btn-swing-demo">🎾 ĐÁNH</span>
+                <span class="demo-btn-pill btn-smash-demo">⚡ SMASH</span>
+              </div>
+            </div>
+            <ul class="feature-notes">
+              <li><strong>🚀 GIAO (TOSS):</strong> Tung bóng lên không trung để thực hiện quả giao bóng.</li>
+              <li><strong>🎾 ĐÁNH (SWING):</strong> Nút chính kích thước lớn, vung vợt đánh bóng theo thời điểm chuẩn xác.</li>
+              <li><strong>⚡ SMASH / 🌀 SLICE / 🎈 LOB:</strong> Nhấn trực tiếp các nút phụ để tung ngay cú đánh kỹ thuật tương ứng!</li>
+            </ul>
+          </div>
+
+          <!-- Swipe & Gyro -->
+          <div class="control-feature-card full-width">
+            <div class="feature-card-header">
+              <span class="feature-icon">📳</span>
+              <h3>Cảm biến lắc máy & Vuốt màn hình</h3>
+            </div>
+            <div class="gyro-features-split">
+              <div class="gyro-split-col">
+                <h4>👆 Vuốt trực tiếp trên màn hình</h4>
+                <p>Bạn có thể vuốt ngón tay tự do ở bất kỳ đâu trên sân đấu. Vuốt vút lên để tung bóng / topspin, vuốt chém xuống để smash, vuốt sang ngang để đánh chéo góc!</p>
+              </div>
+              <div class="gyro-split-col">
+                <h4>📳 Lắc điện thoại đánh bóng (Motion Sensor)</h4>
+                <p>Bật tính năng <strong>"Lắc máy"</strong> bên dưới. Cầm điện thoại trên tay và vung mạnh về phía trước như chiếc vợt Wii Remote thật để tung cú đánh kết hợp rung phản hồi chân thực!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Settings -->
+      <div id="tab-pane-settings" class="controls-tab-pane">
+        <div class="settings-form">
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="setting-touch-gamepad" class="setting-label">🎮 Hiển thị Gamepad cảm ứng trên màn hình</label>
+              <div class="setting-sub">Hiển thị cần gạt ảo và các nút Đánh, Giao, Smash (tự động bật trên Mobile/Tablet).</div>
+            </div>
+            <div class="setting-control">
+              <input type="checkbox" id="setting-touch-gamepad" class="wii-toggle-checkbox" checked />
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="setting-gyro-motion" class="setting-label">📳 Cảm biến chuyển động (Lắc máy đánh bóng)</label>
+              <div class="setting-sub">Sử dụng con quay hồi chuyển Gyroscope/Accelerometer trên điện thoại để vung vợt.</div>
+            </div>
+            <div class="setting-control">
+              <input type="checkbox" id="setting-gyro-motion" class="wii-toggle-checkbox" />
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="setting-haptics" class="setting-label">📳 Rung phản hồi cảm ứng (Haptic Vibration)</label>
+              <div class="setting-sub">Rung nhẹ khi chạm nút và rung mạnh khi tiếp xúc bóng trúng điểm ngọt (Sweet Spot).</div>
+            </div>
+            <div class="setting-control">
+              <input type="checkbox" id="setting-haptics" class="wii-toggle-checkbox" checked />
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="setting-manual-movement" class="setting-label">🏃 Di chuyển thủ công kết hợp hỗ trợ (Manual Footwork)</label>
+              <div class="setting-sub">Cho phép bạn tự do chạy khắp sân bằng phím WASD / Cần gạt, đồng thời hỗ trợ bắt bóng mượt mà.</div>
+            </div>
+            <div class="setting-control">
+              <input type="checkbox" id="setting-manual-movement" class="wii-toggle-checkbox" checked />
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <label for="setting-move-speed" class="setting-label">⚡ Tốc độ di chuyển nhân vật</label>
+              <div class="setting-sub">Điều chỉnh tốc độ chạy trên sân (đã hiệu chỉnh vừa phải, không bị quá nhanh). Hiện tại: <span id="setting-speed-val" class="speed-val-badge">Chuẩn (1.0x)</span></div>
+            </div>
+            <div class="setting-control speed-slider-wrap">
+              <input type="range" id="setting-move-speed" min="0.6" max="1.4" step="0.1" value="1.0" class="wii-range-slider" />
+              <div class="speed-slider-labels">
+                <span>Chậm (0.6x)</span>
+                <span>Chuẩn (1.0x)</span>
+                <span>Nhanh (1.4x)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Card Footer -->
+      <div class="controls-card-footer">
+        <button id="btn-close-controls" type="button" class="wii-ok-btn primary">
+          <span>✓ Đã hiểu & Tiếp tục chơi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Companion / Phone Controller Modal -->
+  <div id="companion-modal" class="wii-modal-backdrop hidden">
+    <div class="wii-dialog-box wii-companion-clean-dialog">
+      <div class="mp-dialog-header">
+        <h2 class="dialog-title">📱 Phone Controller</h2>
+        <span id="mp-active-status" class="mp-conn-tag">Scan QR</span>
+      </div>
+      <p class="dialog-desc">Scan with your phone camera</p>
+      <div id="mp-card-p1" class="mp-clean-qr-wrap">
+        <span id="mp-p1-status" class="hidden"></span>
+        <img id="companion-qr" src="https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player1_qr.png" alt="Phone Controller QR" width="200" height="200" class="mp-qr-img" />
+        <a id="companion-link" href="/companion.html?room=default&role=p1" target="_blank" rel="noopener" class="mp-subtle-link">Open controller link ↗</a>
+      </div>
+      <div id="mp-card-p2" class="mp-clean-qr-wrap hidden">
+        <span id="mp-p2-status" class="hidden"></span>
+        <img id="companion-qr-p2" src="https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player2_qr.png" alt="Phone Controller QR" width="200" height="200" class="mp-qr-img" />
+        <a id="companion-link-p2" href="/companion.html?room=default&role=p2" target="_blank" rel="noopener" class="mp-subtle-link">Open controller link ↗</a>
+      </div>
+      <div class="dialog-actions">
+        <button id="btn-close-companion" type="button" class="wii-pill-btn">Back to Court</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory / Match Results Modal -->
+  <div id="victory-modal" class="wii-modal-backdrop hidden">
+    <div class="wii-skill-card">
+      <div class="skill-card-header">Club Skill Rating</div>
+      <div class="skill-card-body">
+        <div class="skill-chart-frame">
+          <canvas id="skill-graph-canvas" width="280" height="200"></canvas>
+        </div>
+        <div class="skill-mii-summary">
+          <div id="victory-result-banner" class="victory-result-banner">YOU WIN!</div>
+          <div class="skill-score-pill">
+            <canvas id="victory-mii-icon" width="192" height="192"></canvas>
+            <div class="skill-score-meta">
+              <div class="skill-rating-number" id="skill-rating-value">1120</div>
+              <div class="skill-player-name">Ammaar (+120)</div>
+            </div>
+          </div>
+          <div id="victory-match-score" class="victory-match-score">Final Games: 2 - 0</div>
+        </div>
+      </div>
+      <div class="skill-card-footer">
+        <button id="btn-play-again" type="button" class="wii-footer-btn primary">Chơi lại (Play again)</button>
+        <button id="btn-return-title" type="button" class="wii-footer-btn secondary">Menu chính</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
     import { renderAllHudMiiAvatars } from './src/mii_avatars.js';
     renderAllHudMiiAvatars();
-  </script><script type="module" src="./src/game_engine.js"></script></body></html>
+  </script>
+  <script type="module" src="./src/game_engine.js"></script>
+</body>
+</html>

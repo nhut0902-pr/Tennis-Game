@@ -1,1 +1,772 @@
-import{renderAllHudMiiAvatars as P,renderMiiAvatar as L}from"./mii_avatars.js";export class HudUI{constructor(t={}){this.callbacks=t,this.bannerTimer=null,this.timingPopupTimer=null,this.skillHistory=[980,1005,1030,1065,1120],this.selectedGamesToWin=2,this.selectedInputMode="mouse",this.selectedDifficulty="casual",this.currentRoomId="default",this.currentTunnelUrl="https://argon-tennis-sandbox-170440.uc.r.appspot.com",this.elTitleModal=document.getElementById("title-modal"),this.elCompanionModal=document.getElementById("companion-modal"),this.elVictoryModal=document.getElementById("victory-modal"),this.elScoreCenter=document.getElementById("score-center-display"),this.elScorePlayer=document.getElementById("score-player-text"),this.elScoreSep=document.getElementById("score-separator"),this.elScoreOpponent=document.getElementById("score-opponent-text"),this.elGamesPlayer=document.getElementById("games-pill-player"),this.elGamesOpponent=document.getElementById("games-pill-opponent"),this.elServerTag=document.getElementById("server-tag"),this.elPlayerNameplate=document.getElementById("player-nameplate"),this.elTimingPopup=document.getElementById("timing-popup"),this.elTimingGrade=document.getElementById("timing-popup-grade"),this.elTimingDetail=document.getElementById("timing-popup-detail"),this.elBannerLayer=document.getElementById("center-banner-layer"),this.elBannerText=document.getElementById("center-banner-text"),this.elBannerSub=document.getElementById("center-banner-sub"),this.elReplayBadge=document.getElementById("replay-badge"),this.elTimingCursor=document.getElementById("timing-cursor"),this.elGaugeModeTitle=document.getElementById("gauge-mode-title"),this.elGaugeSpeedReadout=document.getElementById("gauge-speed-readout"),this.elAudioDot=document.getElementById("audio-status-dot"),this.elAudioLabel=document.getElementById("audio-track-label"),this.elCameraLabel=document.getElementById("camera-mode-label"),this.elWebcamPip=document.getElementById("webcam-pip-card"),this.elWebcamDot=document.getElementById("webcam-status-dot"),this.elPhoneDot=document.getElementById("phone-status-dot"),this.elPhoneLabel=document.getElementById("phone-status-label"),this.elOpponentPresencePill=document.getElementById("opponent-presence-pill"),this.elOpponentPresenceText=document.getElementById("opponent-presence-text"),this._lastRoomStatus={},this._lastOtherReady=!1,this._justJoinedTimer=null,this._renderAllMiiPortraits(),this._bindEvents(),this._initUrlParamsState()}_renderAllMiiPortraits(){P()}_drawMiiFace(t,n={}){L(t,n.characterId||t?.id||"player1",n)}_initUrlParamsState(){const t=new URLSearchParams(window.location.search),n=(t.get("room")||"").trim().toUpperCase(),e=(t.get("role")||"p1").trim().toLowerCase()==="p2"?"p2":"p1",i=(t.get("mode")||t.get("difficulty")||"").toLowerCase();if(this.playerRole=e,n&&n!=="DEFAULT"?(this.currentRoomId=n,this._setDifficultySelection("1v1",{notify:!1})):["casual","pro","1v1"].includes(i)&&this._setDifficultySelection(i,{notify:!1}),e==="p2"){const o=document.querySelector(".you-tag");o&&(o.textContent="Player 1");const s=document.getElementById("setup-opponent-label");s&&(s.textContent="You")}this.updateMultiplayerRoomInfo({roomId:this.currentRoomId,tunnelUrl:this.currentTunnelUrl,role:this.playerRole})}_setDifficultySelection(t,{notify:n=!0}={}){const e=["casual","pro","1v1"].includes(t)?t:"casual";this.selectedDifficulty=e,document.querySelectorAll("#difficulty-mode-group .wii-green-choice").forEach(a=>{a.classList.toggle("selected",a.dataset.difficulty===e)});const o=document.getElementById("match-length-section");if(e==="1v1")o&&o.classList.add("hidden"),this.selectedGamesToWin=1,this.configureGameBubbles(1),n&&this.callbacks.onSelectMatchLength&&this.callbacks.onSelectMatchLength(1);else{o&&o.classList.remove("hidden");const a=document.querySelector("#match-length-group .wii-green-choice.selected"),r=parseInt(a?.dataset?.games||"3",10);this.selectedGamesToWin=Math.ceil(r/2),this.configureGameBubbles(this.selectedGamesToWin),n&&this.callbacks.onSelectMatchLength&&this.callbacks.onSelectMatchLength(this.selectedGamesToWin)}const s=document.getElementById("setup-opponent-label");s&&this.playerRole!=="p2"&&(e==="1v1"?s.textContent="Player 2":e==="pro"?s.textContent="Matt":s.textContent="Club AI"),this.updateOpponentPresence(this._lastRoomStatus||{}),n&&this.callbacks.onSelectDifficulty&&this.callbacks.onSelectDifficulty(e)}_bindEvents(){document.querySelectorAll("#difficulty-mode-group .wii-green-choice").forEach(l=>{l.addEventListener("click",()=>{const c=l.dataset.difficulty||"casual";this._setDifficultySelection(c,{notify:!0})})});const n=document.querySelectorAll("#match-length-group .wii-green-choice");n.forEach(l=>{l.addEventListener("click",()=>{n.forEach(u=>u.classList.remove("selected")),l.classList.add("selected");const c=parseInt(l.dataset.games||"3",10);this.selectedGamesToWin=Math.ceil(c/2),this.configureGameBubbles(this.selectedGamesToWin),this.callbacks.onSelectMatchLength&&this.callbacks.onSelectMatchLength(this.selectedGamesToWin)})});const e=document.querySelectorAll("#input-mode-group .wii-cyan-choice");e.forEach(l=>{l.addEventListener("click",()=>{e.forEach(c=>c.classList.remove("selected")),l.classList.add("selected"),this.selectedInputMode=l.dataset.input||"mouse",this.callbacks.onSelectInputMode&&this.callbacks.onSelectInputMode(this.selectedInputMode)})});const i=document.getElementById("btn-start-match");i&&i.addEventListener("click",()=>{this.hideTitleModal(),this.callbacks.onStartMatch&&this.callbacks.onStartMatch({gamesToWin:this.selectedGamesToWin,inputMode:this.selectedInputMode,difficulty:this.selectedDifficulty})});const o=document.getElementById("btn-audio-toggle");o&&o.addEventListener("click",l=>{l.stopPropagation(),this.callbacks.onToggleAudio&&this.callbacks.onToggleAudio()});const s=document.getElementById("btn-camera-cycle");s&&s.addEventListener("click",l=>{l.stopPropagation(),this.callbacks.onCycleCamera&&this.callbacks.onCycleCamera()});const a=document.getElementById("btn-replay-trigger");a&&a.addEventListener("click",l=>{l.stopPropagation(),this.callbacks.onToggleReplay&&this.callbacks.onToggleReplay()});const r=document.getElementById("btn-webcam-toggle");r&&r.addEventListener("click",l=>{l.stopPropagation(),this.callbacks.onToggleWebcam&&this.callbacks.onToggleWebcam()});const m=document.getElementById("btn-phone-racket");m&&m.addEventListener("click",l=>{l.stopPropagation(),this.openMultiplayerModal()});const p=document.getElementById("btn-multiplayer-modal");p&&p.addEventListener("click",l=>{l.stopPropagation(),this.openMultiplayerModal()});const g=document.getElementById("btn-create-1v1-room");g&&g.addEventListener("click",async()=>{g.disabled=!0,g.textContent="Creating...";try{if(this.callbacks.onCreateMultiplayerRoom){const l=await this.callbacks.onCreateMultiplayerRoom();l&&l.roomId&&(this.currentRoomId=l.roomId,this._setDifficultySelection("1v1",{notify:!1}),this.updateMultiplayerRoomInfo({roomId:l.roomId,tunnelUrl:l.tunnelUrl||this.currentTunnelUrl,urls:l.urls}))}}finally{g.disabled=!1,g.textContent="+ New 1v1 Room"}});const y=document.getElementById("btn-save-tunnel-url");y&&y.addEventListener("click",async()=>{const l=document.getElementById("tunnel-url-input"),c=(l?l.value:"").trim().replace(/\/+$/,"");if(c){this.currentTunnelUrl=c;try{await fetch("/api/tunnel/url",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tunnelUrl:c})})}catch{}this.updateMultiplayerRoomInfo({roomId:this.currentRoomId,tunnelUrl:this.currentTunnelUrl}),y.textContent="Saved \u2713",setTimeout(()=>{y.textContent="Update Tunnel"},1400)}});const f=document.getElementById("btn-send-gchat-invite");f&&f.addEventListener("click",async()=>{const l=document.getElementById("gchat-target-input"),c=document.getElementById("gchat-send-status"),u=(l?l.value:"").trim();if(!u){c&&(c.textContent="Enter a Google Chat Space ID (e.g. AAAAb123456) or colleague email (user@google.com) first.");return}if((!this.currentRoomId||this.currentRoomId==="default")&&this.callbacks.onCreateMultiplayerRoom){const h=await this.callbacks.onCreateMultiplayerRoom();h&&h.roomId&&(this.currentRoomId=h.roomId)}f.disabled=!0,f.textContent="Sending...";try{const h=u.includes("@"),E=await(await fetch("/api/gchat/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room:this.currentRoomId,spaceId:h?"":u,dmEmail:h?u:"",tunnelUrl:this.currentTunnelUrl})})).json();c&&(E.sent?c.textContent=`\u2705 Posted /argontennis 1v1 Match Card (Room ${this.currentRoomId}) to ${u}!`:c.textContent=`\u2139\uFE0F Room ${this.currentRoomId} ready! Run: python3 scripts/gchat_argontennis_bot.py ${h?"--dm "+u:"--space "+u} --room ${this.currentRoomId}`)}catch{c&&(c.textContent=`Room ${this.currentRoomId} ready \u2014 share the P2 Court & Pocket Racket links above!`)}finally{f.disabled=!1,f.textContent="Send GChat Card"}});const I=document.getElementById("btn-copy-gchat-cmd");I&&I.addEventListener("click",async()=>{const l=document.getElementById("gchat-target-input"),c=document.getElementById("gchat-send-status"),h=`python3 scripts/gchat_argontennis_bot.py --watch-space ${(l?l.value:"").trim()||"<SPACE_ID>"} --tunnel-url ${this.currentTunnelUrl}`;try{navigator.clipboard&&navigator.clipboard.writeText&&await navigator.clipboard.writeText(h),c&&(c.textContent=`\u{1F4CB} Copied: ${h}`)}catch{c&&(c.textContent=`Run: ${h}`)}});const b=document.getElementById("btn-close-companion");b&&b.addEventListener("click",()=>{this.elCompanionModal&&this.elCompanionModal.classList.add("hidden")});const B=document.getElementById("btn-play-again");B&&B.addEventListener("click",()=>{this.hideVictoryModal(),this.callbacks.onPlayAgain&&this.callbacks.onPlayAgain()});const T=document.getElementById("btn-return-title");T&&T.addEventListener("click",()=>{this.hideVictoryModal(),this.showTitleModal()})}async openMultiplayerModal(){if(this.elCompanionModal){try{const t=await fetch("/api/tunnel/status",{cache:"no-store"});if(t.ok){const n=await t.json();if(n.tunnelUrl){this.currentTunnelUrl=n.tunnelUrl;const e=document.getElementById("tunnel-url-input");e&&(e.value=n.tunnelUrl)}}}catch{}this.updateMultiplayerRoomInfo({roomId:this.currentRoomId,tunnelUrl:this.currentTunnelUrl}),this.elCompanionModal.classList.remove("hidden")}}hideTitleModal(){document.documentElement.classList.add("autoplay-mode"),this.elTitleModal&&(this.elTitleModal.classList.add("hidden"),this.elTitleModal.style.display="none")}showTitleModal(){document.documentElement.classList.remove("autoplay-mode"),this.elTitleModal&&(this.elTitleModal.classList.remove("hidden"),this.elTitleModal.style.display="flex")}hideVictoryModal(){this.elVictoryModal&&this.elVictoryModal.classList.add("hidden")}showVictoryModal({playerWon:t,playerGames:n,opponentGames:e}){if(!this.elVictoryModal)return;const i=document.getElementById("victory-result-banner"),o=document.getElementById("victory-match-score"),s=document.getElementById("skill-rating-value");i&&(i.textContent=t?"YOU WIN!":"TRY AGAIN!",i.style.color=t?"#ffea28":"#9ad4ff"),o&&(o.textContent=`Final Games: ${n} - ${e}`);const a=t?1145:1020;s&&(s.textContent=String(a)),this._drawSkillGraph(t),this.elVictoryModal.classList.remove("hidden")}_drawSkillGraph(t){const n=document.getElementById("skill-graph-canvas");if(!n)return;const e=n.getContext("2d"),i=n.width,o=n.height;e.clearRect(0,0,i,o),e.fillStyle="#f8fbff",e.fillRect(0,0,i,o),e.strokeStyle="#d0dce8",e.lineWidth=1;for(let p=25;p<o;p+=35)e.beginPath(),e.moveTo(0,p),e.lineTo(i,p),e.stroke();const s=o*.56;e.strokeStyle="#9aaab8",e.setLineDash([4,4]),e.beginPath(),e.moveTo(0,s),e.lineTo(i,s),e.stroke(),e.setLineDash([]),e.fillStyle="#6c7c8c",e.font="bold 11px sans-serif",e.fillText("PRO 1000",8,s-5);const a=t?[.74,.66,.58,.45,.24]:[.74,.66,.58,.52,.55];e.strokeStyle="#1f96f2",e.lineWidth=3.5,e.lineCap="round",e.lineJoin="round",e.beginPath(),a.forEach((p,g)=>{const y=24+g/(a.length-1)*(i-48),f=o*p;g===0?e.moveTo(y,f):e.lineTo(y,f)}),e.stroke();const r=i-24,m=o*a[a.length-1];e.fillStyle="#ffea28",e.beginPath(),e.arc(r,m,6,0,Math.PI*2),e.fill(),e.strokeStyle="#006cc4",e.lineWidth=2.5,e.stroke()}configureGameBubbles(t=2){[this.elGamesPlayer,this.elGamesOpponent].forEach(n=>{if(!n)return;n.querySelectorAll(".game-bubble").forEach((i,o)=>{o<Math.max(1,t)?i.classList.remove("hidden"):i.classList.add("hidden")})})}updateScoreboard({playerScoreText:t="00",opponentScoreText:n="00",deuceLabel:e=null,playerGames:i=0,opponentGames:o=0,gamesToWin:s=2}){this.elScoreCenter&&(e?(this.elScoreCenter.classList.add("deuce-mode"),this.elScorePlayer.textContent=e,this.elScoreSep.classList.add("hidden"),this.elScoreOpponent.classList.add("hidden")):(this.elScoreCenter.classList.remove("deuce-mode"),this.elScorePlayer.textContent=t,this.elScoreSep.classList.remove("hidden"),this.elScoreOpponent.classList.remove("hidden"),this.elScoreOpponent.textContent=n),this.configureGameBubbles(s),this.elGamesPlayer&&this.elGamesPlayer.querySelectorAll(".game-bubble").forEach((r,m)=>r.classList.toggle("won",m<i)),this.elGamesOpponent&&this.elGamesOpponent.querySelectorAll(".game-bubble").forEach((r,m)=>r.classList.toggle("won",m<o)))}updateServerTag(t,n){if(!this.elServerTag)return;if(!n||!t||!t.visible){this.elServerTag.classList.add("hidden");return}this.elServerTag.classList.remove("hidden");const e=Math.max(80,Math.min(window.innerWidth-80,t.x)),i=Math.max(95,Math.min(window.innerHeight-90,t.y));this.elServerTag.style.left=`${e.toFixed(1)}px`,this.elServerTag.style.top=`${i.toFixed(1)}px`}updatePlayerNameplate(t,n){if(!this.elPlayerNameplate)return;if(!n||!t||!t.visible){this.elPlayerNameplate.classList.add("hidden");return}this.elPlayerNameplate.classList.remove("hidden");const e=Math.max(90,Math.min(window.innerWidth-90,t.x)),i=Math.max(120,Math.min(window.innerHeight-50,t.y));this.elPlayerNameplate.style.left=`${e.toFixed(1)}px`,this.elPlayerNameplate.style.top=`${i.toFixed(1)}px`}showTimingPopup({grade:t="PERFECT",detail:n="POWER TOPSPIN \u2022 176 KM/H",screenPos:e=null,durationMs:i=1100}){if(this.elTimingPopup){if(this.timingPopupTimer&&clearTimeout(this.timingPopupTimer),this.elTimingGrade.textContent=t,this.elTimingGrade.className="timing-grade",t.includes("EARLY")?this.elTimingGrade.classList.add("grade-early"):t.includes("LATE")?this.elTimingGrade.classList.add("grade-late"):this.elTimingGrade.classList.add("grade-perfect"),this.elTimingDetail.textContent=n,e&&e.visible){const o=Math.max(110,Math.min(window.innerWidth-110,e.x)),s=Math.max(110,Math.min(window.innerHeight-120,e.y));this.elTimingPopup.style.left=`${o.toFixed(1)}px`,this.elTimingPopup.style.top=`${s.toFixed(1)}px`}else this.elTimingPopup.style.left="50%",this.elTimingPopup.style.top="54%";this.elTimingPopup.classList.remove("hidden"),i>0&&(this.timingPopupTimer=setTimeout(()=>{this.elTimingPopup.classList.add("hidden")},i))}}showCenterBanner(t,{style:n="style-gold",subText:e="",durationMs:i=1500,persistent:o=!1}={}){!this.elBannerLayer||!this.elBannerText||(this.bannerTimer&&(clearTimeout(this.bannerTimer),this.bannerTimer=null),this.elBannerText.textContent=t,this.elBannerText.className=`center-banner-text ${n}`,this.elBannerSub&&(e?(this.elBannerSub.textContent=e,this.elBannerSub.classList.remove("hidden")):this.elBannerSub.classList.add("hidden")),this.elBannerLayer.classList.remove("hidden"),!o&&i>0&&(this.bannerTimer=setTimeout(()=>{this.hideCenterBanner()},i)))}hideCenterBanner(){this.bannerTimer&&(clearTimeout(this.bannerTimer),this.bannerTimer=null),this.elBannerLayer&&this.elBannerLayer.classList.add("hidden")}setReplayMode(t){document.body.classList.toggle("replay-mode",!!t),this.elReplayBadge&&this.elReplayBadge.classList.toggle("hidden",!t)}setActiveShotChip(t){}updateTimingGauge({cursorNormalized:t=.5,modeTitle:n="SWING TIMING",speedText:e="READY"}){if(this.elTimingCursor){const i=Math.max(4,Math.min(96,t*100));this.elTimingCursor.style.left=`${i.toFixed(1)}%`}this.elGaugeModeTitle&&(this.elGaugeModeTitle.textContent=n),this.elGaugeSpeedReadout&&(this.elGaugeSpeedReadout.textContent=e)}updateAudioStatus({playing:t,trackName:n}){this.elAudioDot&&this.elAudioDot.classList.toggle("music-on",!!t),this.elAudioLabel&&(this.elAudioLabel.textContent=t?`Lyria: ${n||"Sunny Rally"}`:"Lyria: Muted")}updateCameraLabel(t){this.elCameraLabel&&(this.elCameraLabel.textContent=t)}updateMotionStatus({webcamActive:t=!1,phoneConnected:n=!1,p1Phone:e=!1,p2Phone:i=!1}){this.elWebcamPip&&this.elWebcamPip.classList.toggle("hidden",!t),this.elWebcamDot&&this.elWebcamDot.classList.toggle("active",!!t),this.elPhoneDot&&this.elPhoneDot.classList.toggle("active",!!(n||e||i)),this.elPhoneLabel&&(e&&i?this.elPhoneLabel.textContent="P1 & P2 Rackets":n||e||i?this.elPhoneLabel.textContent="Racket Connected":this.elPhoneLabel.textContent="Pocket Racket")}updateMultiplayerRoomInfo(t={}){const n={...this._lastRoomStatus||{},...t};if(this._lastRoomStatus=n,n.roomId&&(this.currentRoomId=String(n.roomId).toLowerCase()),n.role&&(this.playerRole=String(n.role).toLowerCase()==="p2"?"p2":"p1"),n.tunnelUrl){this.currentTunnelUrl=String(n.tunnelUrl).replace(/\/+$/,"");const d=document.getElementById("tunnel-url-input");d&&document.activeElement!==d&&(d.value=this.currentTunnelUrl)}const e=this.playerRole==="p2",i=document.getElementById("mp-card-p1"),o=document.getElementById("mp-card-p2"),s=document.getElementById("mp-gchat-invite-box"),a=document.getElementById("btn-create-1v1-room");i&&i.classList.toggle("hidden",e),o&&o.classList.toggle("hidden",!e),s&&s.classList.toggle("hidden",e),a&&a.classList.toggle("hidden",e);const r=document.getElementById("companion-room-badge");r&&(r.textContent=`ROOM #${this.currentRoomId.toUpperCase()} \u2022 ${e?"PLAYER 2":"PLAYER 1"}`);const m=encodeURIComponent(this.currentRoomId),p=(this.currentTunnelUrl||window.location.origin).replace(/\/+$/,""),g=`${p}/companion.html?room=${m}&role=p1`,y=`${p}/companion.html?room=${m}&role=p2`,f=document.getElementById("companion-link");f&&(f.href=g);const I=document.getElementById("companion-link-p2");I&&(I.href=y);const b=document.getElementById("companion-qr");if(b){const d="https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player1_qr.png";b.dataset.lastSrc!==d&&(b.src=d,b.dataset.lastSrc=d)}const B=document.getElementById("companion-qr-p2");if(B){const d="https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player2_qr.png";B.dataset.lastSrc!==d&&(B.src=d,B.dataset.lastSrc=d)}const T=document.getElementById("court-link-p1");T&&(T.href=`/?room=${m}&role=p1`);const l=document.getElementById("court-link-p2");l&&(l.href=`/?room=${m}&role=p2`);const c=document.getElementById("mp-p1-status");if(c){const d=!!(n.p1Phone||n.p1Online);c.textContent=n.p1Phone?"Connected \u2713":d?"Court Ready":"Scan QR",c.classList.toggle("online",!!n.p1Phone)}const u=document.getElementById("mp-p2-status");if(u){const d=!!(n.p2Phone||n.p2Online);u.textContent=n.p2Phone?"Connected \u2713":d?"Court Ready":"Scan QR",u.classList.toggle("online",!!n.p2Phone)}const h=document.getElementById("mp-active-status");if(h){const d=e?!!n.p2Phone:!!n.p1Phone;h.textContent=d?"Connected \u2713":"Scan QR",h.classList.toggle("online",d)}this.updateOpponentPresence(n)}updateOpponentPresence(t={}){const n=!!(t.isMultiplayer||this.selectedDifficulty==="1v1"||this.currentRoomId&&this.currentRoomId!=="default"),e=document.querySelector(".mii-side-opponent .mii-avatar-badge:not(.secondary-mii)");if(!n){this.elOpponentPresencePill&&this.elOpponentPresencePill.classList.add("hidden"),e&&e.classList.remove("opponent-ready"),this._lastOtherReady=!1;return}const i=t.hostName&&t.hostName.trim()?t.hostName.trim():"Player 1",o=t.guestName&&t.guestName.trim()?t.guestName.trim():"Player 2",s=this.playerRole==="p2";let a=!1,r="";s?(a=!!(t.p2Phone||t.p1Phone||t.p1Online),t.p2Phone?r=`Racket Ready \u2022 ${i} Joined`:t.p1Phone||t.p1Online?r=`${i} Ready \u2022 Scan QR for Phone Racket`:r=`Waiting for ${i}\u2026`):(a=!!(t.p2Phone||t.p2Online),t.p2Phone&&t.p2Online?r=`${o} Connected \u2022 Ready to Serve!`:t.p2Phone?r=`${o}'s Racket Ready \u2022 Ready to Serve!`:t.p2Online?r=`${o} Joined \u2022 Ready to Serve!`:r=`Waiting for ${o}\u2026`),this.elOpponentPresencePill&&(this.elOpponentPresencePill.classList.remove("hidden"),this.elOpponentPresencePill.classList.toggle("ready",a),this.elOpponentPresencePill.classList.toggle("in-rally",!!t.inRally),a&&!this._lastOtherReady&&(this.elOpponentPresencePill.classList.remove("just-joined"),this.elOpponentPresencePill.offsetWidth,this.elOpponentPresencePill.classList.add("just-joined"),this._justJoinedTimer&&clearTimeout(this._justJoinedTimer),this._justJoinedTimer=setTimeout(()=>{this.elOpponentPresencePill&&this.elOpponentPresencePill.classList.remove("just-joined")},950))),this.elOpponentPresenceText&&(this.elOpponentPresenceText.textContent=r),e&&e.classList.toggle("opponent-ready",a);const m=document.getElementById("setup-opponent-label");m&&this.selectedDifficulty==="1v1"&&!s&&(m.textContent=a?`\u{1F7E2} ${o} Ready`:o),this._lastOtherReady=a}}
+import { renderAllHudMiiAvatars as renderMiiAvatars, renderMiiAvatar as renderSingleMii } from "./mii_avatars.js";
+
+export class HudUI {
+  constructor(callbacks = {}) {
+    this.callbacks = callbacks;
+    this.bannerTimer = null;
+    this.timingPopupTimer = null;
+    this.skillHistory = [980, 1005, 1030, 1065, 1120];
+    this.selectedGamesToWin = 2;
+    this.selectedInputMode = "mouse";
+    this.selectedDifficulty = "casual";
+    this.currentRoomId = "default";
+    this.currentTunnelUrl = "https://argon-tennis-sandbox-170440.uc.r.appspot.com";
+
+    // Modals
+    this.elTitleModal = document.getElementById("title-modal");
+    this.elCompanionModal = document.getElementById("companion-modal");
+    this.elVictoryModal = document.getElementById("victory-modal");
+    this.elControlsModal = document.getElementById("controls-modal");
+
+    // Scoreboard Elements
+    this.elScoreCenter = document.getElementById("score-center-display");
+    this.elScorePlayer = document.getElementById("score-player-text");
+    this.elScoreSep = document.getElementById("score-separator");
+    this.elScoreOpponent = document.getElementById("score-opponent-text");
+    this.elGamesPlayer = document.getElementById("games-pill-player");
+    this.elGamesOpponent = document.getElementById("games-pill-opponent");
+
+    // World Projected Elements
+    this.elServerTag = document.getElementById("server-tag");
+    this.elPlayerNameplate = document.getElementById("player-nameplate");
+    this.elTimingPopup = document.getElementById("timing-popup");
+    this.elTimingGrade = document.getElementById("timing-popup-grade");
+    this.elTimingDetail = document.getElementById("timing-popup-detail");
+
+    // Center Banner & Replay
+    this.elBannerLayer = document.getElementById("center-banner-layer");
+    this.elBannerText = document.getElementById("center-banner-text");
+    this.elBannerSub = document.getElementById("center-banner-sub");
+    this.elReplayBadge = document.getElementById("replay-badge");
+
+    // Gauges & Indicators
+    this.elTimingCursor = document.getElementById("timing-cursor");
+    this.elGaugeModeTitle = document.getElementById("gauge-mode-title");
+    this.elGaugeSpeedReadout = document.getElementById("gauge-speed-readout");
+    this.elAudioDot = document.getElementById("audio-status-dot");
+    this.elAudioLabel = document.getElementById("audio-track-label");
+    this.elCameraLabel = document.getElementById("camera-mode-label");
+    this.elWebcamPip = document.getElementById("webcam-pip-card");
+    this.elWebcamDot = document.getElementById("webcam-status-dot");
+    this.elPhoneDot = document.getElementById("phone-status-dot");
+    this.elPhoneLabel = document.getElementById("phone-status-label");
+    this.elTouchDot = document.getElementById("touch-status-dot");
+    this.elGyroDot = document.getElementById("gyro-status-dot");
+
+    // Opponent presence
+    this.elOpponentPresencePill = document.getElementById("opponent-presence-pill");
+    this.elOpponentPresenceText = document.getElementById("opponent-presence-text");
+    this._lastRoomStatus = {};
+    this._lastOtherReady = false;
+    this._justJoinedTimer = null;
+
+    this._renderAllMiiPortraits();
+    this._bindEvents();
+    this._initUrlParamsState();
+  }
+
+  _renderAllMiiPortraits() {
+    renderMiiAvatars();
+  }
+
+  _drawMiiFace(canvas, opts = {}) {
+    renderSingleMii(canvas, opts.characterId || canvas?.id || "player1", opts);
+  }
+
+  _initUrlParamsState() {
+    const params = new URLSearchParams(window.location.search);
+    const room = (params.get("room") || "").trim().toUpperCase();
+    const role = (params.get("role") || "p1").trim().toLowerCase() === "p2" ? "p2" : "p1";
+    const mode = (params.get("mode") || params.get("difficulty") || "").toLowerCase();
+
+    this.playerRole = role;
+    if (room && room !== "DEFAULT") {
+      this.currentRoomId = room;
+      this._setDifficultySelection("1v1", { notify: false });
+    } else if (["casual", "pro", "1v1"].includes(mode)) {
+      this._setDifficultySelection(mode, { notify: false });
+    }
+
+    if (role === "p2") {
+      const youTag = document.querySelector(".you-tag");
+      if (youTag) youTag.textContent = "Player 1";
+      const oppLabel = document.getElementById("setup-opponent-label");
+      if (oppLabel) oppLabel.textContent = "You";
+    }
+
+    this.updateMultiplayerRoomInfo({
+      roomId: this.currentRoomId,
+      tunnelUrl: this.currentTunnelUrl,
+      role: this.playerRole
+    });
+  }
+
+  _setDifficultySelection(diff, { notify = true } = {}) {
+    const target = ["casual", "pro", "1v1"].includes(diff) ? diff : "casual";
+    this.selectedDifficulty = target;
+    document.querySelectorAll("#difficulty-mode-group .wii-green-choice").forEach(b => {
+      b.classList.toggle("selected", b.dataset.difficulty === target);
+    });
+
+    const matchLenSection = document.getElementById("match-length-section");
+    if (target === "1v1") {
+      if (matchLenSection) matchLenSection.classList.add("hidden");
+      this.selectedGamesToWin = 1;
+      this.configureGameBubbles(1);
+      if (notify && this.callbacks.onSelectMatchLength) this.callbacks.onSelectMatchLength(1);
+    } else {
+      if (matchLenSection) matchLenSection.classList.remove("hidden");
+      const selMatch = document.querySelector("#match-length-group .wii-green-choice.selected");
+      const g = parseInt(selMatch?.dataset?.games || "3", 10);
+      this.selectedGamesToWin = Math.ceil(g / 2);
+      this.configureGameBubbles(this.selectedGamesToWin);
+      if (notify && this.callbacks.onSelectMatchLength) this.callbacks.onSelectMatchLength(this.selectedGamesToWin);
+    }
+
+    const oppLabel = document.getElementById("setup-opponent-label");
+    if (oppLabel && this.playerRole !== "p2") {
+      if (target === "1v1") oppLabel.textContent = "Player 2";
+      else if (target === "pro") oppLabel.textContent = "Matt";
+      else oppLabel.textContent = "Club AI";
+    }
+
+    this.updateOpponentPresence(this._lastRoomStatus || {});
+    if (notify && this.callbacks.onSelectDifficulty) {
+      this.callbacks.onSelectDifficulty(target);
+    }
+  }
+
+  _bindEvents() {
+    // Difficulty mode buttons
+    document.querySelectorAll("#difficulty-mode-group .wii-green-choice").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const d = btn.dataset.difficulty || "casual";
+        this._setDifficultySelection(d, { notify: true });
+      });
+    });
+
+    // Match length buttons
+    const lenButtons = document.querySelectorAll("#match-length-group .wii-green-choice");
+    lenButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        lenButtons.forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        const g = parseInt(btn.dataset.games || "3", 10);
+        this.selectedGamesToWin = Math.ceil(g / 2);
+        this.configureGameBubbles(this.selectedGamesToWin);
+        if (this.callbacks.onSelectMatchLength) {
+          this.callbacks.onSelectMatchLength(this.selectedGamesToWin);
+        }
+      });
+    });
+
+    // Start match button
+    const btnStart = document.getElementById("btn-start-match");
+    if (btnStart) {
+      btnStart.addEventListener("click", () => {
+        this.hideTitleModal();
+        if (this.callbacks.onStartMatch) {
+          this.callbacks.onStartMatch({
+            gamesToWin: this.selectedGamesToWin,
+            inputMode: this.selectedInputMode,
+            difficulty: this.selectedDifficulty
+          });
+        }
+      });
+    }
+
+    // Audio toggle
+    const btnAudio = document.getElementById("btn-audio-toggle");
+    if (btnAudio) {
+      btnAudio.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.callbacks.onToggleAudio) this.callbacks.onToggleAudio();
+      });
+    }
+
+    // Camera cycle
+    const btnCam = document.getElementById("btn-camera-cycle");
+    if (btnCam) {
+      btnCam.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.callbacks.onCycleCamera) this.callbacks.onCycleCamera();
+      });
+    }
+
+    // Replay toggle
+    const btnReplay = document.getElementById("btn-replay-trigger");
+    if (btnReplay) {
+      btnReplay.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.callbacks.onToggleReplay) this.callbacks.onToggleReplay();
+      });
+    }
+
+    // Webcam toggle
+    const btnWebcam = document.getElementById("btn-webcam-toggle");
+    if (btnWebcam) {
+      btnWebcam.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.callbacks.onToggleWebcam) this.callbacks.onToggleWebcam();
+      });
+    }
+
+    // Controls Guide Modal buttons
+    const btnControls = document.getElementById("btn-controls-guide");
+    if (btnControls) {
+      btnControls.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.openControlsModal();
+      });
+    }
+
+    const btnTitleControls = document.getElementById("btn-title-controls");
+    if (btnTitleControls) {
+      btnTitleControls.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.openControlsModal();
+      });
+    }
+
+    const btnCloseControls = document.getElementById("btn-close-controls");
+    if (btnCloseControls) {
+      btnCloseControls.addEventListener("click", () => this.closeControlsModal());
+    }
+
+    const btnCloseControlsX = document.getElementById("btn-close-controls-x");
+    if (btnCloseControlsX) {
+      btnCloseControlsX.addEventListener("click", () => this.closeControlsModal());
+    }
+
+    // Controls Tab Switching
+    const tabBtns = document.querySelectorAll(".controls-tab-btn");
+    tabBtns.forEach(tb => {
+      tb.addEventListener("click", () => {
+        const targetTab = tb.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove("active"));
+        tb.classList.add("active");
+
+        document.querySelectorAll(".controls-tab-pane").forEach(pane => {
+          pane.classList.remove("active");
+        });
+        const activePane = document.getElementById(`tab-pane-${targetTab}`);
+        if (activePane) activePane.classList.add("active");
+      });
+    });
+
+    // Touch Gamepad Toggle button on HUD
+    const btnTouchToggle = document.getElementById("btn-touch-toggle");
+    if (btnTouchToggle) {
+      btnTouchToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.callbacks.onToggleTouchControls) this.callbacks.onToggleTouchControls();
+      });
+    }
+
+    // Gyroscope / Motion Toggle button on HUD
+    const btnGyroToggle = document.getElementById("btn-gyro-toggle");
+    if (btnGyroToggle) {
+      btnGyroToggle.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (this.callbacks.onToggleDeviceMotion) await this.callbacks.onToggleDeviceMotion();
+      });
+    }
+
+    // Settings Modal Checkboxes
+    const setTouchGamepad = document.getElementById("setting-touch-gamepad");
+    if (setTouchGamepad) {
+      setTouchGamepad.addEventListener("change", () => {
+        if (this.callbacks.onUpdateSettings) {
+          this.callbacks.onUpdateSettings({ touchGamepadEnabled: setTouchGamepad.checked });
+        }
+      });
+    }
+
+    const setGyroMotion = document.getElementById("setting-gyro-motion");
+    if (setGyroMotion) {
+      setGyroMotion.addEventListener("change", async () => {
+        if (this.callbacks.onUpdateSettings) {
+          this.callbacks.onUpdateSettings({ deviceMotionEnabled: setGyroMotion.checked });
+        }
+      });
+    }
+
+    const setHaptics = document.getElementById("setting-haptics");
+    if (setHaptics) {
+      setHaptics.addEventListener("change", () => {
+        if (this.callbacks.onUpdateSettings) {
+          this.callbacks.onUpdateSettings({ hapticsEnabled: setHaptics.checked });
+        }
+      });
+    }
+
+    const setManualMovement = document.getElementById("setting-manual-movement");
+    if (setManualMovement) {
+      setManualMovement.addEventListener("change", () => {
+        if (this.callbacks.onUpdateSettings) {
+          this.callbacks.onUpdateSettings({ manualMovement: setManualMovement.checked });
+        }
+      });
+    }
+
+    const setMoveSpeed = document.getElementById("setting-move-speed");
+    const speedValBadge = document.getElementById("setting-speed-val");
+    if (setMoveSpeed) {
+      const updateSpeedBadge = (val) => {
+        if (!speedValBadge) return;
+        const num = parseFloat(val);
+        if (num <= 0.7) speedValBadge.textContent = `Chậm (${num.toFixed(1)}x)`;
+        else if (num >= 1.2) speedValBadge.textContent = `Nhanh (${num.toFixed(1)}x)`;
+        else speedValBadge.textContent = `Chuẩn (${num.toFixed(1)}x)`;
+      };
+      setMoveSpeed.addEventListener("input", (e) => {
+        const val = parseFloat(e.target.value);
+        updateSpeedBadge(val);
+        if (this.callbacks.onUpdateSettings) {
+          this.callbacks.onUpdateSettings({ moveSpeedRatio: val });
+        }
+      });
+    }
+
+    // Companion modal
+    const btnCloseCompanion = document.getElementById("btn-close-companion");
+    if (btnCloseCompanion) {
+      btnCloseCompanion.addEventListener("click", () => {
+        if (this.elCompanionModal) this.elCompanionModal.classList.add("hidden");
+      });
+    }
+
+    // Victory modal
+    const btnPlayAgain = document.getElementById("btn-play-again");
+    if (btnPlayAgain) {
+      btnPlayAgain.addEventListener("click", () => {
+        this.hideVictoryModal();
+        if (this.callbacks.onPlayAgain) this.callbacks.onPlayAgain();
+      });
+    }
+
+    const btnReturnTitle = document.getElementById("btn-return-title");
+    if (btnReturnTitle) {
+      btnReturnTitle.addEventListener("click", () => {
+        this.hideVictoryModal();
+        this.showTitleModal();
+      });
+    }
+  }
+
+  openControlsModal(defaultTab = null) {
+    if (!this.elControlsModal) return;
+    const isMobile = typeof window !== "undefined" && (window.innerWidth <= 1024 || "ontouchstart" in window);
+    const targetTab = defaultTab || (isMobile ? "mobile" : "pc");
+
+    // Activate tab
+    document.querySelectorAll(".controls-tab-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.tab === targetTab);
+    });
+    document.querySelectorAll(".controls-tab-pane").forEach(p => {
+      p.classList.toggle("active", p.id === `tab-pane-${targetTab}`);
+    });
+
+    // Sync settings form inputs
+    try {
+      const saved = JSON.parse(localStorage.getItem("argon_tennis_controls_settings") || "{}");
+      const cbTouch = document.getElementById("setting-touch-gamepad");
+      const cbGyro = document.getElementById("setting-gyro-motion");
+      const cbHaptics = document.getElementById("setting-haptics");
+      const cbManual = document.getElementById("setting-manual-movement");
+      const speedInput = document.getElementById("setting-move-speed");
+      const speedBadge = document.getElementById("setting-speed-val");
+
+      if (cbTouch && typeof saved.touchGamepadEnabled === "boolean") cbTouch.checked = saved.touchGamepadEnabled;
+      if (cbGyro && typeof saved.deviceMotionEnabled === "boolean") cbGyro.checked = saved.deviceMotionEnabled;
+      if (cbHaptics && typeof saved.hapticsEnabled === "boolean") cbHaptics.checked = saved.hapticsEnabled;
+      if (cbManual && typeof saved.manualMovement === "boolean") cbManual.checked = saved.manualMovement;
+      if (speedInput) {
+        const val = typeof saved.moveSpeedRatio === "number" ? saved.moveSpeedRatio : (typeof saved.moveSensitivity === "number" ? saved.moveSensitivity : 1.0);
+        speedInput.value = String(val);
+        if (speedBadge) {
+          if (val <= 0.7) speedBadge.textContent = `Chậm (${val.toFixed(1)}x)`;
+          else if (val >= 1.2) speedBadge.textContent = `Nhanh (${val.toFixed(1)}x)`;
+          else speedBadge.textContent = `Chuẩn (${val.toFixed(1)}x)`;
+        }
+      }
+    } catch {}
+
+    this.elControlsModal.classList.remove("hidden");
+  }
+
+  closeControlsModal() {
+    if (this.elControlsModal) {
+      this.elControlsModal.classList.add("hidden");
+    }
+  }
+
+  setTouchToggleActive(active) {
+    if (this.elTouchDot) this.elTouchDot.classList.toggle("active", !!active);
+    const btn = document.getElementById("btn-touch-toggle");
+    if (btn) btn.classList.toggle("active", !!active);
+    const cb = document.getElementById("setting-touch-gamepad");
+    if (cb) cb.checked = !!active;
+  }
+
+  setGyroToggleActive(active) {
+    if (this.elGyroDot) this.elGyroDot.classList.toggle("active", !!active);
+    const btn = document.getElementById("btn-gyro-toggle");
+    if (btn) btn.classList.toggle("active", !!active);
+    const cb = document.getElementById("setting-gyro-motion");
+    if (cb) cb.checked = !!active;
+  }
+
+  hideTitleModal() {
+    document.documentElement.classList.add("autoplay-mode");
+    if (this.elTitleModal) {
+      this.elTitleModal.classList.add("hidden");
+      this.elTitleModal.style.display = "none";
+    }
+  }
+
+  showTitleModal() {
+    document.documentElement.classList.remove("autoplay-mode");
+    if (this.elTitleModal) {
+      this.elTitleModal.classList.remove("hidden");
+      this.elTitleModal.style.display = "flex";
+    }
+  }
+
+  hideVictoryModal() {
+    if (this.elVictoryModal) this.elVictoryModal.classList.add("hidden");
+  }
+
+  showVictoryModal({ playerWon, playerGames, opponentGames }) {
+    if (!this.elVictoryModal) return;
+    const banner = document.getElementById("victory-result-banner");
+    const scoreText = document.getElementById("victory-match-score");
+    const skillValue = document.getElementById("skill-rating-value");
+
+    if (banner) {
+      banner.textContent = playerWon ? "YOU WIN!" : "TRY AGAIN!";
+      banner.style.color = playerWon ? "#ffea28" : "#9ad4ff";
+    }
+    if (scoreText) {
+      scoreText.textContent = `Final Games: ${playerGames} - ${opponentGames}`;
+    }
+    const finalRating = playerWon ? 1145 : 1020;
+    if (skillValue) skillValue.textContent = String(finalRating);
+
+    this._drawSkillGraph(playerWon);
+    this.elVictoryModal.classList.remove("hidden");
+  }
+
+  _drawSkillGraph(won) {
+    const canvas = document.getElementById("skill-graph-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#f8fbff";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = "#d0dce8";
+    ctx.lineWidth = 1;
+    for (let y = 25; y < h; y += 35) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    const proLineY = h * 0.56;
+    ctx.strokeStyle = "#9aaab8";
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(0, proLineY);
+    ctx.lineTo(w, proLineY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#6c7c8c";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText("PRO 1000", 8, proLineY - 5);
+
+    const pts = won ? [0.74, 0.66, 0.58, 0.45, 0.24] : [0.74, 0.66, 0.58, 0.52, 0.55];
+    ctx.strokeStyle = "#1f96f2";
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      const x = 24 + (i / (pts.length - 1)) * (w - 48);
+      const y = h * p;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    const lastX = w - 24;
+    const lastY = h * pts[pts.length - 1];
+    ctx.fillStyle = "#ffea28";
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#006cc4";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  }
+
+  configureGameBubbles(targetWins = 2) {
+    [this.elGamesPlayer, this.elGamesOpponent].forEach(pill => {
+      if (!pill) return;
+      pill.querySelectorAll(".game-bubble").forEach((b, idx) => {
+        if (idx < Math.max(1, targetWins)) b.classList.remove("hidden");
+        else b.classList.add("hidden");
+      });
+    });
+  }
+
+  updateScoreboard({
+    playerScoreText = "00",
+    opponentScoreText = "00",
+    deuceLabel = null,
+    playerGames = 0,
+    opponentGames = 0,
+    gamesToWin = 2
+  }) {
+    if (this.elScoreCenter) {
+      if (deuceLabel) {
+        this.elScoreCenter.classList.add("deuce-mode");
+        this.elScorePlayer.textContent = deuceLabel;
+        this.elScoreSep.classList.add("hidden");
+        this.elScoreOpponent.classList.add("hidden");
+      } else {
+        this.elScoreCenter.classList.remove("deuce-mode");
+        this.elScorePlayer.textContent = playerScoreText;
+        this.elScoreSep.classList.remove("hidden");
+        this.elScoreOpponent.classList.remove("hidden");
+        this.elScoreOpponent.textContent = opponentScoreText;
+      }
+      this.configureGameBubbles(gamesToWin);
+      if (this.elGamesPlayer) {
+        this.elGamesPlayer.querySelectorAll(".game-bubble").forEach((b, idx) => {
+          b.classList.toggle("won", idx < playerGames);
+        });
+      }
+      if (this.elGamesOpponent) {
+        this.elGamesOpponent.querySelectorAll(".game-bubble").forEach((b, idx) => {
+          b.classList.toggle("won", idx < opponentGames);
+        });
+      }
+    }
+  }
+
+  updateServerTag(pos, visible) {
+    if (!this.elServerTag) return;
+    if (!visible || !pos || !pos.visible) {
+      this.elServerTag.classList.add("hidden");
+      return;
+    }
+    this.elServerTag.classList.remove("hidden");
+    const cx = Math.max(80, Math.min(window.innerWidth - 80, pos.x));
+    const cy = Math.max(95, Math.min(window.innerHeight - 90, pos.y));
+    this.elServerTag.style.left = `${cx.toFixed(1)}px`;
+    this.elServerTag.style.top = `${cy.toFixed(1)}px`;
+  }
+
+  updatePlayerNameplate(pos, visible) {
+    if (!this.elPlayerNameplate) return;
+    if (!visible || !pos || !pos.visible) {
+      this.elPlayerNameplate.classList.add("hidden");
+      return;
+    }
+    this.elPlayerNameplate.classList.remove("hidden");
+    const cx = Math.max(90, Math.min(window.innerWidth - 90, pos.x));
+    const cy = Math.max(120, Math.min(window.innerHeight - 50, pos.y));
+    this.elPlayerNameplate.style.left = `${cx.toFixed(1)}px`;
+    this.elPlayerNameplate.style.top = `${cy.toFixed(1)}px`;
+  }
+
+  showTimingPopup({ grade = "PERFECT", detail = "POWER TOPSPIN • 176 KM/H", screenPos = null, durationMs = 1100 }) {
+    if (!this.elTimingPopup) return;
+    if (this.timingPopupTimer) clearTimeout(this.timingPopupTimer);
+
+    this.elTimingGrade.textContent = grade;
+    this.elTimingGrade.className = "timing-grade";
+    if (grade.includes("EARLY")) this.elTimingGrade.classList.add("grade-early");
+    else if (grade.includes("LATE")) this.elTimingGrade.classList.add("grade-late");
+    else this.elTimingGrade.classList.add("grade-perfect");
+
+    this.elTimingDetail.textContent = detail;
+    if (screenPos && screenPos.visible) {
+      const cx = Math.max(110, Math.min(window.innerWidth - 110, screenPos.x));
+      const cy = Math.max(110, Math.min(window.innerHeight - 120, screenPos.y));
+      this.elTimingPopup.style.left = `${cx.toFixed(1)}px`;
+      this.elTimingPopup.style.top = `${cy.toFixed(1)}px`;
+    } else {
+      this.elTimingPopup.style.left = "50%";
+      this.elTimingPopup.style.top = "54%";
+    }
+    this.elTimingPopup.classList.remove("hidden");
+    if (durationMs > 0) {
+      this.timingPopupTimer = setTimeout(() => {
+        this.elTimingPopup.classList.add("hidden");
+      }, durationMs);
+    }
+  }
+
+  showCenterBanner(text, { style = "style-gold", subText = "", durationMs = 1500, persistent = false } = {}) {
+    if (!this.elBannerLayer || !this.elBannerText) return;
+    if (this.bannerTimer) {
+      clearTimeout(this.bannerTimer);
+      this.bannerTimer = null;
+    }
+    this.elBannerText.textContent = text;
+    this.elBannerText.className = `center-banner-text ${style}`;
+    if (this.elBannerSub) {
+      if (subText) {
+        this.elBannerSub.textContent = subText;
+        this.elBannerSub.classList.remove("hidden");
+      } else {
+        this.elBannerSub.classList.add("hidden");
+      }
+    }
+    this.elBannerLayer.classList.remove("hidden");
+    if (!persistent && durationMs > 0) {
+      this.bannerTimer = setTimeout(() => {
+        this.hideCenterBanner();
+      }, durationMs);
+    }
+  }
+
+  hideCenterBanner() {
+    if (this.bannerTimer) {
+      clearTimeout(this.bannerTimer);
+      this.bannerTimer = null;
+    }
+    if (this.elBannerLayer) this.elBannerLayer.classList.add("hidden");
+  }
+
+  setReplayMode(active) {
+    document.body.classList.toggle("replay-mode", !!active);
+    if (this.elReplayBadge) this.elReplayBadge.classList.toggle("hidden", !active);
+  }
+
+  updateTimingGauge({ cursorNormalized = 0.5, modeTitle = "SWING TIMING", speedText = "READY" }) {
+    if (this.elTimingCursor) {
+      const pct = Math.max(4, Math.min(96, cursorNormalized * 100));
+      this.elTimingCursor.style.left = `${pct.toFixed(1)}%`;
+    }
+    if (this.elGaugeModeTitle) this.elGaugeModeTitle.textContent = modeTitle;
+    if (this.elGaugeSpeedReadout) this.elGaugeSpeedReadout.textContent = speedText;
+  }
+
+  updateAudioStatus({ playing, trackName }) {
+    if (this.elAudioDot) this.elAudioDot.classList.toggle("music-on", !!playing);
+    if (this.elAudioLabel) {
+      this.elAudioLabel.textContent = playing ? `Lyria: ${trackName || "Sunny Rally"}` : "Lyria: Muted";
+    }
+  }
+
+  updateCameraLabel(label) {
+    if (this.elCameraLabel) this.elCameraLabel.textContent = label;
+  }
+
+  updateMotionStatus({ webcamActive = false, phoneConnected = false, p1Phone = false, p2Phone = false }) {
+    if (this.elWebcamPip) this.elWebcamPip.classList.toggle("hidden", !webcamActive);
+    if (this.elWebcamDot) this.elWebcamDot.classList.toggle("active", !!webcamActive);
+    const anyPhone = phoneConnected || p1Phone || p2Phone;
+    if (this.elPhoneDot) this.elPhoneDot.classList.toggle("active", !!anyPhone);
+    if (this.elPhoneLabel) {
+      if (p1Phone && p2Phone) this.elPhoneLabel.textContent = "P1 & P2 Rackets";
+      else if (anyPhone) this.elPhoneLabel.textContent = "Racket Connected";
+      else this.elPhoneLabel.textContent = "Pocket Racket";
+    }
+  }
+
+  updateMultiplayerRoomInfo(info = {}) {
+    const merged = { ...this._lastRoomStatus || {}, ...info };
+    this._lastRoomStatus = merged;
+    if (merged.roomId) this.currentRoomId = String(merged.roomId).toLowerCase();
+    if (merged.role) this.playerRole = String(merged.role).toLowerCase() === "p2" ? "p2" : "p1";
+    if (merged.tunnelUrl) this.currentTunnelUrl = String(merged.tunnelUrl).replace(/\/+$/, "");
+
+    const isP2 = this.playerRole === "p2";
+    const p1Card = document.getElementById("mp-card-p1");
+    const p2Card = document.getElementById("mp-card-p2");
+    if (p1Card) p1Card.classList.toggle("hidden", isP2);
+    if (p2Card) p2Card.classList.toggle("hidden", !isP2);
+
+    const mRoom = encodeURIComponent(this.currentRoomId);
+    const origin = (this.currentTunnelUrl || window.location.origin).replace(/\/+$/, "");
+    const compP1 = `${origin}/companion.html?room=${mRoom}&role=p1`;
+    const compP2 = `${origin}/companion.html?room=${mRoom}&role=p2`;
+
+    const linkP1 = document.getElementById("companion-link");
+    if (linkP1) linkP1.href = compP1;
+    const linkP2 = document.getElementById("companion-link-p2");
+    if (linkP2) linkP2.href = compP2;
+
+    const qrP1 = document.getElementById("companion-qr");
+    if (qrP1) qrP1.src = "https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player1_qr.png";
+    const qrP2 = document.getElementById("companion-qr-p2");
+    if (qrP2) qrP2.src = "https://www.gstatic.com/aistudio/starter-apps/tennis/qr/player2_qr.png";
+
+    const p1Status = document.getElementById("mp-p1-status");
+    if (p1Status) {
+      const online = !!(merged.p1Phone || merged.p1Online);
+      p1Status.textContent = merged.p1Phone ? "Connected ✓" : online ? "Court Ready" : "Scan QR";
+      p1Status.classList.toggle("online", !!merged.p1Phone);
+    }
+    const p2Status = document.getElementById("mp-p2-status");
+    if (p2Status) {
+      const online = !!(merged.p2Phone || merged.p2Online);
+      p2Status.textContent = merged.p2Phone ? "Connected ✓" : online ? "Court Ready" : "Scan QR";
+      p2Status.classList.toggle("online", !!merged.p2Phone);
+    }
+    const activeStatus = document.getElementById("mp-active-status");
+    if (activeStatus) {
+      const online = isP2 ? !!merged.p2Phone : !!merged.p1Phone;
+      activeStatus.textContent = online ? "Connected ✓" : "Scan QR";
+      activeStatus.classList.toggle("online", online);
+    }
+    this.updateOpponentPresence(merged);
+  }
+
+  updateOpponentPresence(status = {}) {
+    const isMultiplayer = !!(status.isMultiplayer || this.selectedDifficulty === "1v1" || (this.currentRoomId && this.currentRoomId !== "default"));
+    const opponentAvatarBadge = document.querySelector(".mii-side-opponent .mii-avatar-badge:not(.secondary-mii)");
+    if (!isMultiplayer) {
+      if (this.elOpponentPresencePill) this.elOpponentPresencePill.classList.add("hidden");
+      if (opponentAvatarBadge) opponentAvatarBadge.classList.remove("opponent-ready");
+      this._lastOtherReady = false;
+      return;
+    }
+
+    const hostName = status.hostName?.trim() || "Player 1";
+    const guestName = status.guestName?.trim() || "Player 2";
+    const isP2 = this.playerRole === "p2";
+
+    let ready = false;
+    let label = "";
+    if (isP2) {
+      ready = !!(status.p2Phone || status.p1Phone || status.p1Online);
+      if (status.p2Phone) label = `Racket Ready • ${hostName} Joined`;
+      else if (status.p1Phone || status.p1Online) label = `${hostName} Ready • Scan QR for Phone Racket`;
+      else label = `Waiting for ${hostName}…`;
+    } else {
+      ready = !!(status.p2Phone || status.p2Online);
+      if (status.p2Phone && status.p2Online) label = `${guestName} Connected • Ready to Serve!`;
+      else if (status.p2Phone) label = `${guestName}'s Racket Ready • Ready to Serve!`;
+      else if (status.p2Online) label = `${guestName} Joined • Ready to Serve!`;
+      else label = `Waiting for ${guestName}…`;
+    }
+
+    if (this.elOpponentPresencePill) {
+      this.elOpponentPresencePill.classList.remove("hidden");
+      this.elOpponentPresencePill.classList.toggle("ready", ready);
+      this.elOpponentPresencePill.classList.toggle("in-rally", !!status.inRally);
+    }
+    if (this.elOpponentPresenceText) this.elOpponentPresenceText.textContent = label;
+    if (opponentAvatarBadge) opponentAvatarBadge.classList.toggle("opponent-ready", ready);
+    this._lastOtherReady = ready;
+  }
+}
+
+export default HudUI;
