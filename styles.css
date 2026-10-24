@@ -1015,77 +1015,79 @@ kbd {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: radial-gradient(circle at 50% 35%, #ffffffd1, #d2ebffb8 55%, #10243aa6);
-  backdrop-filter: blur(6px);
+  background: rgba(8, 12, 18, 0.92);
 }
 
 .wii-title-card {
-  width: min(520px, 94vw);
+  width: min(500px, 94vw);
   max-height: 92vh;
   overflow-y: auto;
-  border-radius: 26px;
-  padding: 22px 26px;
-  background: linear-gradient(180deg, #fff, #f5faff 76%, #e4f2ff);
-  border: 4px solid #63bfff;
-  box-shadow: 0 18px 48px #00204861, inset 0 2px #fff;
-  color: #243242;
+  border-radius: 12px;
+  padding: 24px;
+  background: #111722;
+  border: 1px solid #263244;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  color: #f8fafc;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .wii-logo-header {
-  text-align: center;
+  text-align: left;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .argon-logo-title {
-  font-size: clamp(32px, 4.4vw, 44px);
+  font-size: clamp(24px, 3.6vw, 30px);
   font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1.02;
-  filter: drop-shadow(0 3px 0 rgba(16, 56, 96, 0.14));
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .logo-word-argon {
-  color: #1e324a;
-  margin-right: 6px;
+  color: #f8fafc;
+  margin-right: 4px;
 }
 
 .logo-word-tennis {
-  color: #169bf0;
-  font-style: italic;
-  text-shadow: 0 3px 0 #bfe6ff;
+  color: #10b981;
 }
 
 .title-sub-badge {
   display: inline-block;
-  margin-top: 4px;
-  padding: 3px 12px;
-  border-radius: 999px;
-  background: #e2f1ff;
-  border: 1px solid #99d5ff;
-  font-size: 12px;
-  font-weight: 800;
-  color: #0068ba;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
 }
 
 .court-preview-diagram {
-  background: linear-gradient(180deg, #74c63b, #56a324);
-  border-radius: 16px;
-  padding: 9px 16px;
-  border: 3px solid #ffffff;
-  box-shadow: inset 0 2px 8px #00000038, 0 4px 12px #003c0f2e;
+  background: #14532d;
+  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid #166534;
 }
 
 .mini-court-turf {
   position: relative;
-  height: 72px;
-  border: 2.5px solid rgba(255, 255, 255, 0.92);
-  border-radius: 4px;
+  height: 68px;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 18px;
+  padding: 0 14px;
 }
 
 .mini-court-lines {
@@ -1099,8 +1101,8 @@ kbd {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: 3px;
-  background: #fffffff2;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.8);
   transform: translate(-50%);
 }
 
@@ -1110,29 +1112,29 @@ kbd {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 12px 4px 6px;
-  border-radius: 999px;
-  background: #10161cd1;
-  border: 2px solid #ffffff;
-  color: #fff;
+  padding: 4px 10px 4px 6px;
+  border-radius: 6px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
 }
 
 .court-slot-marker canvas,
 .court-slot-marker .wii-mii-svg {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
   flex-shrink: 0;
   display: block;
 }
 
 .slot-tag {
-  font-size: 12.5px;
-  font-weight: 900;
+  font-size: 12px;
+  font-weight: 800;
 }
 
-.you-tag { color: #ffea28; }
-.cpu-tag { color: #b8dcff; }
+.you-tag { color: #10b981; }
+.cpu-tag { color: #cbd5e1; }
 
 .setup-section {
   display: flex;
@@ -1141,42 +1143,64 @@ kbd {
 }
 
 .setup-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
-  color: #4a6078;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  text-transform: uppercase;
 }
 
 .wii-green-btn-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
+  gap: 8px;
+}
+
+#difficulty-mode-group.wii-green-btn-row {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .wii-green-choice {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 11px 8px;
-  border-radius: 13px;
-  background: linear-gradient(180deg, #74cc3d, #4ea11d);
-  border: 2.5px solid #c8f29e;
-  color: #fff;
+  gap: 2px;
+  padding: 10px 8px;
+  border-radius: 6px;
+  background: #192231;
+  border: 1px solid #2d3b4e;
+  color: #cbd5e1;
   font-family: var(--wii-font);
   cursor: pointer;
-  box-shadow: 0 3px 8px #00000029, inset 0 1px #ffffff80;
-  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.wii-green-choice:hover {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
 }
 
 .wii-green-choice.selected {
-  border-color: #ffea28;
-  box-shadow: 0 0 0 3px #25a8f5, 0 5px 12px #0050a052;
-  transform: translateY(-2px);
+  background: #064e3b;
+  border-color: #10b981;
+  color: #ffffff;
 }
 
 .choice-main {
-  font-size: 14.5px;
-  font-weight: 900;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.choice-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.wii-green-choice.selected .choice-sub {
+  color: #a7f3d0;
 }
 
 .title-controls-cta {
@@ -1186,52 +1210,51 @@ kbd {
 }
 
 .wii-subtle-pill-btn {
-  padding: 7px 18px;
-  border-radius: 999px;
-  background: #edf5fc;
-  border: 1.5px solid #a8d5fc;
-  color: #0b5fa8;
+  width: 100%;
+  padding: 9px 16px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid #263244;
+  color: #94a3b8;
   font-family: var(--wii-font);
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12.5px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.12s ease;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
 .wii-subtle-pill-btn:hover {
-  background: #dff0ff;
-  transform: translateY(-1px);
+  background: #192231;
+  border-color: #3b4c63;
+  color: #f8fafc;
 }
 
 .wii-modal-actions {
   display: flex;
   justify-content: center;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .wii-ok-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-width: 240px;
-  padding: 12px 32px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #7be0ff, #24a4f5 52%, #0072d6);
-  border: 3px solid #ffffff;
-  box-shadow: 0 6px 18px #0066cc73, inset 0 2px 1px #ffffffa6;
-  color: #fff;
+  width: 100%;
+  padding: 12px 24px;
+  border-radius: 6px;
+  background: #10b981;
+  border: 1px solid #059669;
+  color: #06130e;
   font-family: var(--wii-font);
-  font-size: 19px;
+  font-size: 14px;
   font-weight: 900;
-  text-shadow: 0 2px 3px rgba(0, 45, 95, 0.65);
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  transition: background 0.12s ease;
 }
 
 .wii-ok-btn:hover {
-  transform: scale(1.04);
-  box-shadow: 0 8px 24px #0078eb99;
+  background: #34d399;
 }
 
 /* ========================================================
@@ -2027,3 +2050,1094 @@ kbd {
     bottom: 14px;
   }
 }
+
+/* ============================================================
+   FLAT DARK SPORTS MODE SELECTOR & ONLINE 1V1 LOBBY MODAL
+   ============================================================ */
+
+.wii-mode-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+  background: #0b0f17;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid #263244;
+}
+
+.mode-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.mode-tab-btn:hover {
+  color: #f8fafc;
+}
+
+.mode-tab-btn.selected {
+  background: #1e293b;
+  color: #ffffff;
+  border: 1px solid #334155;
+}
+
+.online-teaser-box {
+  background: #161f2e;
+  border: 1px solid #263244;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 6px 0 14px;
+}
+
+.online-teaser-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #f8fafc;
+}
+
+.online-teaser-desc {
+  font-size: 12.5px;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.online-cta-btn {
+  background: #2563eb !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.online-cta-btn:hover {
+  background: #3b82f6 !important;
+}
+
+.highlight-online {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: none !important;
+}
+
+/* --- Flat Dark Sports Lobby Card --- */
+.wii-lobby-card {
+  width: 94%;
+  max-width: 820px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: #111722;
+  border: 1px solid #263244;
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+}
+
+.lobby-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #1e293b;
+  background: #0d131c;
+}
+
+.lobby-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lobby-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#firebase-lobby-modal .controls-close-x {
+  width: auto;
+  height: auto;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid #334155;
+  background: #192231;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#firebase-lobby-modal .controls-close-x:hover {
+  background: #263244;
+  color: #ffffff;
+  transform: none;
+}
+
+.lobby-profile-bar {
+  padding: 14px 20px;
+  background: #151d2a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.profile-meta-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-avatar-slot {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: #0b0f17;
+  border: 1px solid #334155;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-avatar-slot canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-inputs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.lobby-text-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 240px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: #0b0f17;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+
+.lobby-text-input:focus {
+  border-color: #3b82f6;
+}
+
+.lobby-text-input.uppercase {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.profile-save-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 7px 14px;
+  border-radius: 4px;
+  background: #2563eb;
+  border: 1px solid #1d4ed8;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-save-btn:hover {
+  background: #3b82f6;
+}
+
+.profile-auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lobby-google-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 4px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lobby-google-btn:hover {
+  background: #263244;
+  color: #ffffff;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.status-badge.online {
+  color: #10b981;
+}
+
+.status-badge.connecting {
+  color: #f59e0b;
+}
+
+/* --- Lobby Browse View & Grid (Host vs Join) --- */
+#lobby-browse-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.lobby-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.1fr 1.15fr;
+  gap: 16px;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.lobby-panel {
+  background: #151d2a;
+  border: 1px solid #263244;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.share-link-highlight-box {
+  border-color: #10b981 !important;
+  background: #0d1f1a !important;
+}
+
+.btn-clean-copy.copy-link-primary {
+  background: #10b981;
+  border-color: #059669;
+  color: #06130e;
+  font-weight: 800;
+}
+
+.btn-clean-copy.copy-link-primary:hover {
+  background: #34d399;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 8px;
+}
+
+.panel-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f8fafc;
+}
+
+.panel-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.panel-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #cbd5e1;
+}
+
+.lobby-select {
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #0b0f17;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.lobby-action-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease;
+}
+
+.lobby-action-btn.primary {
+  background: #10b981;
+  border-color: #059669;
+  color: #06130e;
+  margin-top: auto;
+}
+
+.lobby-action-btn.primary:hover {
+  background: #34d399;
+}
+
+.lobby-action-btn.secondary {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.lobby-action-btn.secondary:hover {
+  background: #3b82f6;
+}
+
+/* Join Panel & Live Rooms List */
+.join-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.join-input-group .lobby-text-input {
+  max-width: none;
+}
+
+.lobby-rooms-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.rooms-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rooms-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.live-dot-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #10b981;
+}
+
+.lobby-rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.lobby-room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: #0b0f17;
+  border: 1px solid #263244;
+}
+
+.lobby-room-item:hover {
+  border-color: #3b82f6;
+}
+
+.lobby-room-item.my-room {
+  border-color: #10b981;
+}
+
+.room-item-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.room-item-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  background: #1e293b;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.room-item-host {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.room-item-games {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #151d2a;
+  border: 1px solid #263244;
+  color: #94a3b8;
+}
+
+.btn-room-join {
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-room-join:hover {
+  background: #3b82f6;
+}
+
+.room-badge-own {
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.lobby-rooms-empty {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  padding: 22px 12px;
+  background: #0b0f17;
+  border-radius: 6px;
+  border: 1px solid #1e293b;
+}
+
+.lobby-card-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  justify-content: flex-start;
+  background: #0d131c;
+}
+
+.lobby-card-footer .wii-footer-btn.secondary {
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: #192231;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.lobby-card-footer .wii-footer-btn.secondary:hover {
+  background: #263244;
+  color: #ffffff;
+}
+
+/* Toast notification with auto fade-out (flat, no blur) */
+.lobby-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #10b981;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.lobby-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.lobby-toast.fading-out {
+  transform: translateX(-50%) translateY(-8px);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ============================================================
+   Dedicated 2-Player Waiting Room Styling (Flat Dark Sports)
+   ============================================================ */
+.lobby-waiting-room {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.waiting-room-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.waiting-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.waiting-header-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: 0.05em;
+}
+
+.waiting-format-tag {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #10b981;
+  background: #064e3b;
+  border: 1px solid #059669;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.waiting-role-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+/* Share Boxes Grid */
+.waiting-share-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 12px;
+}
+
+@media (max-width: 680px) {
+  .waiting-share-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.waiting-share-box {
+  background: #151d2a;
+  border: 1px solid #263244;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.waiting-share-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+}
+
+.waiting-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.waiting-clean-input {
+  flex: 1;
+  min-width: 0;
+  background: #0b0f17;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  color: #f8fafc;
+  font-family: inherit;
+  padding: 7px 10px;
+  font-size: 13px;
+  outline: none;
+  user-select: all;
+}
+
+.waiting-clean-input.code-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 16px;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.waiting-clean-input.link-input {
+  font-size: 12px;
+  color: #cbd5e1;
+  text-overflow: ellipsis;
+}
+
+.btn-clean-copy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border-radius: 4px;
+  background: #2563eb;
+  border: 1px solid #1d4ed8;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-clean-copy.highlight {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.btn-clean-copy:hover {
+  background: #3b82f6;
+}
+
+.btn-clean-copy.copied {
+  background: #10b981 !important;
+  border-color: #059669 !important;
+  color: #06130e !important;
+}
+
+/* 2-Player Lineup Container */
+.waiting-lineup-container {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 14px;
+  padding: 6px 0;
+}
+
+@media (max-width: 600px) {
+  .waiting-lineup-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.waiting-player-card {
+  position: relative;
+  background: #151d2a;
+  border: 1px solid #263244;
+  border-radius: 8px;
+  padding: 18px 16px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.waiting-player-card.host-card {
+  border-color: #334155;
+}
+
+.waiting-player-card.guest-card {
+  border-style: dashed;
+  border-color: #334155;
+  background: #0f1520;
+}
+
+.waiting-player-card.guest-card.connected {
+  border-style: solid;
+  border-color: #10b981;
+  background: #151d2a;
+}
+
+.player-card-badge {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.player-card-badge.host {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #f8fafc;
+}
+
+.player-card-badge.guest {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+}
+
+.player-avatar-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0b0f17;
+  border: 1px solid #334155;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-avatar-wrap canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-info-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.waiting-player-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f8fafc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.waiting-player-name.empty {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.waiting-serve-note {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+.player-status-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.player-status-tag.ready {
+  color: #10b981;
+}
+
+.player-status-tag.waiting {
+  color: #f59e0b;
+}
+
+.waiting-vs-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.vs-text {
+  font-size: 18px;
+  font-weight: 900;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.vs-sub {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.06em;
+}
+
+/* Actions Footer Area */
+.waiting-actions-area {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.waiting-role-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-start-tennis-match {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: 1px solid #059669;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  color: #06130e;
+  background: #10b981;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  transition: background 0.12s ease;
+}
+
+.btn-start-tennis-match:not(:disabled):hover {
+  background: #34d399;
+}
+
+.btn-start-tennis-match.disabled,
+.btn-start-tennis-match:disabled {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+}
+
+.waiting-status-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  font-weight: 600;
+}
+
+.guest-waiting-banner {
+  width: 100%;
+  max-width: 500px;
+  padding: 11px 16px;
+  border-radius: 6px;
+  background: #151d2a;
+  border: 1px solid #263244;
+  color: #cbd5e1;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.btn-cancel-waiting-room {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancel-waiting-room:hover {
+  background: #1e293b;
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+/* ============================================================
+   Waiting Room 3-2-1 Match Start Countdown Overlay (Flat)
+   ============================================================ */
+.waiting-countdown-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 15, 23, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.countdown-modal-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.countdown-badge-pill {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  background: #151d2a;
+  border: 1px solid #263244;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.countdown-giant-number {
+  font-size: 76px;
+  font-weight: 900;
+  line-height: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, sans-serif;
+  color: #f8fafc;
+  user-select: none;
+}
+
+.countdown-giant-number.start-pop {
+  font-size: 40px;
+  color: #10b981;
+  letter-spacing: 0.04em;
+}
+
+.countdown-sub-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+  min-height: 20px;
+}
+
+.countdown-progress-bar {
+  width: 100%;
+  max-width: 240px;
+  height: 4px;
+  background: #1e293b;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.countdown-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #10b981;
+  transition: width 0.95s linear;
+}
+
+/* Responsive adjustment for Mobile */
+@media (max-width: 768px) {
+  .lobby-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .wii-lobby-card {
+    width: 96%;
+    max-height: 94vh;
+  }
+  .lobby-profile-bar {
+    padding: 10px 14px;
+  }
+  .profile-meta-wrap {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .profile-avatar-slot {
+    width: 42px;
+    height: 42px;
+  }
+  .profile-inputs {
+    width: 100%;
+    min-width: 0;
+  }
+  .lobby-text-input {
+    max-width: none;
+    min-width: 0;
+  }
+  .lobby-waiting-room {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  .waiting-player-card {
+    padding: 14px 12px 12px;
+    gap: 12px;
+  }
+  .player-avatar-wrap {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+
+

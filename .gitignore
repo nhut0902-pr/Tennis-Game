@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.aistudio/
+public/assets/aistudio/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log

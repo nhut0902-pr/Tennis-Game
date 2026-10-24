@@ -1193,9 +1193,19 @@ export class MotionController {
     }
   }
 
+  _isModalOpen() {
+    if (typeof document === "undefined") return false;
+    const modalIds = ["title-modal", "firebase-lobby-modal", "controls-modal", "victory-modal", "companion-modal"];
+    return modalIds.some((id) => {
+      const el = document.getElementById(id);
+      return el && !el.classList.contains("hidden") && el.style.display !== "none";
+    });
+  }
+
   _initDOMBindings() {
     this._onKeyDown = (e) => {
-      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT")) return;
+      if (this._isModalOpen()) return;
       const code = e.code;
       this.keysDown.add(code);
 
@@ -1249,6 +1259,7 @@ export class MotionController {
 
     // Mouse Right Click for Toss / Serve
     this._onContextMenu = (e) => {
+      if (this._isModalOpen()) return;
       // If clicking inside game canvas or main viewport, prevent default menu and trigger toss!
       if (!e.target.closest("button, a, input, select, .wii-modal-backdrop, .hud-corner-dock")) {
         e.preventDefault();
@@ -1258,7 +1269,7 @@ export class MotionController {
 
     // Mouse Wheel to cycle shot types
     this._onWheel = (e) => {
-      if (e.target.closest(".wii-modal-backdrop, .touch-gamepad-layer")) return;
+      if (this._isModalOpen() || e.target.closest(".wii-modal-backdrop, .touch-gamepad-layer")) return;
       const shots = ["topspin", "slice", "lob", "smash"];
       const currIdx = shots.indexOf(this.selectedShotType);
       const nextIdx = e.deltaY > 0 ? (currIdx + 1) % shots.length : (currIdx - 1 + shots.length) % shots.length;
@@ -1267,7 +1278,8 @@ export class MotionController {
 
     // Pointer (Mouse / Touch Swipe) on court
     this._onPointerDown = (e) => {
-      if (e.target && e.target.closest("button, a, input, select, .hud-interactive, .control-btn, .touch-gamepad-layer, .touch-shot-btn, .touch-action-btn, #touch-joystick-base")) {
+      if (this._isModalOpen()) return;
+      if (e.target && e.target.closest("button, a, input, select, .wii-modal-backdrop, .hud-interactive, .control-btn, .touch-gamepad-layer, .touch-shot-btn, .touch-action-btn, #touch-joystick-base")) {
         return;
       }
       this.pointerDrag = {

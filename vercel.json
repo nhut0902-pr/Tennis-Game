@@ -1,0 +1,11 @@
+{
+  "framework": "vite",
+  "buildCommand": "vite build && node scripts/download-assets.mjs",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/((?!assets/|companion\\.html).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

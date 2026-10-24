@@ -67,6 +67,10 @@ export class HudUI {
 
   _renderAllMiiPortraits() {
     renderMiiAvatars();
+    const lobbyAvatar = document.getElementById("lobby-mii-avatar");
+    if (lobbyAvatar) {
+      renderSingleMii(lobbyAvatar, "player1");
+    }
   }
 
   _drawMiiFace(canvas, opts = {}) {
@@ -82,9 +86,16 @@ export class HudUI {
     this.playerRole = role;
     if (room && room !== "DEFAULT") {
       this.currentRoomId = room;
+      this._setMainMode("online");
       this._setDifficultySelection("1v1", { notify: false });
-    } else if (["casual", "pro", "1v1"].includes(mode)) {
+    } else if (mode === "1v1") {
+      this._setMainMode("online");
+      this._setDifficultySelection("1v1", { notify: false });
+    } else if (["casual", "pro"].includes(mode)) {
+      this._setMainMode("bot");
       this._setDifficultySelection(mode, { notify: false });
+    } else {
+      this._setMainMode("bot");
     }
 
     if (role === "p2") {
@@ -99,6 +110,27 @@ export class HudUI {
       tunnelUrl: this.currentTunnelUrl,
       role: this.playerRole
     });
+  }
+
+  _setMainMode(mode = "bot") {
+    const isBot = mode !== "online";
+    const tabBot = document.getElementById("tab-mode-bot");
+    const tabOnline = document.getElementById("tab-mode-online");
+    const botOptions = document.getElementById("bot-mode-options");
+    const onlineOptions = document.getElementById("online-mode-options");
+
+    if (tabBot) tabBot.classList.toggle("selected", isBot);
+    if (tabOnline) tabOnline.classList.toggle("selected", !isBot);
+    if (botOptions) botOptions.classList.toggle("hidden", !isBot);
+    if (onlineOptions) onlineOptions.classList.toggle("hidden", isBot);
+
+    if (isBot) {
+      if (this.selectedDifficulty === "1v1") {
+        this._setDifficultySelection("casual", { notify: true });
+      }
+    } else {
+      this._setDifficultySelection("1v1", { notify: true });
+    }
   }
 
   _setDifficultySelection(diff, { notify = true } = {}) {
@@ -137,6 +169,16 @@ export class HudUI {
   }
 
   _bindEvents() {
+    // Mode switcher buttons (Bot vs Online)
+    const tabBot = document.getElementById("tab-mode-bot");
+    if (tabBot) {
+      tabBot.addEventListener("click", () => this._setMainMode("bot"));
+    }
+    const tabOnline = document.getElementById("tab-mode-online");
+    if (tabOnline) {
+      tabOnline.addEventListener("click", () => this._setMainMode("online"));
+    }
+
     // Difficulty mode buttons
     document.querySelectorAll("#difficulty-mode-group .wii-green-choice").forEach(btn => {
       btn.addEventListener("click", () => {

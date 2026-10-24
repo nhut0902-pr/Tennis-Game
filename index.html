@@ -248,8 +248,11 @@
               <button id="btn-replay-trigger" class="hud-mini-btn" type="button" title="Xem lại pha bóng vừa rồi (R)">
                 <span>Replay</span>
               </button>
+              <button id="btn-online-lobby" class="hud-mini-btn highlight-online" type="button" title="Mở sảnh đấu trực tuyến 1v1">
+                <span>1v1 Online</span>
+              </button>
               <button id="btn-multiplayer-modal" class="hud-mini-btn hidden" type="button" title="Chơi 1v1 Nhiều Người">
-                <span>💬 1v1</span>
+                <span>1v1</span>
               </button>
             </div>
           </div>
@@ -263,10 +266,10 @@
     <div class="wii-title-card">
       <div class="wii-logo-header">
         <h1 class="argon-logo-title">
-          <span class="logo-word-argon">Argon</span>
-          <span class="logo-word-tennis">Tennis</span>
+          <span class="logo-word-argon">ARGON</span>
+          <span class="logo-word-tennis">TENNIS</span>
         </h1>
-        <div class="title-sub-badge">Hỗ trợ đầy đủ Mobile 📱 & Máy tính 💻</div>
+        <div class="title-sub-badge">HỖ TRỢ ĐIỆN THOẠI & MÁY TÍNH</div>
       </div>
 
       <div class="court-preview-diagram">
@@ -287,46 +290,75 @@
         </div>
       </div>
 
-      <div class="setup-section">
-        <div class="setup-label">Độ khó đối thủ:</div>
-        <div class="wii-green-btn-row" id="difficulty-mode-group">
-          <button type="button" class="wii-green-choice selected" data-difficulty="casual">
-            <span class="choice-main">Casual AI</span>
+      <!-- Chế độ chơi: Đấu Bot vs Đấu 1v1 Online -->
+      <div class="setup-section game-category-section">
+        <div class="setup-label">CHẾ ĐỘ THI ĐẤU</div>
+        <div class="wii-mode-selector" id="game-main-mode-group">
+          <button type="button" class="mode-tab-btn selected" id="tab-mode-bot" data-main-mode="bot">
+            <span class="mode-tab-text">Đấu với Máy (AI)</span>
           </button>
-          <button type="button" class="wii-green-choice" data-difficulty="pro">
-            <span class="choice-main">Pro AI</span>
-          </button>
-          <button type="button" class="wii-green-choice" data-difficulty="1v1">
-            <span class="choice-main">1v1 Match</span>
+          <button type="button" class="mode-tab-btn" id="tab-mode-online" data-main-mode="online">
+            <span class="mode-tab-text">Đấu Trực Tuyến 1v1</span>
           </button>
         </div>
       </div>
 
-      <div class="setup-section" id="match-length-section">
-        <div class="setup-label">Số Game thắng:</div>
-        <div class="wii-green-btn-row" id="match-length-group">
-          <button type="button" class="wii-green-choice" data-games="1">
-            <span class="choice-main">1 Game</span>
+      <!-- Container: Đấu với Bot -->
+      <div id="bot-mode-options" class="mode-panel">
+        <div class="setup-section">
+          <div class="setup-label">ĐỘ KHÓ AI</div>
+          <div class="wii-green-btn-row" id="difficulty-mode-group">
+            <button type="button" class="wii-green-choice selected" data-difficulty="casual">
+              <span class="choice-main">Tiêu chuẩn</span>
+              <span class="choice-sub">Dễ làm quen</span>
+            </button>
+            <button type="button" class="wii-green-choice" data-difficulty="pro">
+              <span class="choice-main">Chuyên nghiệp</span>
+              <span class="choice-sub">Tốc độ cao</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="setup-section" id="match-length-section">
+          <div class="setup-label">THỂ THỨC TRẬN ĐẤU</div>
+          <div class="wii-green-btn-row" id="match-length-group">
+            <button type="button" class="wii-green-choice" data-games="1">
+              <span class="choice-main">1 Game</span>
+            </button>
+            <button type="button" class="wii-green-choice selected" data-games="3">
+              <span class="choice-main">Best of 3</span>
+            </button>
+            <button type="button" class="wii-green-choice" data-games="5">
+              <span class="choice-main">Best of 5</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="wii-modal-actions">
+          <button id="btn-start-match" type="button" class="wii-ok-btn">
+            <span>BẮT ĐẦU TRẬN ĐẤU</span>
           </button>
-          <button type="button" class="wii-green-choice selected" data-games="3">
-            <span class="choice-main">Best of 3</span>
-          </button>
-          <button type="button" class="wii-green-choice" data-games="5">
-            <span class="choice-main">Best of 5</span>
+        </div>
+      </div>
+
+      <!-- Container: Đấu 1v1 Online (Firebase) -->
+      <div id="online-mode-options" class="mode-panel hidden">
+        <div class="online-teaser-box">
+          <div class="online-teaser-info">
+            <div class="online-teaser-title">CHẾ ĐỘ ĐỐI KHÁNG 1V1 TRỰC TUYẾN</div>
+            <div class="online-teaser-desc">Tạo phòng riêng gửi mã hoặc đường dẫn cho bạn bè, hoặc tham gia trực tiếp các phòng đang mở.</div>
+          </div>
+        </div>
+        <div class="wii-modal-actions">
+          <button id="btn-title-online" type="button" class="wii-ok-btn online-cta-btn">
+            <span>VÀO SẢNH CHỜ 1V1</span>
           </button>
         </div>
       </div>
 
       <div class="title-controls-cta">
         <button id="btn-title-controls" type="button" class="wii-subtle-pill-btn">
-          <span>🎮 Xem hướng dẫn điều khiển (PC & Mobile)</span>
-        </button>
-      </div>
-
-      <div class="wii-modal-actions">
-        <button id="btn-start-match" type="button" class="wii-ok-btn">
-          <span class="hand-cursor-icon">🎾</span>
-          <span>Bắt đầu trận đấu</span>
+          <span>Hướng dẫn điều khiển & Cài đặt</span>
         </button>
       </div>
     </div>
@@ -608,6 +640,240 @@
       </div>
     </div>
   </div>
+
+  <!-- Firebase Online 1v1 Multiplayer Lobby Modal -->
+  <div id="firebase-lobby-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lobby-modal-title">
+    <div class="wii-lobby-card">
+      <div class="lobby-card-header">
+        <div class="lobby-header-title-wrap">
+          <h2 id="lobby-modal-title" class="lobby-card-title">SẢNH THI ĐẤU TRỰC TUYẾN 1V1</h2>
+        </div>
+        <button id="btn-close-lobby-x" type="button" class="controls-close-x" aria-label="Đóng">Đóng</button>
+      </div>
+
+      <!-- Browse / Create Rooms View -->
+      <div id="lobby-browse-view">
+        <!-- Player Profile & Firebase Status Bar -->
+        <div class="lobby-profile-bar">
+          <div class="profile-meta-wrap">
+            <div class="profile-avatar-slot">
+              <canvas id="lobby-mii-avatar" width="96" height="96"></canvas>
+            </div>
+            <div class="profile-inputs">
+              <div class="profile-input-row">
+                <label for="lobby-profile-name" class="profile-label">TÊN VẬN ĐỘNG VIÊN</label>
+                <input type="text" id="lobby-profile-name" class="lobby-text-input" placeholder="Nhập tên hiển thị" maxlength="16" />
+                <button type="button" id="btn-save-profile-name" class="profile-save-btn">Lưu tên</button>
+              </div>
+              <div class="profile-auth-row">
+                <button type="button" id="btn-google-login" class="lobby-google-btn">
+                  <span>Đăng nhập tài khoản Google</span>
+                </button>
+                <div id="lobby-firebase-status" class="status-badge connecting">
+                  Đang kết nối máy chủ...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Lobby Grid: Host Room vs Join Room -->
+        <div class="lobby-grid">
+          <!-- Card 1: Tạo phòng mới (Host) -->
+          <div class="lobby-panel host-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">TẠO PHÒNG & LINK CHIA SẺ</h3>
+            </div>
+            <p class="panel-desc">Sao chép đường dẫn chia sẻ hoặc mã phòng bên dưới gửi cho bạn bè, sau đó nhấn Tạo phòng để vào sảnh đợi đối thủ.</p>
+
+            <div class="panel-form-group">
+              <label for="host-games-select" class="panel-label">THỂ THỨC TRẬN ĐẤU</label>
+              <select id="host-games-select" class="lobby-select">
+                <option value="1">1 Game (Đánh nhanh)</option>
+                <option value="2" selected>Best of 3 (Thắng 2 game)</option>
+                <option value="3">Best of 5 (Thắng 3 game)</option>
+              </select>
+            </div>
+
+            <div class="panel-form-group">
+              <label for="host-custom-code" class="panel-label">MÃ PHÒNG THI ĐẤU</label>
+              <div class="waiting-input-row">
+                <input type="text" id="host-custom-code" class="waiting-clean-input code-input uppercase" placeholder="Tự động" maxlength="12" />
+                <button type="button" id="btn-copy-browse-code" class="btn-clean-copy">
+                  <span>Sao chép mã</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-form-group">
+              <label for="host-preview-link" class="panel-label">LINK CHIA SẺ MỜI BẠN BÈ (CLICK ĐỂ CHÉP & MỞ PHÒNG)</label>
+              <div class="waiting-input-row">
+                <input type="text" id="host-preview-link" class="waiting-clean-input link-input" readonly value="https://..." />
+                <button type="button" id="btn-copy-browse-link" class="btn-clean-copy copy-link-primary">
+                  <span>Sao chép link</span>
+                </button>
+              </div>
+            </div>
+
+            <button id="btn-host-create" type="button" class="lobby-action-btn primary">
+              <span>TẠO PHÒNG & VÀO SẢNH CHỜ</span>
+            </button>
+          </div>
+
+          <!-- Card 2: Vào phòng & Danh sách phòng chờ -->
+          <div class="lobby-panel join-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">VÀO PHÒNG THI ĐẤU</h3>
+            </div>
+            <p class="panel-desc">Nhập mã phòng hoặc dán link chia sẻ từ bạn bè, hoặc chọn phòng đang mở bên dưới.</p>
+
+            <div class="join-input-group">
+              <input type="text" id="join-code-input" class="lobby-text-input uppercase" placeholder="Nhập mã phòng hoặc dán link..." maxlength="256" />
+              <button id="btn-join-room" type="button" class="lobby-action-btn secondary">
+                <span>VÀO PHÒNG</span>
+              </button>
+            </div>
+
+            <div class="lobby-rooms-section">
+              <div class="rooms-header-row">
+                <span class="rooms-title">DANH SÁCH PHÒNG ĐANG CHỜ</span>
+                <span class="live-dot-tag">TRỰC TUYẾN</span>
+              </div>
+              <div id="lobby-rooms-list" class="lobby-rooms-list">
+                <!-- Live room items will be dynamically rendered here -->
+              </div>
+              <div id="lobby-rooms-empty" class="lobby-rooms-empty">
+                Hiện chưa có phòng chờ công khai. Hãy tạo phòng mới ở khung bên cạnh.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lobby Footer -->
+        <div class="lobby-card-footer">
+          <button id="btn-close-lobby" type="button" class="wii-footer-btn secondary">
+            <span>Quay lại màn hình chính</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dedicated 2-Player Waiting Room View (Phòng Chờ Riêng 2 Người) -->
+      <div id="lobby-waiting-room" class="lobby-waiting-room hidden">
+        <!-- Room Header & Format -->
+        <div class="waiting-room-header">
+          <div class="waiting-header-left">
+            <span class="waiting-header-title">PHÒNG CHỜ TRƯỚC TRẬN ĐẤU</span>
+            <span id="waiting-games-badge" class="waiting-format-tag">Best of 3</span>
+          </div>
+          <div class="waiting-role-tag" id="waiting-my-role-badge">Vai trò: Chủ phòng (P1)</div>
+        </div>
+
+        <!-- Clean Text Boxes for Code & Invite Link -->
+        <div class="waiting-share-grid">
+          <div class="waiting-share-box">
+            <label for="waiting-code-input" class="waiting-share-label">MÃ PHÒNG (GỬI CHO ĐỐI THỦ)</label>
+            <div class="waiting-input-row">
+              <input type="text" id="waiting-code-input" class="waiting-clean-input code-input" readonly value="------" />
+              <button type="button" id="btn-copy-waiting-code" class="btn-clean-copy">
+                <span>Sao chép mã</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="waiting-share-box share-link-highlight-box">
+            <label for="waiting-link-input" class="waiting-share-label">LINK CHIA SẺ TRỰC TIẾP (GỬI LINK NÀY ĐỂ BẠN BÈ VÀO NGAY)</label>
+            <div class="waiting-input-row">
+              <input type="text" id="waiting-link-input" class="waiting-clean-input link-input" readonly value="" placeholder="https://..." />
+              <button type="button" id="btn-copy-waiting-link" class="btn-clean-copy copy-link-primary">
+                <span>Sao chép link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Player Match Lineup (Host vs Guest) -->
+        <div class="waiting-lineup-container">
+          <!-- Player 1: Host -->
+          <div class="waiting-player-card host-card" id="waiting-p1-card">
+            <div class="player-card-badge host">CHỦ PHÒNG (P1)</div>
+            <div class="player-avatar-wrap" id="waiting-p1-avatar-wrap">
+              <canvas id="waiting-p1-avatar" width="96" height="96"></canvas>
+            </div>
+            <div class="player-info-wrap">
+              <div id="waiting-p1-name" class="waiting-player-name">Player 1</div>
+              <div class="waiting-serve-note">Quyền giao bóng trước</div>
+              <div class="player-status-tag ready">
+                Sẵn sàng thi đấu
+              </div>
+            </div>
+          </div>
+
+          <!-- VS Badge -->
+          <div class="waiting-vs-divider">
+            <span class="vs-text">VS</span>
+            <span class="vs-sub">1V1</span>
+          </div>
+
+          <!-- Player 2: Guest -->
+          <div class="waiting-player-card guest-card" id="waiting-p2-card">
+            <div class="player-card-badge guest">KHÁCH ĐẤU (P2)</div>
+            <div class="player-avatar-wrap" id="waiting-p2-avatar-wrap">
+              <canvas id="waiting-p2-avatar" width="96" height="96"></canvas>
+            </div>
+            <div class="player-info-wrap">
+              <div id="waiting-p2-name" class="waiting-player-name empty">Đang chờ đối thủ...</div>
+              <div class="waiting-serve-note" id="waiting-p2-sub">Đỡ giao bóng</div>
+              <div class="player-status-tag waiting" id="waiting-p2-status">
+                Chưa kết nối
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waiting Room Action Footer -->
+        <div class="waiting-actions-area">
+          <!-- Host Controls -->
+          <div id="waiting-host-controls" class="waiting-role-controls">
+            <button type="button" id="btn-waiting-start-match" class="btn-start-tennis-match disabled" disabled>
+              <span>BẮT ĐẦU TRẬN ĐẤU</span>
+            </button>
+            <div id="waiting-host-hint" class="waiting-status-hint">
+              Đang chờ đối thủ vào phòng. Sao chép mã phòng hoặc đường dẫn ở trên để gửi cho bạn bè.
+            </div>
+            <button type="button" id="btn-waiting-cancel-room" class="btn-cancel-waiting-room">
+              Hủy phòng và quay lại sảnh
+            </button>
+          </div>
+
+          <!-- Guest Controls -->
+          <div id="waiting-guest-controls" class="waiting-role-controls hidden">
+            <div class="guest-waiting-banner">
+              <span>Đã kết nối vào phòng. Đang chờ chủ phòng bắt đầu trận đấu...</span>
+            </div>
+            <button type="button" id="btn-waiting-leave-room" class="btn-cancel-waiting-room">
+              Rời phòng và quay lại sảnh
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-2-1 Countdown Overlay -->
+        <div id="waiting-countdown-overlay" class="waiting-countdown-overlay hidden" aria-live="assertive">
+          <div class="countdown-modal-box">
+            <div class="countdown-badge-pill">CHUẨN BỊ VÀO SÂN</div>
+            <div id="waiting-countdown-number" class="countdown-giant-number">3</div>
+            <div id="waiting-countdown-label" class="countdown-sub-label">Vào vị trí sân đấu...</div>
+            <div class="countdown-progress-bar">
+              <div id="waiting-countdown-bar" class="countdown-progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="lobby-toast" class="lobby-toast hidden"></div>
+
 
   <script type="module">
     import { renderAllHudMiiAvatars } from './src/mii_avatars.js';

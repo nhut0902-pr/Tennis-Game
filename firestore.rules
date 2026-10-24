@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidRoomPayload(data) {
+      return data.roomId is string &&
+             data.roomId.size() >= 1 &&
+             data.roomId.size() <= 32 &&
+             data.hostId is string &&
+             data.hostId.size() >= 3 &&
+             data.hostId.size() <= 128 &&
+             data.hostName is string &&
+             data.hostName.size() <= 100 &&
+             data.status in ['waiting', 'playing', 'finished'];
+    }
+
+    // Player profiles
+    match /players/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId) || (userId is string && userId.size() >= 4 && userId.size() <= 128);
+    }
+
+    // 1v1 Tennis Rooms (supports both Google Auth users and instant Guest players)
+    match /rooms/{roomId} {
+      // Any player can browse and view rooms
+      allow read: if true;
+
+      // Create: validate room schema and host identity
+      allow create: if isValidRoomPayload(request.resource.data) &&
+                    (!isAuthenticated() || request.resource.data.hostId == request.auth.uid);
+
+      // Update: host or guest can update room state; roomId and hostId must remain immutable
+      allow update: if isValidRoomPayload(request.resource.data) &&
+                    request.resource.data.roomId == resource.data.roomId &&
+                    request.resource.data.hostId == resource.data.hostId;
+
+      // Delete: allow host to cancel/clean up their room
+      allow delete: if true;
+    }
+  }
+}

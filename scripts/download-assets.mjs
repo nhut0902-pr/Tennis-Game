@@ -22,7 +22,7 @@ const ASSETS_TO_DOWNLOAD = [
 ];
 
 async function downloadAsset(relPath) {
-  const destPath = path.resolve('public', 'assets', relPath);
+  const destPath = path.resolve('dist', 'assets', relPath);
   try {
     const stat = await fs.stat(destPath);
     if (stat.size > 0) {
@@ -44,7 +44,7 @@ async function downloadAsset(relPath) {
 }
 
 async function main() {
-  console.log('[download-assets] Ensuring static 3D models and MediaPipe assets in public/assets/...');
+  console.log('[download-assets] Ensuring static 3D models and MediaPipe assets in dist/assets/...');
   await Promise.all(ASSETS_TO_DOWNLOAD.map(downloadAsset));
   console.log('[download-assets] All static assets ready.');
 }

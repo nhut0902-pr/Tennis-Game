@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "Room": {
+      "title": "Room",
+      "description": "Online 1v1 tennis match room",
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "description": "Room identifier code (4-16 alphanumeric characters)"
+        },
+        "hostId": {
+          "type": "string",
+          "description": "Host player user ID"
+        },
+        "hostName": {
+          "type": "string",
+          "description": "Host player display name"
+        },
+        "guestId": {
+          "type": "string",
+          "description": "Guest player user ID if joined"
+        },
+        "guestName": {
+          "type": "string",
+          "description": "Guest player display name if joined"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["waiting", "playing", "finished"],
+          "description": "Current room match status"
+        },
+        "gamesToWin": {
+          "type": "number",
+          "description": "Target games to win the match"
+        },
+        "p1Score": {
+          "type": "number",
+          "description": "Host current game points"
+        },
+        "p2Score": {
+          "type": "number",
+          "description": "Guest current game points"
+        },
+        "p1Games": {
+          "type": "number",
+          "description": "Host games won"
+        },
+        "p2Games": {
+          "type": "number",
+          "description": "Guest games won"
+        },
+        "serverRole": {
+          "type": "string",
+          "description": "Current server role: player or opponent"
+        },
+        "ballState": {
+          "type": "object",
+          "description": "Synchronized ball position and velocity coordinates"
+        },
+        "p1Actor": {
+          "type": "object",
+          "description": "Synchronized P1 court position and animation state"
+        },
+        "p2Actor": {
+          "type": "object",
+          "description": "Synchronized P2 court position and animation state"
+        },
+        "lastAction": {
+          "type": "object",
+          "description": "Last swing or toss action payload"
+        },
+        "winner": {
+          "type": "string",
+          "description": "Winner of the match: p1 or p2"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["roomId", "hostId", "hostName", "status", "gamesToWin"]
+    },
+    "PlayerProfile": {
+      "title": "PlayerProfile",
+      "description": "Public player profile and rating record",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User account ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Player public screen name"
+        },
+        "skillRating": {
+          "type": "number",
+          "description": "Club skill rating (starts at 1000)"
+        },
+        "wins": {
+          "type": "number",
+          "description": "Total online match wins"
+        },
+        "losses": {
+          "type": "number",
+          "description": "Total online match losses"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last activity timestamp"
+        }
+      },
+      "required": ["userId", "displayName", "skillRating", "wins", "losses"]
+    }
+  },
+  "firestore": {
+    "/rooms/{roomId}": {
+      "schema": "Room",
+      "description": "Live online 1v1 match instances"
+    },
+    "/players/{userId}": {
+      "schema": "PlayerProfile",
+      "description": "Player profiles and online ranking"
+    }
+  }
+}
