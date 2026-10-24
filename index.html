@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Argon Tennis - Game quần vợt 3D phong cách Wii Sports với hệ thống điều khiển đa nền tảng tối ưu cho cả Điện thoại (Mobile) và Máy tính (PC)." />
+  <meta name="theme-color" content="#0b0f17" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Argon Tennis" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <meta property="og:title" content="Argon Tennis - Điều khiển Mobile & PC" />
   <meta property="og:description" content="Trải nghiệm game tennis 3D đỉnh cao với cần gạt ảo & nút bấm trên Mobile, lắc máy Gyroscope, hoặc bàn phím & chuột trên PC." />
   <title>Argon Tennis - Điều Khiển Mobile & PC</title>
@@ -251,6 +258,9 @@
               <button id="btn-online-lobby" class="hud-mini-btn highlight-online" type="button" title="Mở sảnh đấu trực tuyến 1v1">
                 <span>1v1 Online</span>
               </button>
+              <button id="btn-hud-install-pwa" class="hud-mini-btn pwa-install-trigger" type="button" title="Cài đặt game về máy như ứng dụng">
+                <span>Cài đặt App</span>
+              </button>
               <button id="btn-multiplayer-modal" class="hud-mini-btn hidden" type="button" title="Chơi 1v1 Nhiều Người">
                 <span>1v1</span>
               </button>
@@ -269,7 +279,14 @@
           <span class="logo-word-argon">ARGON</span>
           <span class="logo-word-tennis">TENNIS</span>
         </h1>
-        <div class="title-sub-badge">HỖ TRỢ ĐIỆN THOẠI & MÁY TÍNH</div>
+        <div class="title-header-badges">
+          <div class="title-sub-badge">HỖ TRỢ MOBILE & PC</div>
+          <div class="network-status-pill online" data-network-badge>TRỰC TUYẾN</div>
+        </div>
+      </div>
+
+      <div id="offline-ready-banner" class="offline-ready-banner hidden">
+        Đang không có mạng Internet — Bạn vẫn có thể vào sân đấu bình thường ở chế độ Đấu với Máy (AI).
       </div>
 
       <div class="court-preview-diagram">
@@ -356,9 +373,12 @@
         </div>
       </div>
 
-      <div class="title-controls-cta">
+      <div class="title-controls-cta title-cta-dual">
         <button id="btn-title-controls" type="button" class="wii-subtle-pill-btn">
           <span>Hướng dẫn điều khiển & Cài đặt</span>
+        </button>
+        <button id="btn-title-install-pwa" type="button" class="wii-subtle-pill-btn pwa-install-trigger">
+          <span>Cài đặt App (Chơi Offline)</span>
         </button>
       </div>
     </div>
@@ -737,7 +757,12 @@
             <div class="lobby-rooms-section">
               <div class="rooms-header-row">
                 <span class="rooms-title">DANH SÁCH PHÒNG ĐANG CHỜ</span>
-                <span class="live-dot-tag">TRỰC TUYẾN</span>
+                <div class="rooms-header-actions">
+                  <button type="button" id="btn-purge-old-rooms" class="btn-purge-rooms" title="Xóa toàn bộ các phòng cũ hoặc trống để giải phóng database">
+                    Xóa phòng cũ
+                  </button>
+                  <span class="live-dot-tag">TỰ XÓA SAU 5 PHÚT TRỐNG</span>
+                </div>
               </div>
               <div id="lobby-rooms-list" class="lobby-rooms-list">
                 <!-- Live room items will be dynamically rendered here -->
@@ -764,6 +789,7 @@
           <div class="waiting-header-left">
             <span class="waiting-header-title">PHÒNG CHỜ TRƯỚC TRẬN ĐẤU</span>
             <span id="waiting-games-badge" class="waiting-format-tag">Best of 3</span>
+            <span id="waiting-expiry-badge" class="waiting-expiry-tag">Tự xóa nếu trống sau: 05:00</span>
           </div>
           <div class="waiting-role-tag" id="waiting-my-role-badge">Vai trò: Chủ phòng (P1)</div>
         </div>
@@ -873,6 +899,44 @@
 
   <!-- Notification Toast -->
   <div id="lobby-toast" class="lobby-toast hidden"></div>
+
+  <!-- PWA App Install Instructions Modal -->
+  <div id="pwa-install-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="pwa-modal-title">
+    <div class="pwa-install-card">
+      <div class="pwa-card-header">
+        <h2 id="pwa-modal-title" class="pwa-card-title">CÀI ĐẶT ỨNG DỤNG VỀ MÁY (PWA)</h2>
+        <button id="btn-close-pwa-modal-x" type="button" class="controls-close-x" aria-label="Đóng">Đóng</button>
+      </div>
+      <div class="pwa-card-body">
+        <p class="pwa-lead-text">
+          Bạn có thể cài đặt <strong>Argon Tennis</strong> trực tiếp lên màn hình chính như một ứng dụng độc lập, mở toàn màn hình và chơi chế độ Đấu với Máy (AI) ngay cả khi không có kết nối mạng.
+        </p>
+        <div class="pwa-steps-grid">
+          <div class="pwa-step-box">
+            <div class="pwa-step-header">TRÊN ĐIỆN THOẠI ANDROID & MÁY TÍNH (CHROME / EDGE)</div>
+            <ol class="pwa-step-list">
+              <li>Nhấn vào biểu tượng <strong>Cài đặt ứng dụng</strong> trên thanh địa chỉ trình duyệt hoặc mở menu 3 chấm ở góc phải.</li>
+              <li>Chọn <strong>Cài đặt ứng dụng (Install App)</strong> hoặc <strong>Thêm vào màn hình chính</strong>.</li>
+              <li>Mở ứng dụng Argon Tennis từ màn hình chính để chơi toàn màn hình.</li>
+            </ol>
+          </div>
+          <div class="pwa-step-box">
+            <div class="pwa-step-header">TRÊN IPHONE / IPAD (TRÌNH DUYỆT SAFARI)</div>
+            <ol class="pwa-step-list">
+              <li>Nhấn nút <strong>Chia sẻ (Share)</strong> ở thanh công cụ phía dưới trình duyệt Safari.</li>
+              <li>Cuộn xuống và chọn <strong>Thêm vào Màn hình chính (Add to Home Screen)</strong>.</li>
+              <li>Nhấn <strong>Thêm (Add)</strong> ở góc trên bên phải để hoàn tất.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="pwa-card-footer">
+        <button id="btn-close-pwa-modal" type="button" class="wii-ok-btn">
+          <span>ĐÃ HIỂU</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
 
   <script type="module">

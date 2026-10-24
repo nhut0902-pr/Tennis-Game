@@ -19,6 +19,11 @@ const ASSETS_TO_DOWNLOAD = [
   'mediapipe/hands/hands_solution_wasm_bin.wasm',
   'mediapipe/hands/hand_landmark_full.tflite',
   'mediapipe/hands/hand_landmark_lite.tflite',
+  // Court sky & horizon textures
+  'textures/court/tns_sky_a.png',
+  'textures/court/cloud01.png',
+  'textures/court/cloud02.png',
+  'textures/court/tns_BG_c1.png',
 ];
 
 async function downloadAsset(relPath) {

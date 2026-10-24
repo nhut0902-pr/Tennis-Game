@@ -2,7 +2,7 @@ import {
   auth,
   db,
   signInAsGuest,
-  signInWithGoogle,
+  setFirebaseNetworkEnabled,
   handleFirestoreError
 } from "./firebase.ts";
 import {
@@ -19,9 +19,15 @@ import {
   getDocs
 } from "firebase/firestore";
 
+// Tự động xóa phòng trống hoặc không hoạt động sau 5 phút (300,000 ms)
+export const ROOM_IDLE_TTL_MS = 5 * 60 * 1000;
+const HEARTBEAT_INTERVAL_MS = 30 * 1000;
+const MIN_SNAPSHOT_INTERVAL_MS = 95; // ~10.5 Hz tick rate để tiết kiệm tối đa băng thông Firebase
+const MIN_MOVEMENT_INTERVAL_MS = 95; // ~10.5 Hz cho di chuyển của Guest
+
 export class OnlineMatchmaker {
   constructor(callbacks = {}) {
-    this.callbacks = callbacks; // onRoomUpdate, onGuestAction, onHostSnapshot, onPlayerJoined, onError
+    this.callbacks = callbacks; // onRoomUpdate, onGuestAction, onHostSnapshot, onPlayerJoined, onError, onRoomsPurged
     this.currentRoomId = null;
     this.isHost = false;
     this.user = null;
@@ -32,6 +38,19 @@ export class OnlineMatchmaker {
     this.lastGuestActionSeqReceived = 0;
     this.lastHostSnapshotSeqReceived = 0;
 
+    // Bandwidth & Rate-limiting state
+    this._lastSnapshotSentTime = 0;
+    this._lastSnapshotDigest = "";
+    this._lastMoveSentTime = 0;
+    this._lastMoveX = null;
+    this._lastMoveZ = null;
+
+    // Heartbeat & 5-minute auto-expiry timers
+    this._heartbeatTimer = null;
+    this._idleExpiryTimer = null;
+    this._periodicPurgeTimer = null;
+    this._roomCreatedOrJoinedAtMs = 0;
+
     // Monitor auth
     auth.onAuthStateChanged((u) => {
       if (u) {
@@ -41,11 +60,113 @@ export class OnlineMatchmaker {
         this.callbacks.onAuthChanged(this.user);
       }
     });
+
+    // Tự động xóa/rời phòng ngay khi đóng tab hoặc tải lại trang để giải phóng kết nối & DB
+    if (typeof window !== "undefined") {
+      const handleUnload = () => {
+        if (this.currentRoomId) {
+          this.leaveRoom();
+        }
+      };
+      window.addEventListener("pagehide", handleUnload);
+      window.addEventListener("beforeunload", handleUnload);
+    }
+  }
+
+  /**
+   * Kiểm tra xem một phòng có bị trống, kết thúc, hay quá 5 phút không hoạt động hay không
+   */
+  isRoomExpiredOrEmpty(data, now = Date.now()) {
+    if (!data) return true;
+    if (data.status === "finished") return true;
+    if (!data.hostId || data.activeUserCount === 0) return true;
+
+    // Trích xuất thời gian hoạt động gần nhất của phòng
+    let lastActive = typeof data.lastActiveMs === "number" ? data.lastActiveMs : 0;
+    if (!lastActive && data.updatedAt && typeof data.updatedAt.toMillis === "function") {
+      lastActive = data.updatedAt.toMillis();
+    }
+    if (!lastActive && data.createdAt && typeof data.createdAt.toMillis === "function") {
+      lastActive = data.createdAt.toMillis();
+    }
+    if (!lastActive && typeof data.createdAtMs === "number") {
+      lastActive = data.createdAtMs;
+    }
+
+    // Các phòng cũ từ phiên trước không có timestamp hoặc đã quá 5 phút -> xóa ngay
+    if (!lastActive) return true;
+    if (now - lastActive > ROOM_IDLE_TTL_MS) return true;
+
+    // Nếu phòng đang ở trạng thái chờ (chỉ có 1 người hoặc trống) quá 5 phút từ lúc tạo
+    const createdMs =
+      typeof data.createdAtMs === "number"
+        ? data.createdAtMs
+        : data.createdAt && typeof data.createdAt.toMillis === "function"
+        ? data.createdAt.toMillis()
+        : lastActive;
+
+    if (data.status === "waiting" && !data.guestId && now - createdMs > ROOM_IDLE_TTL_MS) {
+      return true;
+    }
+
+    // Kiểm tra heartbeat của chủ phòng
+    if (typeof data.hostLastSeenMs === "number" && now - data.hostLastSeenMs > ROOM_IDLE_TTL_MS) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Dọn dẹp toàn bộ phòng cũ / phòng trống quá 5 phút trên Firestore để DB luôn nhẹ và trống
+   */
+  async purgeStaleRooms({ deleteAllUnused = false } = {}) {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      return 0;
+    }
+    try {
+      await setFirebaseNetworkEnabled(true);
+      const snap = await getDocs(collection(db, "rooms"));
+      const now = Date.now();
+      const deletePromises = [];
+
+      snap.forEach((docSnap) => {
+        const roomId = docSnap.id;
+        if (roomId === "healthcheck") return;
+        // Không xóa phòng mà chính người chơi đang ở trong đó
+        if (this.currentRoomId && roomId === this.currentRoomId) return;
+
+        const data = docSnap.data();
+        const shouldDelete =
+          deleteAllUnused
+            ? data.status !== "playing" || this.isRoomExpiredOrEmpty(data, now)
+            : this.isRoomExpiredOrEmpty(data, now);
+
+        if (shouldDelete) {
+          deletePromises.push(
+            deleteDoc(doc(db, "rooms", roomId)).catch(() => {})
+          );
+        }
+      });
+
+      if (deletePromises.length > 0) {
+        await Promise.all(deletePromises);
+        if (this.callbacks.onRoomsPurged) {
+          this.callbacks.onRoomsPurged(deletePromises.length);
+        }
+      }
+      return deletePromises.length;
+    } catch {
+      return 0;
+    }
   }
 
   async ensureUser(displayName = "") {
     if (auth.currentUser) {
       this.user = auth.currentUser;
+      if (displayName && displayName.trim()) {
+        this.user.displayName = displayName.trim();
+      }
       return this.user;
     }
     if (this.user && this.user.uid) {
@@ -72,10 +193,73 @@ export class OnlineMatchmaker {
     return code;
   }
 
+  _startRoomTimers(roomId) {
+    this._stopRoomTimers();
+    this._roomCreatedOrJoinedAtMs = Date.now();
+
+    // Heartbeat mỗi 30 giây để báo phòng còn người hoạt động
+    this._heartbeatTimer = setInterval(async () => {
+      if (!this.currentRoomId || this.currentRoomId !== roomId) {
+        this._stopRoomTimers();
+        return;
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
+      const now = Date.now();
+      const roomRef = doc(db, "rooms", roomId);
+      try {
+        const payload = this.isHost
+          ? { lastActiveMs: now, hostLastSeenMs: now }
+          : { lastActiveMs: now, guestLastSeenMs: now };
+        await updateDoc(roomRef, payload);
+      } catch {
+        // Phòng có thể đã bị xóa
+      }
+    }, HEARTBEAT_INTERVAL_MS);
+
+    // Bộ đếm kiểm tra mỗi 20 giây: nếu phòng vẫn trống (không có đối thủ) sau 5 phút -> tự động xóa phòng
+    this._idleExpiryTimer = setInterval(async () => {
+      if (!this.currentRoomId || this.currentRoomId !== roomId) {
+        this._stopRoomTimers();
+        return;
+      }
+      const elapsed = Date.now() - this._roomCreatedOrJoinedAtMs;
+      if (elapsed >= ROOM_IDLE_TTL_MS && !this.matchStartedTriggered) {
+        const expiredRoomId = this.currentRoomId;
+        await this.leaveRoom();
+        if (this.callbacks.onRoomClosed) {
+          this.callbacks.onRoomClosed({
+            reason: "idle_timeout",
+            message: `Phòng ${expiredRoomId} đã tự động xóa do trống quá 5 phút.`
+          });
+        }
+      }
+    }, 15 * 1000);
+  }
+
+  _stopRoomTimers() {
+    if (this._heartbeatTimer) {
+      clearInterval(this._heartbeatTimer);
+      this._heartbeatTimer = null;
+    }
+    if (this._idleExpiryTimer) {
+      clearInterval(this._idleExpiryTimer);
+      this._idleExpiryTimer = null;
+    }
+  }
+
   /**
-   * Tạo phòng đấu 1v1 mới (hoặc tự động vào phòng nếu người dùng nhập mã phòng đang chờ có sẵn vào ô Mã tùy chỉnh)
+   * Tạo phòng đấu 1v1 mới (hoặc tự động vào phòng nếu người dùng nhập mã phòng đang chờ có sẵn)
    */
   async createRoom({ customCode = "", hostName = "", gamesToWin = 1 } = {}) {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      throw new Error("Không có kết nối mạng. Vui lòng chuyển sang Chơi Offline với Máy (AI).");
+    }
+
+    await setFirebaseNetworkEnabled(true);
+    // Dọn các phòng cũ quá hạn trước khi tạo phòng mới
+    this.purgeStaleRooms().catch(() => {});
+
     const user = await this.ensureUser(hostName);
     const cleanedCustom = (customCode || "").trim().toUpperCase();
     const roomId = cleanedCustom || this.generateRoomCode();
@@ -84,17 +268,24 @@ export class OnlineMatchmaker {
     const roomRef = doc(db, "rooms", roomId);
 
     try {
-      // Nếu người chơi dán mã phòng của bạn bè vào ô Mã phòng tùy chỉnh, tự động cho họ vào phòng đó với tư cách Guest (P2)
       if (cleanedCustom) {
         const existingSnap = await getDoc(roomRef);
         if (existingSnap.exists()) {
           const existingData = existingSnap.data();
-          if (existingData.status === "waiting" && existingData.hostId && existingData.hostId !== user.uid && !existingData.guestId) {
+          if (this.isRoomExpiredOrEmpty(existingData)) {
+            await deleteDoc(roomRef).catch(() => {});
+          } else if (
+            existingData.status === "waiting" &&
+            existingData.hostId &&
+            existingData.hostId !== user.uid &&
+            !existingData.guestId
+          ) {
             return await this.joinRoom(roomId, finalHostName);
           }
         }
       }
 
+      const now = Date.now();
       const initialData = {
         roomId,
         hostId: user.uid,
@@ -103,6 +294,11 @@ export class OnlineMatchmaker {
         guestName: null,
         status: "waiting", // waiting | playing | finished
         gamesToWin: Number(gamesToWin || 1),
+        activeUserCount: 1,
+        createdAtMs: now,
+        lastActiveMs: now,
+        hostLastSeenMs: now,
+        guestLastSeenMs: null,
         p1Score: 0,
         p2Score: 0,
         p1Games: 0,
@@ -123,6 +319,7 @@ export class OnlineMatchmaker {
       this.isHost = true;
       this.matchStartedTriggered = false;
       this._subscribeToRoom(roomId);
+      this._startRoomTimers(roomId);
       return { roomId, isHost: true, hostName: finalHostName, gamesToWin: Number(gamesToWin || 1) };
     } catch (err) {
       handleFirestoreError(err, `tạo phòng đấu [${roomId}]`, { roomId });
@@ -134,6 +331,11 @@ export class OnlineMatchmaker {
    * Tham gia phòng đấu có sẵn
    */
   async joinRoom(targetRoomId, guestName = "") {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      throw new Error("Không có kết nối mạng. Vui lòng chuyển sang Chơi Offline với Máy (AI).");
+    }
+
+    await setFirebaseNetworkEnabled(true);
     const roomId = (targetRoomId || "").trim().toUpperCase();
     if (!roomId) throw new Error("Vui lòng nhập mã phòng hợp lệ.");
 
@@ -144,10 +346,15 @@ export class OnlineMatchmaker {
     try {
       const snap = await getDoc(roomRef);
       if (!snap.exists()) {
-        throw new Error(`Không tìm thấy phòng "${roomId}". Vui lòng kiểm tra lại mã phòng!`);
+        throw new Error(`Không tìm thấy phòng "${roomId}" (hoặc phòng đã tự động xóa sau 5 phút trống).`);
       }
       const data = snap.data();
+      if (this.isRoomExpiredOrEmpty(data)) {
+        await deleteDoc(roomRef).catch(() => {});
+        throw new Error(`Phòng "${roomId}" đã hết hạn sau 5 phút không hoạt động và đã được dọn dẹp.`);
+      }
       if (data.status === "finished") {
+        await deleteDoc(roomRef).catch(() => {});
         throw new Error(`Phòng "${roomId}" đã kết thúc trận đấu.`);
       }
       if (data.status === "playing" && data.guestId && data.guestId !== user.uid) {
@@ -157,10 +364,13 @@ export class OnlineMatchmaker {
         throw new Error(`Phòng "${roomId}" đã có đối thủ tham gia.`);
       }
 
-      // Update room as joined - duy trì status: "waiting" để 2 người vào sảnh chờ
+      const now = Date.now();
       await updateDoc(roomRef, {
         guestId: user.uid,
         guestName: finalGuestName,
+        activeUserCount: 2,
+        lastActiveMs: now,
+        guestLastSeenMs: now,
         updatedAt: serverTimestamp()
       });
 
@@ -168,6 +378,7 @@ export class OnlineMatchmaker {
       this.isHost = false;
       this.matchStartedTriggered = false;
       this._subscribeToRoom(roomId);
+      this._startRoomTimers(roomId);
       return { roomId, isHost: false, hostName: data.hostName, guestName: finalGuestName, gamesToWin: data.gamesToWin };
     } catch (err) {
       handleFirestoreError(err, `tham gia phòng [${roomId}]`, { roomId });
@@ -182,10 +393,14 @@ export class OnlineMatchmaker {
     if (!this.currentRoomId || !this.isHost) {
       throw new Error("Chỉ chủ phòng mới có quyền bắt đầu trận đấu.");
     }
+    const now = Date.now();
+    this._roomCreatedOrJoinedAtMs = now;
     const roomRef = doc(db, "rooms", this.currentRoomId);
     try {
       await updateDoc(roomRef, {
         status: "playing",
+        lastActiveMs: now,
+        hostLastSeenMs: now,
         matchStartedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -209,23 +424,30 @@ export class OnlineMatchmaker {
       roomRef,
       (docSnap) => {
         if (!docSnap.exists()) {
+          this._stopRoomTimers();
           if (this.callbacks.onRoomClosed) {
-            this.callbacks.onRoomClosed({ message: "Phòng chơi đã bị hủy hoặc đóng bởi chủ phòng." });
+            this.callbacks.onRoomClosed({ message: "Phòng chơi đã đóng hoặc tự động xóa." });
           } else if (this.callbacks.onError) {
-            this.callbacks.onError({ message: "Phòng chơi đã bị hủy hoặc đóng bởi chủ phòng." });
+            this.callbacks.onError({ message: "Phòng chơi đã đóng hoặc tự động xóa." });
           }
           return;
         }
 
         const data = docSnap.data();
 
-        // Cập nhật thông tin sảnh chờ (Host, Guest, Games, Status)
+        // Nếu cả 2 người thoát hoặc phòng hết hạn 5 phút -> xóa ngay
+        if (this.isRoomExpiredOrEmpty(data)) {
+          deleteDoc(roomRef).catch(() => {});
+          return;
+        }
+
         if (this.callbacks.onWaitingRoomUpdate) {
           this.callbacks.onWaitingRoomUpdate(data);
         }
 
-        // Báo cho chủ phòng khi khách vào
         if (this.isHost && data.guestId) {
+          // Reset 5-minute idle timer when guest joins
+          this._roomCreatedOrJoinedAtMs = Date.now();
           if (this.callbacks.onPlayerJoined) {
             this.callbacks.onPlayerJoined({
               role: "p2",
@@ -234,9 +456,9 @@ export class OnlineMatchmaker {
           }
         }
 
-        // Khi chủ phòng bấm Bắt đầu -> status đổi sang "playing"
         if (data.status === "playing" && !this.matchStartedTriggered) {
           this.matchStartedTriggered = true;
+          this._roomCreatedOrJoinedAtMs = Date.now();
           if (this.callbacks.onMatchStart) {
             this.callbacks.onMatchStart({
               roomId,
@@ -284,13 +506,31 @@ export class OnlineMatchmaker {
   }
 
   /**
-   * Lắng nghe danh sách phòng chờ công khai trong sảnh chờ
+   * Lắng nghe danh sách phòng chờ công khai trong sảnh chờ (kèm tự động dọn phòng quá 5 phút)
    */
   subscribeToLobbyRooms(onListUpdate) {
     if (this.unsubLobby) {
       this.unsubLobby();
       this.unsubLobby = null;
     }
+    if (this._periodicPurgeTimer) {
+      clearInterval(this._periodicPurgeTimer);
+      this._periodicPurgeTimer = null;
+    }
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      onListUpdate([]);
+      return () => {};
+    }
+
+    setFirebaseNetworkEnabled(true).catch(() => {});
+    // Quét và xóa ngay tất cả phòng cũ khi mở sảnh chờ
+    this.purgeStaleRooms().catch(() => {});
+
+    // Quét định kỳ mỗi 45 giây khi đang mở sảnh chờ
+    this._periodicPurgeTimer = setInterval(() => {
+      this.purgeStaleRooms().catch(() => {});
+    }, 45 * 1000);
 
     try {
       const q = query(
@@ -301,17 +541,27 @@ export class OnlineMatchmaker {
       this.unsubLobby = onSnapshot(
         q,
         (querySnapshot) => {
-          const rooms = [];
-          querySnapshot.forEach((doc) => {
-            rooms.push({ id: doc.id, ...doc.data() });
+          const now = Date.now();
+          const activeRooms = [];
+          querySnapshot.forEach((docSnap) => {
+            if (docSnap.id === "healthcheck") return;
+            const data = docSnap.data();
+            // Nếu phát hiện phòng quá 5 phút hoặc không có người -> xóa tự động khỏi DB ngay lập tức
+            if (this.isRoomExpiredOrEmpty(data, now)) {
+              if (!this.currentRoomId || docSnap.id !== this.currentRoomId) {
+                deleteDoc(doc(db, "rooms", docSnap.id)).catch(() => {});
+              }
+              return;
+            }
+            activeRooms.push({ id: docSnap.id, ...data });
           });
-          // Sort by creation or update time descending
-          rooms.sort((a, b) => {
-            const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
-            const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
+
+          activeRooms.sort((a, b) => {
+            const timeA = a.lastActiveMs || (a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0);
+            const timeB = b.lastActiveMs || (b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0);
             return timeB - timeA;
           });
-          onListUpdate(rooms.slice(0, 15));
+          onListUpdate(activeRooms.slice(0, 15));
         },
         (error) => {
           handleFirestoreError(error, "lắng nghe danh sách phòng chờ");
@@ -323,6 +573,10 @@ export class OnlineMatchmaker {
           this.unsubLobby();
           this.unsubLobby = null;
         }
+        if (this._periodicPurgeTimer) {
+          clearInterval(this._periodicPurgeTimer);
+          this._periodicPurgeTimer = null;
+        }
       };
     } catch (err) {
       handleFirestoreError(err, "khởi tạo danh sách phòng chờ");
@@ -331,19 +585,42 @@ export class OnlineMatchmaker {
   }
 
   /**
-   * Host đồng bộ snapshot trận đấu
+   * Host đồng bộ snapshot trận đấu (Đã tối ưu Tick-rate ~10Hz & Delta/Compact Payload để tiết kiệm băng thông)
    */
   async broadcastSnapshot(snapshot) {
     if (!this.isHost || !this.currentRoomId) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
+    const now = performance.now();
+    const isCriticalPhaseChange =
+      snapshot.phase === "POINT_OVER" ||
+      snapshot.phase === "MATCH_OVER" ||
+      snapshot.banner?.seq;
+
+    if (!isCriticalPhaseChange && now - this._lastSnapshotSentTime < MIN_SNAPSHOT_INTERVAL_MS) {
+      return;
+    }
+
+    // Kiểm tra xem dữ liệu có thay đổi thực sự không (tránh gửi trùng lặp khi đứng yên chờ giao bóng)
+    const digest = `${snapshot.phase}|${snapshot.score?.playerPoints}-${snapshot.score?.opponentPoints}|${snapshot.ball?.px},${snapshot.ball?.py},${snapshot.ball?.pz}|${snapshot.actors?.player?.px},${snapshot.actors?.player?.pz}|${snapshot.actors?.opponent?.px},${snapshot.actors?.opponent?.pz}|${snapshot.banner?.seq || 0}`;
+    if (!isCriticalPhaseChange && digest === this._lastSnapshotDigest && now - this._lastSnapshotSentTime < 1500) {
+      return;
+    }
+
+    this._lastSnapshotSentTime = now;
+    this._lastSnapshotDigest = digest;
     this.hostSnapshotSeq += 1;
+
+    const wallNow = Date.now();
     const roomRef = doc(db, "rooms", this.currentRoomId);
     try {
       await updateDoc(roomRef, {
         snapshot,
         snapshotSeq: this.hostSnapshotSeq,
-        updatedAt: serverTimestamp()
+        lastActiveMs: wallNow,
+        hostLastSeenMs: wallNow
       });
-    } catch (err) {
+    } catch {
       // Non-blocking sync throttled
     }
   }
@@ -353,17 +630,25 @@ export class OnlineMatchmaker {
    */
   async sendGuestAction(actionPayload) {
     if (this.isHost || !this.currentRoomId) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
     this.guestActionSeq += 1;
+    const now = Date.now();
     const roomRef = doc(db, "rooms", this.currentRoomId);
     try {
       await updateDoc(roomRef, {
         guestAction: {
-          ...actionPayload,
+          type: actionPayload.type || "swing",
+          shotType: actionPayload.shotType || "TOPSPIN",
+          speed: Number(Number(actionPayload.speed || 1.15).toFixed(2)),
+          dirX: Number(Number(actionPayload.dirX || 0).toFixed(2)),
+          side: actionPayload.side || null,
           seq: this.guestActionSeq,
-          timestamp: Date.now()
+          timestamp: now
         },
         guestActionSeq: this.guestActionSeq,
-        updatedAt: serverTimestamp()
+        lastActiveMs: now,
+        guestLastSeenMs: now
       });
     } catch (err) {
       handleFirestoreError(err, "gửi hành động đánh bóng của Guest");
@@ -371,51 +656,122 @@ export class OnlineMatchmaker {
   }
 
   /**
-   * Guest gửi hướng di chuyển joystick / phím
+   * Guest gửi tọa độ di chuyển siêu gọn {x, z} ở tần suất ~10Hz chỉ khi vị trí thay đổi
    */
   async sendGuestMovement(moveInput) {
     if (this.isHost || !this.currentRoomId) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
+    const now = performance.now();
+    if (now - this._lastMoveSentTime < MIN_MOVEMENT_INTERVAL_MS) return;
+
+    const x = Number(moveInput.x.toFixed(2));
+    const z = Number(moveInput.z.toFixed(2));
+
+    if (
+      this._lastMoveX !== null &&
+      this._lastMoveZ !== null &&
+      Math.abs(x - this._lastMoveX) < 0.02 &&
+      Math.abs(z - this._lastMoveZ) < 0.02
+    ) {
+      return;
+    }
+
+    this._lastMoveSentTime = now;
+    this._lastMoveX = x;
+    this._lastMoveZ = z;
+
+    const wallNow = Date.now();
     const roomRef = doc(db, "rooms", this.currentRoomId);
     try {
       await updateDoc(roomRef, {
-        guestInput: {
-          x: Number(moveInput.x.toFixed(2)),
-          z: Number(moveInput.z.toFixed(2)),
-          timestamp: Date.now()
-        }
+        guestInput: { x, z, t: wallNow },
+        lastActiveMs: wallNow,
+        guestLastSeenMs: wallNow
       });
-    } catch (err) {
+    } catch {
       // Ignored non-fatal
     }
   }
 
   /**
-   * Rời khỏi phòng hiện tại (Host hủy phòng hoặc Guest thoát sảnh)
+   * Xóa phòng ngay khi trận đấu kết thúc để không tốn dung lượng lưu trữ DB
    */
-  async leaveRoom() {
+  async finishAndCleanRoom() {
+    const roomId = this.currentRoomId;
+    if (!roomId) return;
+    this._stopRoomTimers();
     if (this.unsubRoom) {
       this.unsubRoom();
       this.unsubRoom = null;
     }
-    if (this.currentRoomId) {
+    this.currentRoomId = null;
+    this.isHost = false;
+    this.matchStartedTriggered = false;
+    try {
+      await deleteDoc(doc(db, "rooms", roomId));
+    } catch {}
+  }
+
+  /**
+   * Rời khỏi phòng hiện tại & xóa phòng nếu trống hoặc không còn người chơi
+   */
+  async leaveRoom() {
+    this._stopRoomTimers();
+    if (this.unsubRoom) {
+      this.unsubRoom();
+      this.unsubRoom = null;
+    }
+    const roomId = this.currentRoomId;
+    const wasHost = this.isHost;
+    this.currentRoomId = null;
+    this.isHost = false;
+    this.matchStartedTriggered = false;
+
+    if (roomId && (typeof navigator === "undefined" || navigator.onLine)) {
       try {
-        const roomRef = doc(db, "rooms", this.currentRoomId);
-        if (this.isHost) {
+        const roomRef = doc(db, "rooms", roomId);
+        if (wasHost) {
+          // Chủ phòng thoát -> xóa hẳn phòng ngay lập tức
           await deleteDoc(roomRef);
-        } else if (this.user) {
-          await updateDoc(roomRef, {
-            guestId: null,
-            guestName: null,
-            updatedAt: serverTimestamp()
-          });
+        } else {
+          const snap = await getDoc(roomRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            if (!data.hostId || this.isRoomExpiredOrEmpty(data)) {
+              await deleteDoc(roomRef);
+            } else {
+              await updateDoc(roomRef, {
+                guestId: null,
+                guestName: null,
+                activeUserCount: 1,
+                lastActiveMs: Date.now(),
+                updatedAt: serverTimestamp()
+              });
+            }
+          }
         }
       } catch (e) {
         console.warn("[OnlineMatchmaker] Lỗi khi rời phòng:", e);
       }
     }
-    this.currentRoomId = null;
-    this.isHost = false;
-    this.matchStartedTriggered = false;
+  }
+
+  /**
+   * Ngắt toàn bộ kết nối Realtime khi người chơi quay về Menu hoặc chơi Offline với AI
+   */
+  async disconnectIfIdle() {
+    if (this.unsubLobby) {
+      this.unsubLobby();
+      this.unsubLobby = null;
+    }
+    if (this._periodicPurgeTimer) {
+      clearInterval(this._periodicPurgeTimer);
+      this._periodicPurgeTimer = null;
+    }
+    if (!this.currentRoomId) {
+      await setFirebaseNetworkEnabled(false);
+    }
   }
 }
 

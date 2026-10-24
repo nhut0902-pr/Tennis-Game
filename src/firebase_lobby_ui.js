@@ -1,10 +1,10 @@
 import {
-  onlineMatchmaker
+  onlineMatchmaker,
+  ROOM_IDLE_TTL_MS
 } from "./online_matchmaker.js";
 import {
   auth,
   signInWithGoogle,
-  signInAsGuest,
   updateUserProfileName,
   testConnection
 } from "./firebase.ts";
@@ -20,6 +20,8 @@ export class FirebaseLobbyUI {
     this._p1AvatarRendered = false;
     this._p2AvatarRendered = false;
     this._lastRenderedRoomsSig = "";
+    this._waitingExpiryInterval = null;
+    this._waitingStartedAtMs = 0;
 
     this._bindElements();
     this._bindEvents();
@@ -27,6 +29,13 @@ export class FirebaseLobbyUI {
     this._initFirebaseHealth();
     this._initMatchmakerCallbacks();
     this._checkURLRoomParam();
+
+    // Purge any stale/old rooms on boot when online so database stays clean
+    if (typeof navigator === "undefined" || navigator.onLine) {
+      setTimeout(() => {
+        onlineMatchmaker.purgeStaleRooms().catch(() => {});
+      }, 1200);
+    }
   }
 
   _bindElements() {
@@ -57,10 +66,12 @@ export class FirebaseLobbyUI {
     this.btnJoinRoom = document.getElementById("btn-join-room");
     this.roomsListContainer = document.getElementById("lobby-rooms-list");
     this.roomsEmptyHint = document.getElementById("lobby-rooms-empty");
+    this.btnPurgeOldRooms = document.getElementById("btn-purge-old-rooms");
 
     // Dedicated Waiting Room Elements
     this.waitingGamesBadge = document.getElementById("waiting-games-badge");
     this.waitingMyRoleBadge = document.getElementById("waiting-my-role-badge");
+    this.waitingExpiryBadge = document.getElementById("waiting-expiry-badge");
 
     this.waitingCodeInput = document.getElementById("waiting-code-input");
     this.btnCopyWaitingCode = document.getElementById("btn-copy-waiting-code");
@@ -126,6 +137,41 @@ export class FirebaseLobbyUI {
       });
     }
 
+    // Manual & instant cleanup of old/stale rooms in DB
+    if (this.btnPurgeOldRooms) {
+      this.btnPurgeOldRooms.addEventListener("click", async () => {
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          this.showToast("Đang ở chế độ Offline không có mạng.");
+          return;
+        }
+        this.btnPurgeOldRooms.disabled = true;
+        const oldText = this.btnPurgeOldRooms.textContent;
+        this.btnPurgeOldRooms.textContent = "Đang dọn...";
+        try {
+          const deletedCount = await onlineMatchmaker.purgeStaleRooms({ deleteAllUnused: true });
+          if (deletedCount > 0) {
+            this.showToast(`Đã xóa ${deletedCount} phòng cũ/trống để làm sạch Database.`);
+          } else {
+            this.showToast("Database đã sạch, không có phòng cũ nào tồn đọng.");
+          }
+        } finally {
+          this.btnPurgeOldRooms.disabled = false;
+          this.btnPurgeOldRooms.textContent = oldText;
+        }
+      });
+    }
+
+    // Listen to browser online/offline changes
+    window.addEventListener("online", () => {
+      this._initFirebaseHealth();
+    });
+    window.addEventListener("offline", () => {
+      if (this.firebaseStatusBadge) {
+        this.firebaseStatusBadge.textContent = "Đang Offline (Chơi với Máy)";
+        this.firebaseStatusBadge.className = "status-badge connecting";
+      }
+    });
+
     // Save profile nickname
     if (this.btnSaveProfileName && this.profileNameInput) {
       this.btnSaveProfileName.addEventListener("click", async () => {
@@ -140,6 +186,10 @@ export class FirebaseLobbyUI {
     // Google Sign In
     if (this.btnGoogleLogin) {
       this.btnGoogleLogin.addEventListener("click", async () => {
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          this.showToast("Không có kết nối mạng để đăng nhập Google.");
+          return;
+        }
         try {
           this.btnGoogleLogin.disabled = true;
           this.btnGoogleLogin.textContent = "Đang đăng nhập...";
@@ -277,7 +327,7 @@ export class FirebaseLobbyUI {
       this.btnWaitingCancelRoom.addEventListener("click", async () => {
         await onlineMatchmaker.leaveRoom();
         this.showBrowseView();
-        this.showToast("Đã hủy phòng thi đấu.");
+        this.showToast("Đã hủy và xóa phòng thi đấu.");
       });
     }
 
@@ -303,28 +353,49 @@ export class FirebaseLobbyUI {
   }
 
   _initMatchmakerCallbacks() {
-    // Listen for room data updates in waiting room
     onlineMatchmaker.callbacks.onWaitingRoomUpdate = (roomData) => {
       if (!this.currentRoom || this.currentRoom.roomId !== roomData.roomId) return;
       this._updateWaitingRoomState(roomData);
     };
 
-    // Listen for match start (triggered when status becomes "playing")
     onlineMatchmaker.callbacks.onMatchStart = (matchData) => {
+      this._stopWaitingExpiryCountdown();
       this._runCountdownAndStart(matchData);
     };
 
-    // Listen for room closed by host
-    onlineMatchmaker.callbacks.onRoomClosed = () => {
-      this.showToast("Phòng chơi đã bị đóng hoặc hủy bởi chủ phòng.");
+    onlineMatchmaker.callbacks.onRoomClosed = (info = {}) => {
+      this._stopWaitingExpiryCountdown();
+      this.showToast(info.message || "Phòng chơi đã đóng hoặc tự động xóa sau 5 phút trống.");
       this.showBrowseView();
     };
+  }
+
+  _startWaitingExpiryCountdown() {
+    this._stopWaitingExpiryCountdown();
+    this._waitingStartedAtMs = Date.now();
+    const updateBadge = () => {
+      if (!this.waitingExpiryBadge) return;
+      const elapsed = Date.now() - this._waitingStartedAtMs;
+      const remainMs = Math.max(0, ROOM_IDLE_TTL_MS - elapsed);
+      const mins = Math.floor(remainMs / 60000);
+      const secs = Math.floor((remainMs % 60000) / 1000);
+      const formatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      this.waitingExpiryBadge.textContent = `Tự xóa nếu trống sau: ${formatted}`;
+    };
+    updateBadge();
+    this._waitingExpiryInterval = setInterval(updateBadge, 1000);
+  }
+
+  _stopWaitingExpiryCountdown() {
+    if (this._waitingExpiryInterval) {
+      clearInterval(this._waitingExpiryInterval);
+      this._waitingExpiryInterval = null;
+    }
   }
 
   _extractRoomCode(rawValue = "") {
     const val = String(rawValue || "").trim();
     if (!val) return "";
-    // If user pasted a full invite URL containing ?room=CODE or &room=CODE or #room=CODE
     const match = val.match(/[?&#]room=([A-Za-z0-9_-]+)/i);
     if (match && match[1]) {
       return match[1].trim().toUpperCase().slice(0, 12);
@@ -345,8 +416,7 @@ export class FirebaseLobbyUI {
     const rawRoom = params.get("room") || hashParams.get("room") || "";
     const roomParam = this._extractRoomCode(rawRoom);
 
-    if (roomParam && roomParam !== "DEFAULT") {
-      // Open lobby modal immediately so title modal never flashes
+    if (roomParam && roomParam !== "DEFAULT" && (typeof navigator === "undefined" || navigator.onLine)) {
       this.open();
       if (this.joinCodeInput) {
         this.joinCodeInput.value = roomParam;
@@ -369,10 +439,17 @@ export class FirebaseLobbyUI {
   }
 
   async _initFirebaseHealth() {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      if (this.firebaseStatusBadge) {
+        this.firebaseStatusBadge.textContent = "Đang Offline (Chơi với Máy)";
+        this.firebaseStatusBadge.className = "status-badge connecting";
+      }
+      return;
+    }
     const ok = await testConnection();
     if (this.firebaseStatusBadge) {
       if (ok) {
-        this.firebaseStatusBadge.textContent = "Máy chủ trực tuyến";
+        this.firebaseStatusBadge.textContent = "Máy chủ trực tuyến (Tự xóa phòng >5p)";
         this.firebaseStatusBadge.className = "status-badge online";
       } else {
         this.firebaseStatusBadge.textContent = "Đang kết nối máy chủ...";
@@ -417,6 +494,7 @@ export class FirebaseLobbyUI {
   }
 
   showBrowseView() {
+    this._stopWaitingExpiryCountdown();
     this.currentRoom = null;
     this.isHost = false;
     const profileBar = this.modal?.querySelector(".lobby-profile-bar");
@@ -430,34 +508,30 @@ export class FirebaseLobbyUI {
   showWaitingRoomView({ roomId, isHost, hostName, guestName, gamesToWin }) {
     this.currentRoom = { roomId, isHost, hostName, guestName, gamesToWin };
     this.isHost = isHost;
+    this._startWaitingExpiryCountdown();
 
     const profileBar = this.modal?.querySelector(".lobby-profile-bar");
     if (profileBar) profileBar.classList.add("hidden");
     if (this.browseView) this.browseView.classList.add("hidden");
     if (this.waitingRoomView) this.waitingRoomView.classList.remove("hidden");
 
-    // Format badge
     if (this.waitingGamesBadge) {
       const gNum = Number(gamesToWin || 1);
       this.waitingGamesBadge.textContent = gNum === 1 ? "1 Game" : `Best of ${gNum * 2 - 1} (Thắng ${gNum})`;
     }
 
-    // Role badge
     if (this.waitingMyRoleBadge) {
       this.waitingMyRoleBadge.textContent = isHost ? "Vai trò: Chủ phòng (P1)" : "Vai trò: Khách đấu (P2)";
     }
 
-    // Room Code text box
     if (this.waitingCodeInput) {
       this.waitingCodeInput.value = roomId;
     }
 
-    // Invite Link text box (uses public shared URL so friends can open directly)
     if (this.waitingLinkInput) {
       this.waitingLinkInput.value = this._buildInviteLink(roomId);
     }
 
-    // Player 1 (Host) Card
     if (this.waitingP1Name) {
       this.waitingP1Name.textContent = hostName || "Player 1";
     }
@@ -466,10 +540,8 @@ export class FirebaseLobbyUI {
       this._p1AvatarRendered = true;
     }
 
-    // Player 2 (Guest) Card
     this._renderGuestCard(guestName);
 
-    // Host vs Guest Controls
     if (isHost) {
       if (this.waitingHostControls) this.waitingHostControls.classList.remove("hidden");
       if (this.waitingGuestControls) this.waitingGuestControls.classList.add("hidden");
@@ -506,7 +578,7 @@ export class FirebaseLobbyUI {
       }
       if (this.waitingP2Status) {
         this.waitingP2Status.className = "player-status-tag waiting";
-        this.waitingP2Status.textContent = "Chưa kết nối";
+        this.waitingP2Status.textContent = "Chưa kết nối (Tự xóa nếu trống >5p)";
       }
     }
   }
@@ -523,7 +595,7 @@ export class FirebaseLobbyUI {
       this.btnWaitingStartMatch.disabled = true;
       this.btnWaitingStartMatch.classList.add("disabled");
       this.btnWaitingStartMatch.innerHTML = `<span>BẮT ĐẦU TRẬN ĐẤU</span>`;
-      this.waitingHostHint.textContent = "Đang chờ đối thủ vào phòng. Sao chép mã phòng hoặc đường dẫn ở trên để gửi cho bạn bè.";
+      this.waitingHostHint.textContent = "Đang chờ đối thủ vào phòng. Phòng trống không người sẽ tự động xóa sau 5 phút.";
     }
   }
 
@@ -535,6 +607,9 @@ export class FirebaseLobbyUI {
     if (this.currentRoom.guestName === guestName && this.currentRoom.hostName === hostName) {
       return;
     }
+    if (guestName && !this.currentRoom.guestName) {
+      this._waitingStartedAtMs = Date.now();
+    }
     this.currentRoom.guestName = guestName;
     this.currentRoom.hostName = hostName;
 
@@ -542,10 +617,8 @@ export class FirebaseLobbyUI {
       this.waitingP1Name.textContent = hostName;
     }
 
-    // Render guest card
     this._renderGuestCard(guestName);
 
-    // Update host button if host
     if (this.isHost) {
       this._updateHostStartButton(!!guestName);
     }
@@ -553,6 +626,10 @@ export class FirebaseLobbyUI {
 
   open() {
     if (!this.modal) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      this.showToast("Bạn đang Offline không có mạng. Hãy chọn Đấu với Máy (AI) để chơi Offline!");
+    }
+
     const titleModal = document.getElementById("title-modal");
     if (titleModal) {
       titleModal.classList.add("hidden");
@@ -562,16 +639,14 @@ export class FirebaseLobbyUI {
     this.modal.classList.remove("hidden");
     this.modal.style.display = "flex";
 
-    // Default to browse view if not already in a room
     if (!this.currentRoom) {
       this.showBrowseView();
     }
 
-    // Subscribe to live rooms
     if (!this.unsubLobbyRooms) {
       this.unsubLobbyRooms = onlineMatchmaker.subscribeToLobbyRooms((rooms) => {
-        if (this.firebaseStatusBadge) {
-          this.firebaseStatusBadge.textContent = "Máy chủ trực tuyến";
+        if (this.firebaseStatusBadge && (typeof navigator === "undefined" || navigator.onLine)) {
+          this.firebaseStatusBadge.textContent = "Máy chủ trực tuyến (Tự xóa phòng >5p)";
           this.firebaseStatusBadge.className = "status-badge online";
         }
         this._renderRoomsList(rooms);
@@ -587,8 +662,11 @@ export class FirebaseLobbyUI {
       this.unsubLobbyRooms();
       this.unsubLobbyRooms = null;
     }
-    // If not starting a match and still in TITLE phase or background showcase, show title modal again
     if (!startingMatch) {
+      // Nếu không bắt đầu trận đấu, ngắt kết nối sảnh để tiết kiệm kết nối đồng thời
+      if (!this.currentRoom) {
+        onlineMatchmaker.disconnectIfIdle().catch(() => {});
+      }
       const engine = window.__argonTennis;
       if (!engine || engine.phase === "TITLE" || engine.autoPlayMode) {
         const titleModal = document.getElementById("title-modal");
@@ -600,11 +678,10 @@ export class FirebaseLobbyUI {
     }
   }
 
-  showToast(message, duration = 2400) {
+  showToast(message, duration = 2600) {
     if (!this.toastEl) return;
     this.toastEl.textContent = message;
     this.toastEl.classList.remove("hidden", "fading-out");
-    // Trigger DOM reflow to restart transition
     void this.toastEl.offsetWidth;
     this.toastEl.classList.add("show");
 
@@ -625,12 +702,10 @@ export class FirebaseLobbyUI {
     if (this._isCountingDown) return;
     this._isCountingDown = true;
 
-    // Ensure waiting room view is active and visible
     if (this.modal) this.modal.classList.remove("hidden");
     if (this.browseView) this.browseView.classList.add("hidden");
     if (this.waitingRoomView) this.waitingRoomView.classList.remove("hidden");
 
-    // Lock interactive buttons during countdown
     if (this.btnWaitingStartMatch) {
       this.btnWaitingStartMatch.disabled = true;
       this.btnWaitingStartMatch.innerHTML = `<span>CHUẨN BỊ VÀO SÂN</span>`;
@@ -639,7 +714,6 @@ export class FirebaseLobbyUI {
     if (this.btnWaitingLeaveRoom) this.btnWaitingLeaveRoom.disabled = true;
     if (this.btnCloseLobbyX) this.btnCloseLobbyX.disabled = true;
 
-    // Display countdown overlay
     if (this.waitingCountdownOverlay) {
       this.waitingCountdownOverlay.classList.remove("hidden");
     }
@@ -675,9 +749,7 @@ export class FirebaseLobbyUI {
         gain.connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + (isFinal ? 0.5 : 0.25));
-      } catch (e) {
-        // Audio blip optional fallback
-      }
+      } catch (e) {}
     };
 
     const renderStep = (idx) => {
@@ -686,7 +758,6 @@ export class FirebaseLobbyUI {
 
       if (this.waitingCountdownNumber) {
         this.waitingCountdownNumber.classList.remove("start-pop");
-        // Reflow to restart keyframe
         void this.waitingCountdownNumber.offsetWidth;
         this.waitingCountdownNumber.textContent = step.text;
         if (step.isStart) {
@@ -767,7 +838,6 @@ export class FirebaseLobbyUI {
       `;
     }).join("");
 
-    // Bind join buttons
     this.roomsListContainer.querySelectorAll(".btn-room-join").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const roomId = btn.dataset.roomId;
@@ -779,6 +849,10 @@ export class FirebaseLobbyUI {
   }
 
   async _handleHostRoom() {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      this.showToast("Không có mạng. Hãy quay lại chọn Đấu với Máy (AI) để chơi Offline!");
+      return;
+    }
     const hostName = (this.profileNameInput?.value || "Player 1").trim();
     const gamesToWin = parseInt(this.hostGamesSelect?.value || "1", 10);
     const customCode = this._extractRoomCode(this.hostCustomCodeInput?.value || "");
@@ -795,7 +869,6 @@ export class FirebaseLobbyUI {
 
       const isHostRole = res.isHost !== false;
 
-      // Switch to dedicated waiting room view immediately!
       this.showWaitingRoomView({
         roomId: res.roomId,
         isHost: isHostRole,
@@ -805,11 +878,10 @@ export class FirebaseLobbyUI {
       });
 
       if (isHostRole) {
-        this.showToast(`Đã tạo phòng ${res.roomId}! Hãy sao chép mã hoặc link để mời bạn bè.`);
+        this.showToast(`Đã tạo phòng ${res.roomId}! Phòng trống sẽ tự xóa sau 5 phút nếu không có người.`);
       } else {
         this.showToast(`Đã vào phòng ${res.roomId}! Đang đợi chủ phòng bấm Bắt đầu.`);
       }
-
     } catch (err) {
       this.showToast(`Lỗi tạo phòng: ${err.message || "Thử lại sau"}`);
       if (this.btnHostCreate) this.btnHostCreate.disabled = false;
@@ -817,6 +889,10 @@ export class FirebaseLobbyUI {
   }
 
   async _handleJoinRoom(rawRoomId, explicitGuestName = "") {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      this.showToast("Không có mạng. Hãy chọn Đấu với Máy (AI) để chơi Offline!");
+      return;
+    }
     const roomId = this._extractRoomCode(rawRoomId);
     const guestName = (explicitGuestName || this.profileNameInput?.value || "Player 2").trim();
 
@@ -829,7 +905,6 @@ export class FirebaseLobbyUI {
       this.showToast(`Đang kết nối vào phòng ${roomId}...`);
       const res = await onlineMatchmaker.joinRoom(roomId, guestName);
 
-      // Switch to dedicated waiting room view immediately!
       this.showWaitingRoomView({
         roomId: res.roomId,
         isHost: false,
@@ -839,7 +914,6 @@ export class FirebaseLobbyUI {
       });
 
       this.showToast(`Đã vào phòng ${roomId}! Đang đợi chủ phòng bấm Bắt đầu.`);
-
     } catch (err) {
       this.showToast(err.message || "Không thể vào phòng. Kiểm tra lại mã phòng!");
     }

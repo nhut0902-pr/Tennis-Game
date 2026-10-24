@@ -3,6 +3,8 @@ import {
   initializeFirestore,
   doc,
   getDoc,
+  enableNetwork,
+  disableNetwork,
   Firestore
 } from "firebase/firestore";
 import firebaseConfig from "../firebase-applet-config.json";
@@ -35,6 +37,29 @@ export const db: Firestore = initializeFirestore(
   firebaseConfig.firestoreDatabaseId || "(default)"
 );
 
+let networkEnabledState = true;
+
+/**
+ * Enable or disable Firestore network connection to save simultaneous connections
+ * and prevent background retries when playing Offline with AI.
+ */
+export async function setFirebaseNetworkEnabled(enabled: boolean): Promise<void> {
+  if (typeof navigator !== "undefined" && !navigator.onLine && enabled) {
+    return;
+  }
+  if (networkEnabledState === enabled) return;
+  networkEnabledState = enabled;
+  try {
+    if (enabled) {
+      await enableNetwork(db);
+    } else {
+      await disableNetwork(db);
+    }
+  } catch {
+    // Ignore transient state errors
+  }
+}
+
 /**
  * Standard Firebase Error structure conforming to guidelines
  */
@@ -57,17 +82,22 @@ export function handleFirestoreError(
 ): FirestoreErrorInfo {
   const err = error as { code?: string; message?: string };
   const errorCode = err?.code || "unknown";
-  let userMessage = "Đã xảy ra lỗi kết nối máy chủ. Vui lòng thử lại.";
+  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+  let userMessage = isOffline
+    ? "Đang ở chế độ Offline không có mạng. Bạn vẫn có thể chơi với Máy (AI)."
+    : "Đã xảy ra lỗi kết nối máy chủ. Vui lòng thử lại.";
   let retryable = true;
 
   if (errorCode === "permission-denied") {
     userMessage = "Không có quyền truy cập dữ liệu phòng chơi.";
     retryable = false;
   } else if (errorCode === "not-found") {
-    userMessage = "Phòng chơi không tồn tại hoặc đã bị hủy.";
+    userMessage = "Phòng chơi không tồn tại hoặc đã tự động xóa sau 5 phút trống.";
     retryable = false;
-  } else if (errorCode === "unavailable" || errorCode === "deadline-exceeded") {
-    userMessage = "Mạng yếu hoặc máy chủ đang bận. Đang thử kết nối lại...";
+  } else if (errorCode === "unavailable" || errorCode === "deadline-exceeded" || isOffline) {
+    userMessage = isOffline
+      ? "Thiết bị đang Offline. Hãy chọn Đấu với Máy (AI) để chơi không cần mạng."
+      : "Mạng yếu hoặc máy chủ đang bận. Đang thử kết nối lại...";
     retryable = true;
   } else if (errorCode === "auth/popup-closed-by-user") {
     userMessage = "Đã đóng cửa sổ đăng nhập Google.";
@@ -86,15 +116,23 @@ export function handleFirestoreError(
     context
   };
 
-  console.error(`[ArgonTennis Firebase] ${actionDescription} failed:`, errorInfo, error);
+  if (isOffline || errorCode === "unavailable") {
+    console.warn(`[ArgonTennis Offline/Network] ${actionDescription}:`, errorInfo.userMessage);
+  } else {
+    console.error(`[ArgonTennis Firebase] ${actionDescription} failed:`, errorInfo, error);
+  }
   return errorInfo;
 }
 
 /**
- * Health check to verify Firestore connectivity
+ * Health check to verify Firestore connectivity (returns false immediately when offline)
  */
 export async function testConnection(): Promise<boolean> {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    return false;
+  }
   try {
+    await setFirebaseNetworkEnabled(true);
     const healthRef = doc(db, "rooms", "healthcheck");
     await getDoc(healthRef);
     return true;
@@ -103,7 +141,6 @@ export async function testConnection(): Promise<boolean> {
     if (error?.code === "not-found") {
       return true;
     }
-    handleFirestoreError(err, "kiểm tra kết nối Firestore");
     return false;
   }
 }
@@ -207,6 +244,9 @@ export async function signInAsGuest(displayName?: string): Promise<AppUser> {
  * Sign in with Google Popup (isolated on a separate FirebaseApp so it never affects Firestore)
  */
 export async function signInWithGoogle(): Promise<AppUser> {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    throw new Error("Không thể đăng nhập Google khi không có kết nối mạng.");
+  }
   try {
     const { getAuth, signInWithPopup, GoogleAuthProvider, signOut } = await import("firebase/auth");
     const authApp = initializeApp(firebaseConfig, "argon-google-auth-popup");
@@ -239,7 +279,6 @@ export async function signInWithGoogle(): Promise<AppUser> {
     const err = error as { code?: string; message?: string };
     const msg = String(err?.message || err?.code || "");
     if (msg.includes("token-service-api-has-not-been-used") || msg.includes("securetoken")) {
-      // Fallback gracefully to active profile when Token Service API is disabled in GCP project
       const fallbackUser = getOrCreateLocalGuest();
       auth.currentUser = fallbackUser;
       notifyAuthListeners();
@@ -256,5 +295,3 @@ export async function signInWithGoogle(): Promise<AppUser> {
 export function subscribeAuthState(callback: (user: AppUser | null) => void): () => void {
   return auth.onAuthStateChanged(callback);
 }
-
-

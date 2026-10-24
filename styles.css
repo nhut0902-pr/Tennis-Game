@@ -3139,5 +3139,211 @@ kbd {
   }
 }
 
+/* ============================================================
+   PWA INSTALL, OFFLINE STATUS & ROOM AUTO-CLEANUP STYLES
+   ============================================================ */
+.title-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 
+.network-status-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: #064e3b;
+  border: 1px solid #059669;
+  color: #10b981;
+}
 
+.network-status-pill.offline {
+  background: #3b2110;
+  border-color: #d97706;
+  color: #fbbf24;
+}
+
+.offline-ready-banner {
+  background: #1c1917;
+  border: 1px solid #d97706;
+  color: #fde68a;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.title-cta-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 520px) {
+  .title-cta-dual {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pwa-install-trigger {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+  font-weight: 800 !important;
+}
+
+.pwa-install-trigger:hover {
+  background: #064e3b !important;
+  color: #ffffff !important;
+}
+
+.pwa-install-trigger.pwa-ready-pulse {
+  background: #064e3b;
+  color: #ecfdf5 !important;
+}
+
+.rooms-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-purge-rooms {
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.btn-purge-rooms:hover:not(:disabled) {
+  background: #263244;
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.btn-purge-rooms:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.waiting-expiry-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fbbf24;
+  background: #271e12;
+  border: 1px solid #92400e;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* PWA Install Guide Modal (Flat Dark Sports) */
+.pwa-install-card {
+  width: min(560px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #111722;
+  border: 1px solid #263244;
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.pwa-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #0d131c;
+  border-bottom: 1px solid #1e293b;
+}
+
+.pwa-card-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f8fafc;
+}
+
+#pwa-install-modal .controls-close-x {
+  width: auto;
+  height: auto;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid #334155;
+  background: #192231;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#pwa-install-modal .controls-close-x:hover {
+  background: #263244;
+  color: #ffffff;
+  transform: none;
+}
+
+.pwa-card-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pwa-lead-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.pwa-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.pwa-step-box {
+  background: #151d2a;
+  border: 1px solid #263244;
+  border-radius: 6px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pwa-step-header {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #10b981;
+}
+
+.pwa-step-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.pwa-card-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #1e293b;
+  background: #0d131c;
+}

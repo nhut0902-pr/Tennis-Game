@@ -1003,9 +1003,19 @@ export class MotionController {
     if (this.phonePollTimer) return;
     const poll = async () => {
       if (this._disposed) return;
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      const companionModal = document.getElementById("companion-modal");
+      const isCompanionModalOpen = companionModal && !companionModal.classList.contains("hidden");
+      const anyPhoneConnected = this.phoneState.connected || this.p2PhoneState.connected;
+      if (!isCompanionModalOpen && !anyPhoneConnected) return;
+
       try {
         const query = `?room=${encodeURIComponent(this.roomId || "default")}&role=${encodeURIComponent(this.role || "p1")}&touch=1`;
         const res = await fetch(`/api/match/state${query}`, { cache: "no-store" });
+        if (res.status === 404) {
+          this.stopPhonePolling();
+          return;
+        }
         if (res.ok) {
           const data = await res.json();
           if (typeof this.onRoomState === "function") this.onRoomState(data);
@@ -1125,8 +1135,7 @@ export class MotionController {
         }
       } catch {}
     };
-    poll();
-    this.phonePollTimer = setInterval(poll, this.phonePollIntervalMs);
+    this.phonePollTimer = setInterval(poll, 250);
   }
 
   stopPhonePolling() {
@@ -1145,19 +1154,24 @@ export class MotionController {
         else navigator.vibrate([28]);
       } catch {}
     }
-    fetch("/api/racket/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        room: this.roomId || "default",
-        role: targetRole,
-        kind,
-        grade,
-        shotType,
-        speedKmh: Math.round(Number(speedKmh || 150)),
-        intensity: Number(intensity || 1)
-      })
-    }).catch(() => {});
+    if (
+      (this.phoneState.connected || this.p2PhoneState.connected) &&
+      (typeof navigator === "undefined" || navigator.onLine)
+    ) {
+      fetch("/api/racket/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          room: this.roomId || "default",
+          role: targetRole,
+          kind,
+          grade,
+          shotType,
+          speedKmh: Math.round(Number(speedKmh || 150)),
+          intensity: Number(intensity || 1)
+        })
+      }).catch(() => {});
+    }
   }
 
   // --- PC Keyboard, Mouse & Screen Swipe ---

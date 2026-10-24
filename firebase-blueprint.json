@@ -74,6 +74,26 @@
           "type": "string",
           "description": "Winner of the match: p1 or p2"
         },
+        "activeUserCount": {
+          "type": "number",
+          "description": "Number of active players currently in the room (1 or 2)"
+        },
+        "createdAtMs": {
+          "type": "number",
+          "description": "Epoch milliseconds when room was created"
+        },
+        "lastActiveMs": {
+          "type": "number",
+          "description": "Epoch milliseconds of last player activity (rooms auto-delete after 5 minutes of inactivity)"
+        },
+        "hostLastSeenMs": {
+          "type": "number",
+          "description": "Epoch milliseconds of host last heartbeat"
+        },
+        "guestLastSeenMs": {
+          "type": "number",
+          "description": "Epoch milliseconds of guest last heartbeat"
+        },
         "createdAt": {
           "type": "string",
           "description": "Creation timestamp"
