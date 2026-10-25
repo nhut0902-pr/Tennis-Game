@@ -2529,34 +2529,19 @@ class CharacterShopManager {
       combined = this._mergeShopStates(combined, cookieState);
     }
 
-    // Check if URL has ?save=ARGON1:... or #save=ARGON1:... parameter for instant zero-DB cross-deploy import
+    // Never import save tokens from shared URLs (?save= / #save=) so invite links never clone Host's character
     try {
-      if (typeof window !== "undefined") {
-        if (window.location.search) {
-          const params = new URLSearchParams(window.location.search);
-          const urlSave = params.get("save");
-          if (urlSave) {
-            const decodedUrl = this._decodeCompactToken(urlSave);
-            if (decodedUrl) {
-              combined = this._mergeShopStates(combined, decodedUrl);
-            }
-          }
-        }
-        if (window.location.hash && window.location.hash.includes("save=")) {
-          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-          const hashSave = hashParams.get("save");
-          if (hashSave) {
-            const decodedHash = this._decodeCompactToken(hashSave);
-            if (decodedHash) {
-              combined = this._mergeShopStates(combined, decodedHash);
-            }
-          }
-        }
+      if (typeof window !== "undefined" && window.location.hash && window.location.hash.includes("save=")) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
       }
     } catch {}
 
     this._writeLocalMirrors(combined);
     return combined;
+  }
+
+  isFreshDefaultProfile() {
+    return (this.state?.updatedAtMs || 0) === 0 && this._computeProgressScore(this.state) === 0;
   }
 
   _writeLocalMirrors(stateObj = this.state) {
@@ -3436,16 +3421,21 @@ class CharacterShopManager {
     const pCharId = this.state.selectedCharacterId;
     const bCharId = this.state.partnerCharacterId;
 
-    // If P2 joins from the exact same browser tab/storage as Host P1 (e.g., testing on 1 machine),
-    // prevent P2 from blindly cloning Host P1's character and upgraded stats.
-    if (
+    // If P2 joins from a brand-new machine (fresh default profile) or the same browser as Host P1,
+    // ensure P2 uses a distinct challenger character & base Lv.1 stats instead of cloning Host P1.
+    const isExactHostClone =
       avoidCloningHostLoadout &&
       avoidCloningHostLoadout.pChar === pCharId &&
       JSON.stringify(avoidCloningHostLoadout.pUpg || {}) ===
-        JSON.stringify(this.getCharacterUpgradeLevels(pCharId) || {})
-    ) {
-      const fallbackMain = pCharId === "alex" ? "elena" : "alex";
-      const fallbackBot = bCharId === "kenji" ? "sofia" : "kenji";
+        JSON.stringify(this.getCharacterUpgradeLevels(pCharId) || {});
+    const isFreshJoiningAgainstHost =
+      Boolean(avoidCloningHostLoadout) && this.isFreshDefaultProfile();
+
+    if (isExactHostClone || isFreshJoiningAgainstHost) {
+      const hostMain = avoidCloningHostLoadout?.pChar || "ammaar";
+      const hostBot = avoidCloningHostLoadout?.bChar || "maya";
+      const fallbackMain = hostMain === "kaito" ? "carlos" : "kaito";
+      const fallbackBot = hostBot === "kenji" ? "hana" : "kenji";
       return {
         pChar: fallbackMain,
         pOut: "outfit_default",
@@ -3489,14 +3479,14 @@ class CharacterShopManager {
 
   getPlayerModifiersFromLoadout(loadout = null) {
     const safeLoadout = loadout || {
-      pChar: "alex",
+      pChar: "ammaar",
       pOut: "outfit_default",
       pRac: "racket_classic",
       pVfx: "vfx_default",
       pAcc: [],
       pUpg: { speed: 1, power: 1, spin: 1, reflex: 1 },
       pSk: {},
-      bChar: "kenji",
+      bChar: "maya",
       bOut: "outfit_default",
       bRac: "racket_classic",
       bVfx: "vfx_default",
@@ -3809,8 +3799,10 @@ export function applyCharacter3DUpgradesToActor(
 
   const app = char.appearance;
 
-  // Store custom Strike VFX & character mechanic on the actor for SwingVFXManager, BallTrail & Engine
+  // Store custom Strike VFX, trail accessory & character mechanic on the actor for SwingVFXManager, BallTrail & Engine
   actor.customStrikeVfx = strikeVfxCfg;
+  actor.customTrailAccessory =
+    ACCESSORY_CATALOG.find((a) => a.slot === "trail" && activeGear.has(a.id)) || null;
   actor.characterMechanic = char.mechanic || null;
   actor.isRobotUnit = Boolean(char.isRobot);
 

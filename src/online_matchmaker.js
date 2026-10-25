@@ -153,6 +153,24 @@ export class OnlineMatchmaker {
         }
       });
 
+      // Also purge any legacy documents in players and clubs collections so DB stores zero player/character profiles
+      try {
+        const [playersSnap, clubsSnap] = await Promise.all([
+          getDocs(collection(db, "players")).catch(() => null),
+          getDocs(collection(db, "clubs")).catch(() => null)
+        ]);
+        if (playersSnap) {
+          playersSnap.forEach((d) => {
+            deletePromises.push(deleteDoc(doc(db, "players", d.id)).catch(() => {}));
+          });
+        }
+        if (clubsSnap) {
+          clubsSnap.forEach((d) => {
+            deletePromises.push(deleteDoc(doc(db, "clubs", d.id)).catch(() => {}));
+          });
+        }
+      } catch {}
+
       if (deletePromises.length > 0) {
         await Promise.all(deletePromises);
         if (this.callbacks.onRoomsPurged) {
@@ -258,7 +276,11 @@ export class OnlineMatchmaker {
   async syncMyLoadout(loadout = null) {
     if (!this.currentRoomId) return;
     if (typeof navigator !== "undefined" && !navigator.onLine) return;
-    const myLoadout = loadout || characterShopManager.getCompactOnlineLoadout();
+    const myLoadout =
+      loadout ||
+      characterShopManager.getCompactOnlineLoadout({
+        avoidCloningHostLoadout: !this.isHost ? this.hostLoadout : null
+      });
     const roomRef = doc(db, "rooms", this.currentRoomId);
     try {
       if (this.isHost) {
@@ -415,8 +437,10 @@ export class OnlineMatchmaker {
       const isSameBrowserAsHost =
         data.hostId === user.uid ||
         (typeof localStorage !== "undefined" && localStorage.getItem("argon_hosting_room_id") === roomId);
+      const shouldAvoidHostClone =
+        isSameBrowserAsHost || characterShopManager.isFreshDefaultProfile();
       const myLoadout = characterShopManager.getCompactOnlineLoadout({
-        avoidCloningHostLoadout: isSameBrowserAsHost ? data.hostLoadout : null
+        avoidCloningHostLoadout: shouldAvoidHostClone ? data.hostLoadout : null
       });
       this.hostLoadout = data.hostLoadout || null;
       this.guestLoadout = myLoadout;

@@ -520,9 +520,19 @@ export class FirebaseLobbyUI {
 
   showWaitingRoomView({ roomId, isHost, hostName, guestName, hostLoadout = null, guestLoadout = null, gamesToWin }) {
     const resolvedHostLoadout =
-      hostLoadout || (isHost ? characterShopManager.getCompactOnlineLoadout() : null);
+      hostLoadout ||
+      onlineMatchmaker.hostLoadout ||
+      (isHost ? characterShopManager.getCompactOnlineLoadout() : null);
     const resolvedGuestLoadout =
-      guestLoadout || (!isHost ? characterShopManager.getCompactOnlineLoadout() : null);
+      guestLoadout ||
+      onlineMatchmaker.guestLoadout ||
+      (!isHost
+        ? characterShopManager.getCompactOnlineLoadout({
+            avoidCloningHostLoadout: characterShopManager.isFreshDefaultProfile()
+              ? resolvedHostLoadout
+              : null
+          })
+        : null);
 
     this.currentRoom = {
       roomId,
@@ -576,11 +586,10 @@ export class FirebaseLobbyUI {
 
   _renderHostSquadAndAvatar(hostLoadout = null) {
     if (hostLoadout) {
-      characterShopManager.syncMiiProfileSlotFromLoadout("player1", hostLoadout, "player");
-      characterShopManager.syncMiiProfileSlotFromLoadout("player2", hostLoadout, "partner");
+      characterShopManager.syncMiiProfileSlotFromLoadout("waiting_host", hostLoadout, "player");
     }
     if (this.waitingP1Avatar) {
-      renderMiiAvatar(this.waitingP1Avatar, "player1");
+      renderMiiAvatar(this.waitingP1Avatar, "waiting_host");
       this._p1AvatarRendered = true;
     }
     if (this.waitingP1Squad) {
@@ -592,11 +601,10 @@ export class FirebaseLobbyUI {
     if (!this.waitingP2Card) return;
 
     if (guestLoadout) {
-      characterShopManager.syncMiiProfileSlotFromLoadout("opponent1", guestLoadout, "player");
-      characterShopManager.syncMiiProfileSlotFromLoadout("opponent2", guestLoadout, "partner");
+      characterShopManager.syncMiiProfileSlotFromLoadout("waiting_guest", guestLoadout, "player");
     }
     if (this.waitingP2Avatar) {
-      renderMiiAvatar(this.waitingP2Avatar, "opponent1");
+      renderMiiAvatar(this.waitingP2Avatar, "waiting_guest");
       this._p2AvatarRendered = true;
     }
 
@@ -919,6 +927,16 @@ export class FirebaseLobbyUI {
       });
 
       const isHostRole = res.isHost !== false;
+      const engine = window.__argonTennis;
+      if (engine) {
+        engine.roomId = res.roomId;
+        engine.playerRole = isHostRole ? "p1" : "p2";
+        engine.isMultiplayer = true;
+        engine.syncOnlineSquadLoadouts({
+          hostLoadout: res.hostLoadout || null,
+          guestLoadout: res.guestLoadout || null
+        });
+      }
 
       this.showWaitingRoomView({
         roomId: res.roomId,
@@ -957,6 +975,17 @@ export class FirebaseLobbyUI {
     try {
       this.showToast(`Đang kết nối vào phòng ${roomId}...`);
       const res = await onlineMatchmaker.joinRoom(roomId, guestName);
+
+      const engine = window.__argonTennis;
+      if (engine) {
+        engine.roomId = res.roomId;
+        engine.playerRole = "p2";
+        engine.isMultiplayer = true;
+        engine.syncOnlineSquadLoadouts({
+          hostLoadout: res.hostLoadout || null,
+          guestLoadout: res.guestLoadout || null
+        });
+      }
 
       this.showWaitingRoomView({
         roomId: res.roomId,
