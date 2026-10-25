@@ -1209,7 +1209,15 @@ export class MotionController {
 
   _isModalOpen() {
     if (typeof document === "undefined") return false;
-    const modalIds = ["title-modal", "firebase-lobby-modal", "controls-modal", "victory-modal", "companion-modal"];
+    const modalIds = [
+      "title-modal",
+      "firebase-lobby-modal",
+      "controls-modal",
+      "victory-modal",
+      "companion-modal",
+      "pwa-install-modal",
+      "character-shop-modal"
+    ];
     return modalIds.some((id) => {
       const el = document.getElementById(id);
       return el && !el.classList.contains("hidden") && el.style.display !== "none";

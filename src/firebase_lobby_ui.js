@@ -9,6 +9,7 @@ import {
   testConnection
 } from "./firebase.ts";
 import { renderMiiAvatar } from "./mii_avatars.js";
+import { characterShopManager } from "./character_shop.js";
 
 export class FirebaseLobbyUI {
   constructor(callbacks = {}) {
@@ -82,6 +83,7 @@ export class FirebaseLobbyUI {
     this.waitingP1AvatarWrap = document.getElementById("waiting-p1-avatar-wrap");
     this.waitingP1Avatar = document.getElementById("waiting-p1-avatar");
     this.waitingP1Name = document.getElementById("waiting-p1-name");
+    this.waitingP1Squad = document.getElementById("waiting-p1-squad");
 
     this.waitingP2Card = document.getElementById("waiting-p2-card");
     this.waitingP2AvatarWrap = document.getElementById("waiting-p2-avatar-wrap");
@@ -90,6 +92,7 @@ export class FirebaseLobbyUI {
     this.waitingP2Status = document.getElementById("waiting-p2-status");
     this.waitingP2Sub = document.getElementById("waiting-p2-sub");
 
+    this.btnWaitingOpenShop = document.getElementById("btn-waiting-open-shop");
     this.waitingHostControls = document.getElementById("waiting-host-controls");
     this.btnWaitingStartMatch = document.getElementById("btn-waiting-start-match");
     this.waitingHostHint = document.getElementById("waiting-host-hint");
@@ -339,6 +342,16 @@ export class FirebaseLobbyUI {
         this.showToast("Đã rời phòng thi đấu.");
       });
     }
+
+    // Open Character & Bot Shop directly from Waiting Room
+    if (this.btnWaitingOpenShop) {
+      this.btnWaitingOpenShop.addEventListener("click", () => {
+        const shopUI = window.__argonTennis?.characterShopUI;
+        if (shopUI) {
+          shopUI.open();
+        }
+      });
+    }
   }
 
   _flashCopyButton(btn, text) {
@@ -505,8 +518,21 @@ export class FirebaseLobbyUI {
     this._ensureBrowseRoomCode();
   }
 
-  showWaitingRoomView({ roomId, isHost, hostName, guestName, gamesToWin }) {
-    this.currentRoom = { roomId, isHost, hostName, guestName, gamesToWin };
+  showWaitingRoomView({ roomId, isHost, hostName, guestName, hostLoadout = null, guestLoadout = null, gamesToWin }) {
+    const resolvedHostLoadout =
+      hostLoadout || (isHost ? characterShopManager.getCompactOnlineLoadout() : null);
+    const resolvedGuestLoadout =
+      guestLoadout || (!isHost ? characterShopManager.getCompactOnlineLoadout() : null);
+
+    this.currentRoom = {
+      roomId,
+      isHost,
+      hostName,
+      guestName,
+      hostLoadout: resolvedHostLoadout,
+      guestLoadout: resolvedGuestLoadout,
+      gamesToWin
+    };
     this.isHost = isHost;
     this._startWaitingExpiryCountdown();
 
@@ -535,12 +561,8 @@ export class FirebaseLobbyUI {
     if (this.waitingP1Name) {
       this.waitingP1Name.textContent = hostName || "Player 1";
     }
-    if (this.waitingP1Avatar && !this._p1AvatarRendered) {
-      renderMiiAvatar(this.waitingP1Avatar, "player1");
-      this._p1AvatarRendered = true;
-    }
-
-    this._renderGuestCard(guestName);
+    this._renderHostSquadAndAvatar(resolvedHostLoadout);
+    this._renderGuestCard(guestName, resolvedGuestLoadout);
 
     if (isHost) {
       if (this.waitingHostControls) this.waitingHostControls.classList.remove("hidden");
@@ -552,10 +574,28 @@ export class FirebaseLobbyUI {
     }
   }
 
-  _renderGuestCard(guestName) {
+  _renderHostSquadAndAvatar(hostLoadout = null) {
+    if (hostLoadout) {
+      characterShopManager.syncMiiProfileSlotFromLoadout("player1", hostLoadout, "player");
+      characterShopManager.syncMiiProfileSlotFromLoadout("player2", hostLoadout, "partner");
+    }
+    if (this.waitingP1Avatar) {
+      renderMiiAvatar(this.waitingP1Avatar, "player1");
+      this._p1AvatarRendered = true;
+    }
+    if (this.waitingP1Squad) {
+      this.waitingP1Squad.textContent = `Đội hình: ${characterShopManager.formatSquadSummaryFromLoadout(hostLoadout)}`;
+    }
+  }
+
+  _renderGuestCard(guestName, guestLoadout = null) {
     if (!this.waitingP2Card) return;
 
-    if (this.waitingP2Avatar && !this._p2AvatarRendered) {
+    if (guestLoadout) {
+      characterShopManager.syncMiiProfileSlotFromLoadout("opponent1", guestLoadout, "player");
+      characterShopManager.syncMiiProfileSlotFromLoadout("opponent2", guestLoadout, "partner");
+    }
+    if (this.waitingP2Avatar) {
       renderMiiAvatar(this.waitingP2Avatar, "opponent1");
       this._p2AvatarRendered = true;
     }
@@ -566,15 +606,23 @@ export class FirebaseLobbyUI {
         this.waitingP2Name.textContent = guestName;
         this.waitingP2Name.classList.remove("empty");
       }
+      if (this.waitingP2Sub) {
+        this.waitingP2Sub.textContent = guestLoadout
+          ? `Đội hình: ${characterShopManager.formatSquadSummaryFromLoadout(guestLoadout)}`
+          : "Đã kết nối đội hình";
+      }
       if (this.waitingP2Status) {
         this.waitingP2Status.className = "player-status-tag ready";
-        this.waitingP2Status.textContent = "Đã kết nối - Sẵn sàng";
+        this.waitingP2Status.textContent = "Đã đồng bộ Nhân vật & Bot";
       }
     } else {
       this.waitingP2Card.classList.remove("connected");
       if (this.waitingP2Name) {
         this.waitingP2Name.textContent = "Đang chờ đối thủ...";
         this.waitingP2Name.classList.add("empty");
+      }
+      if (this.waitingP2Sub) {
+        this.waitingP2Sub.textContent = "Đang chờ đồng bộ Nhân vật & Bot...";
       }
       if (this.waitingP2Status) {
         this.waitingP2Status.className = "player-status-tag waiting";
@@ -590,7 +638,7 @@ export class FirebaseLobbyUI {
       this.btnWaitingStartMatch.disabled = false;
       this.btnWaitingStartMatch.classList.remove("disabled");
       this.btnWaitingStartMatch.innerHTML = `<span>BẮT ĐẦU TRẬN ĐẤU</span>`;
-      this.waitingHostHint.textContent = "Đối thủ đã sẵn sàng. Nhấn BẮT ĐẦU TRẬN ĐẤU để vào sân.";
+      this.waitingHostHint.textContent = "Đã đồng bộ Nhân vật & Bot Đồng Đội của cả 2 bên! Nhấn BẮT ĐẦU TRẬN ĐẤU để vào sân.";
     } else {
       this.btnWaitingStartMatch.disabled = true;
       this.btnWaitingStartMatch.classList.add("disabled");
@@ -604,20 +652,23 @@ export class FirebaseLobbyUI {
 
     const guestName = roomData.guestName || null;
     const hostName = roomData.hostName || this.currentRoom.hostName;
-    if (this.currentRoom.guestName === guestName && this.currentRoom.hostName === hostName) {
-      return;
-    }
+    const hostLoadout = roomData.hostLoadout || this.currentRoom.hostLoadout || null;
+    const guestLoadout = roomData.guestLoadout || this.currentRoom.guestLoadout || null;
+
     if (guestName && !this.currentRoom.guestName) {
       this._waitingStartedAtMs = Date.now();
     }
     this.currentRoom.guestName = guestName;
     this.currentRoom.hostName = hostName;
+    this.currentRoom.hostLoadout = hostLoadout;
+    this.currentRoom.guestLoadout = guestLoadout;
 
     if (this.waitingP1Name && hostName) {
       this.waitingP1Name.textContent = hostName;
     }
 
-    this._renderGuestCard(guestName);
+    this._renderHostSquadAndAvatar(hostLoadout);
+    this._renderGuestCard(guestName, guestLoadout);
 
     if (this.isHost) {
       this._updateHostStartButton(!!guestName);
@@ -874,6 +925,8 @@ export class FirebaseLobbyUI {
         isHost: isHostRole,
         hostName: res.hostName || hostName,
         guestName: res.guestName || null,
+        hostLoadout: res.hostLoadout || null,
+        guestLoadout: res.guestLoadout || null,
         gamesToWin: res.gamesToWin || gamesToWin
       });
 
@@ -910,6 +963,8 @@ export class FirebaseLobbyUI {
         isHost: false,
         hostName: res.hostName || "Player 1",
         guestName: res.guestName || guestName,
+        hostLoadout: res.hostLoadout || null,
+        guestLoadout: res.guestLoadout || null,
         gamesToWin: res.gamesToWin || 1
       });
 

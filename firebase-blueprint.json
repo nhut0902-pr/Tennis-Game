@@ -130,6 +130,18 @@
           "type": "number",
           "description": "Total online match losses"
         },
+        "shopState": {
+          "type": "object",
+          "description": "Persistent player shop inventory, coins, unlocked characters, upgrades, outfits, rackets, accessories, and partner AI state"
+        },
+        "selectedMapId": {
+          "type": "string",
+          "description": "Currently selected 3D stadium court map ID"
+        },
+        "updatedAtMs": {
+          "type": "number",
+          "description": "Epoch milliseconds of last shop or profile update"
+        },
         "updatedAt": {
           "type": "string",
           "description": "Last activity timestamp"

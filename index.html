@@ -11,6 +11,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=JetBrains+Mono:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <meta property="og:title" content="Argon Tennis - Điều khiển Mobile & PC" />
   <meta property="og:description" content="Trải nghiệm game tennis 3D đỉnh cao với cần gạt ảo & nút bấm trên Mobile, lắc máy Gyroscope, hoặc bàn phím & chuột trên PC." />
   <title>Argon Tennis - Điều Khiển Mobile & PC</title>
@@ -131,7 +134,10 @@
             <div class="thumb-center-dot"></div>
           </div>
         </div>
-        <div class="joystick-label">🕹️ CẦN GẠT DI CHUYỂN</div>
+        <div class="joystick-label">
+          <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
+          CẦN GẠT DI CHUYỂN
+        </div>
       </div>
 
       <!-- Right: Action Buttons Cluster -->
@@ -139,15 +145,21 @@
         <!-- Shot Modifier Buttons Row -->
         <div class="touch-shot-row">
           <button id="btn-touch-lob" class="touch-shot-btn" type="button" title="Lốp bóng cao qua đầu">
-            <span class="shot-icon">🎈</span>
+            <span class="shot-icon">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19C4 11 10 5 20 5M15 5l5 0 0 5"/></svg>
+            </span>
             <span class="shot-name">LOB</span>
           </button>
           <button id="btn-touch-slice" class="touch-shot-btn" type="button" title="Cắt bóng xoáy chìm">
-            <span class="shot-icon">🌀</span>
+            <span class="shot-icon">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 7C14 7 7 12 4 19M16 19H4v-12"/></svg>
+            </span>
             <span class="shot-name">SLICE</span>
           </button>
           <button id="btn-touch-smash" class="touch-shot-btn" type="button" title="Đập bóng cực mạnh">
-            <span class="shot-icon">⚡</span>
+            <span class="shot-icon">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
             <span class="shot-name">SMASH</span>
           </button>
         </div>
@@ -155,12 +167,16 @@
         <!-- Main Action Buttons (Giao & Đánh) -->
         <div class="touch-main-row">
           <button id="btn-touch-toss" class="touch-action-btn btn-toss" type="button" title="Tung bóng giao / Lốp bóng">
-            <span class="action-icon">🚀</span>
+            <span class="action-icon">
+              <svg class="ui-svg-icon stroke icon-md" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/><circle cx="12" cy="21" r="1" fill="currentColor"/></svg>
+            </span>
             <span class="action-label">GIAO</span>
             <span class="action-sub">TOSS</span>
           </button>
           <button id="btn-touch-swing" class="touch-action-btn btn-swing" type="button" title="Vung vợt đánh bóng">
-            <span class="action-icon">🎾</span>
+            <span class="action-icon">
+              <svg class="ui-svg-icon stroke icon-md" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/><path d="m13.8 13.8 7.2 7.2M7.5 3v12M3 7.5h12M17.5 17.5l2 2"/></svg>
+            </span>
             <span class="action-label">ĐÁNH</span>
             <span class="action-sub">SWING</span>
           </button>
@@ -232,8 +248,16 @@
           <!-- Bottom Left Dock (Buttons Pill Row) -->
           <div id="bottom-left-dock" class="hud-corner-dock bottom-left-dock">
             <div class="dock-pill-row">
+              <button id="btn-hud-shop" class="hud-mini-btn highlight-shop" type="button" title="Mở Cửa Hàng & Nâng Cấp Nhân Vật 3D">
+                <span>Cửa Hàng 3D</span>
+                <span class="shop-coin-mini"><svg class="coin-svg-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width:12px;height:12px;vertical-align:-1px;"><circle cx="12" cy="12" r="9.5" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/><path d="M12 8v8M9.5 10.2h3.8a1.5 1.5 0 0 1 0 3H9.5h3.8a1.5 1.5 0 0 1 0 3H9.5" stroke="#fef08a" stroke-width="1.4" stroke-linecap="round"/></svg> <span data-shop-coins>1,850</span></span>
+              </button>
+              <button id="btn-map-cycle" class="hud-mini-btn highlight-online" type="button" title="Đổi Sân Đấu 3D / Map (M)">
+                <span>Sân:</span>
+                <strong id="hud-map-label">Melbourne Blue</strong>
+              </button>
               <button id="btn-controls-guide" class="hud-mini-btn highlight-btn" type="button" title="Mở bảng hướng dẫn & cài đặt điều khiển PC & Mobile">
-                <span>🎮</span>
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
                 <span>Điều khiển</span>
               </button>
               <button id="btn-touch-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt phím cảm ứng trên màn hình">
@@ -351,6 +375,11 @@
           </div>
         </div>
 
+        <div class="setup-section" id="court-map-section">
+          <div class="setup-label">CHỌN SÂN ĐẤU 3D (8 MAP ĐẶC BIỆT)</div>
+          <div id="court-map-selector-grid" class="court-map-selector-grid"></div>
+        </div>
+
         <div class="wii-modal-actions">
           <button id="btn-start-match" type="button" class="wii-ok-btn">
             <span>BẮT ĐẦU TRẬN ĐẤU</span>
@@ -373,6 +402,13 @@
         </div>
       </div>
 
+      <div class="title-shop-cta">
+        <button id="btn-title-shop" type="button" class="wii-shop-cta-btn">
+          <span class="shop-cta-title">CỬA HÀNG &amp; NÂNG CẤP NHÂN VẬT 3D (OVR 400+)</span>
+          <span class="shop-cta-badge"><span data-shop-coins>1,850</span> XU</span>
+        </button>
+      </div>
+
       <div class="title-controls-cta title-cta-dual">
         <button id="btn-title-controls" type="button" class="wii-subtle-pill-btn">
           <span>Hướng dẫn điều khiển & Cài đặt</span>
@@ -388,20 +424,34 @@
   <div id="controls-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="controls-modal-title">
     <div class="wii-controls-card">
       <div class="controls-card-header">
-        <h2 id="controls-modal-title" class="controls-card-title">🎮 Hướng Dẫn & Cài Đặt Điều Khiển</h2>
-        <button id="btn-close-controls-x" type="button" class="controls-close-x" aria-label="Đóng">✕</button>
+        <h2 id="controls-modal-title" class="controls-card-title">
+          <svg class="ui-svg-icon stroke icon-md" viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+          Hướng Dẫn &amp; Cài Đặt Điều Khiển
+        </h2>
+        <button id="btn-close-controls-x" type="button" class="controls-close-x" aria-label="Đóng">
+          <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
 
       <!-- Controls Tabs Header -->
       <div class="controls-tab-bar">
         <button id="tab-btn-pc" class="controls-tab-btn active" type="button" data-tab="pc">
-          <span>💻 Máy Tính (PC / Laptop)</span>
+          <span>
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Máy Tính (PC / Laptop)
+          </span>
         </button>
         <button id="tab-btn-mobile" class="controls-tab-btn" type="button" data-tab="mobile">
-          <span>📱 Điện Thoại (Mobile)</span>
+          <span>
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            Điện Thoại (Mobile)
+          </span>
         </button>
         <button id="tab-btn-settings" class="controls-tab-btn" type="button" data-tab="settings">
-          <span>⚙️ Cài Đặt</span>
+          <span>
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Cài Đặt
+          </span>
         </button>
       </div>
 
@@ -411,8 +461,10 @@
           <!-- Keyboard Movement -->
           <div class="control-feature-card">
             <div class="feature-card-header">
-              <span class="feature-icon">🏃</span>
-              <h3>Di chuyển nhân vật & Chỉnh góc</h3>
+              <span class="feature-icon">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17" cy="4" r="2"/><path d="m15 8-4 3 2 4 4 1M8 12l3-3 2 1M5 19l4-4M13 15l2 6"/></svg>
+              </span>
+              <h3>Di chuyển nhân vật &amp; Chỉnh góc</h3>
             </div>
             <div class="feature-keys-row">
               <div class="kbd-badge-group">
@@ -431,8 +483,10 @@
           <!-- Racket Swing & Serve -->
           <div class="control-feature-card">
             <div class="feature-card-header">
-              <span class="feature-icon">🎾</span>
-              <h3>Đánh bóng & Giao bóng (Serve)</h3>
+              <span class="feature-icon">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/><path d="m13.8 13.8 7.2 7.2M7.5 3v12M3 7.5h12M17.5 17.5l2 2"/></svg>
+              </span>
+              <h3>Đánh bóng &amp; Giao bóng (Serve)</h3>
             </div>
             <div class="feature-keys-row">
               <div class="kbd-badge-group">
@@ -451,28 +505,42 @@
           <!-- Shot Types -->
           <div class="control-feature-card full-width">
             <div class="feature-card-header">
-              <span class="feature-icon">⚡</span>
+              <span class="feature-icon">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </span>
               <h3>Các kiểu đánh bóng kỹ thuật</h3>
             </div>
             <div class="shot-types-grid">
               <div class="shot-chip">
                 <div class="shot-chip-keys"><kbd>1</kbd> hoặc <kbd>J</kbd> / <kbd>Z</kbd></div>
-                <div class="shot-chip-title">🌀 Topspin</div>
+                <div class="shot-chip-title">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19C4 11 10 5 20 5M15 5l5 0 0 5"/></svg>
+                  Topspin
+                </div>
                 <div class="shot-chip-desc">Bóng xoáy cuộn mạnh, tốc độ cao và quỹ đạo cong chìm.</div>
               </div>
               <div class="shot-chip">
                 <div class="shot-chip-keys"><kbd>2</kbd> hoặc <kbd>K</kbd> / <kbd>X</kbd></div>
-                <div class="shot-chip-title">✂️ Slice</div>
+                <div class="shot-chip-title">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 7C14 7 7 12 4 19M16 19H4v-12"/></svg>
+                  Slice
+                </div>
                 <div class="shot-chip-desc">Cắt bóng xoáy ngược, nảy thấp và lướt là là mặt cỏ.</div>
               </div>
               <div class="shot-chip">
                 <div class="shot-chip-keys"><kbd>3</kbd> hoặc <kbd>L</kbd> / <kbd>C</kbd></div>
-                <div class="shot-chip-title">🎈 Lob</div>
+                <div class="shot-chip-title">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19C4 11 10 5 20 5M15 5l5 0 0 5"/></svg>
+                  Lob
+                </div>
                 <div class="shot-chip-desc">Lốp bóng bổng hình cầu vồng qua đầu đối thủ lên lưới.</div>
               </div>
               <div class="shot-chip">
                 <div class="shot-chip-keys"><kbd>4</kbd> hoặc <kbd>I</kbd> / <kbd>V</kbd></div>
-                <div class="shot-chip-title">⚡ Smash</div>
+                <div class="shot-chip-title">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  Smash
+                </div>
                 <div class="shot-chip-desc">Cú đập búa bổ cực mạnh từ trên cao không thể cản phá!</div>
               </div>
             </div>
@@ -486,7 +554,9 @@
           <!-- Joystick Guide -->
           <div class="control-feature-card">
             <div class="feature-card-header">
-              <span class="feature-icon">🕹️</span>
+              <span class="feature-icon">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
+              </span>
               <h3>Cần gạt ảo (Virtual Joystick)</h3>
             </div>
             <div class="feature-visual-demo">
@@ -504,36 +574,55 @@
           <!-- Touch Buttons Guide -->
           <div class="control-feature-card">
             <div class="feature-card-header">
-              <span class="feature-icon">📱</span>
+              <span class="feature-icon">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              </span>
               <h3>Cụm nút bấm cảm ứng (Action Buttons)</h3>
             </div>
             <div class="feature-visual-demo">
               <div class="demo-btns-row">
-                <span class="demo-btn-pill btn-toss-demo">🚀 GIAO</span>
-                <span class="demo-btn-pill btn-swing-demo">🎾 ĐÁNH</span>
-                <span class="demo-btn-pill btn-smash-demo">⚡ SMASH</span>
+                <span class="demo-btn-pill btn-toss-demo">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  GIAO
+                </span>
+                <span class="demo-btn-pill btn-swing-demo">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/><path d="m13.8 13.8 7.2 7.2"/></svg>
+                  ĐÁNH
+                </span>
+                <span class="demo-btn-pill btn-smash-demo">
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  SMASH
+                </span>
               </div>
             </div>
             <ul class="feature-notes">
-              <li><strong>🚀 GIAO (TOSS):</strong> Tung bóng lên không trung để thực hiện quả giao bóng.</li>
-              <li><strong>🎾 ĐÁNH (SWING):</strong> Nút chính kích thước lớn, vung vợt đánh bóng theo thời điểm chuẩn xác.</li>
-              <li><strong>⚡ SMASH / 🌀 SLICE / 🎈 LOB:</strong> Nhấn trực tiếp các nút phụ để tung ngay cú đánh kỹ thuật tương ứng!</li>
+              <li><strong>GIAO (TOSS):</strong> Tung bóng lên không trung để thực hiện quả giao bóng.</li>
+              <li><strong>ĐÁNH (SWING):</strong> Nút chính kích thước lớn, vung vợt đánh bóng theo thời điểm chuẩn xác.</li>
+              <li><strong>SMASH / SLICE / LOB:</strong> Nhấn trực tiếp các nút phụ để tung ngay cú đánh kỹ thuật tương ứng!</li>
             </ul>
           </div>
 
           <!-- Swipe & Gyro -->
           <div class="control-feature-card full-width">
             <div class="feature-card-header">
-              <span class="feature-icon">📳</span>
-              <h3>Cảm biến lắc máy & Vuốt màn hình</h3>
+              <span class="feature-icon">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M3 8a8 8 0 0 0 0 8M21 8a8 8 0 0 1 0 8"/></svg>
+              </span>
+              <h3>Cảm biến lắc máy &amp; Vuốt màn hình</h3>
             </div>
             <div class="gyro-features-split">
               <div class="gyro-split-col">
-                <h4>👆 Vuốt trực tiếp trên màn hình</h4>
+                <h4>
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8M6 14a4 4 0 0 0 8 0v-4a2 2 0 0 1 4 0v5a7 7 0 0 1-7 7h-1a7 7 0 0 1-7-7v-3"/></svg>
+                  Vuốt trực tiếp trên màn hình
+                </h4>
                 <p>Bạn có thể vuốt ngón tay tự do ở bất kỳ đâu trên sân đấu. Vuốt vút lên để tung bóng / topspin, vuốt chém xuống để smash, vuốt sang ngang để đánh chéo góc!</p>
               </div>
               <div class="gyro-split-col">
-                <h4>📳 Lắc điện thoại đánh bóng (Motion Sensor)</h4>
+                <h4>
+                  <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M3 8a8 8 0 0 0 0 8M21 8a8 8 0 0 1 0 8"/></svg>
+                  Lắc điện thoại đánh bóng (Motion Sensor)
+                </h4>
                 <p>Bật tính năng <strong>"Lắc máy"</strong> bên dưới. Cầm điện thoại trên tay và vung mạnh về phía trước như chiếc vợt Wii Remote thật để tung cú đánh kết hợp rung phản hồi chân thực!</p>
               </div>
             </div>
@@ -546,7 +635,10 @@
         <div class="settings-form">
           <div class="setting-item">
             <div class="setting-info">
-              <label for="setting-touch-gamepad" class="setting-label">🎮 Hiển thị Gamepad cảm ứng trên màn hình</label>
+              <label for="setting-touch-gamepad" class="setting-label">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+                Hiển thị Gamepad cảm ứng trên màn hình
+              </label>
               <div class="setting-sub">Hiển thị cần gạt ảo và các nút Đánh, Giao, Smash (tự động bật trên Mobile/Tablet).</div>
             </div>
             <div class="setting-control">
@@ -556,7 +648,10 @@
 
           <div class="setting-item">
             <div class="setting-info">
-              <label for="setting-gyro-motion" class="setting-label">📳 Cảm biến chuyển động (Lắc máy đánh bóng)</label>
+              <label for="setting-gyro-motion" class="setting-label">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M3 8a8 8 0 0 0 0 8M21 8a8 8 0 0 1 0 8"/></svg>
+                Cảm biến chuyển động (Lắc máy đánh bóng)
+              </label>
               <div class="setting-sub">Sử dụng con quay hồi chuyển Gyroscope/Accelerometer trên điện thoại để vung vợt.</div>
             </div>
             <div class="setting-control">
@@ -566,7 +661,10 @@
 
           <div class="setting-item">
             <div class="setting-info">
-              <label for="setting-haptics" class="setting-label">📳 Rung phản hồi cảm ứng (Haptic Vibration)</label>
+              <label for="setting-haptics" class="setting-label">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h2M20 12h2M6 8v8M18 8v8M10 5v14M14 5v14"/></svg>
+                Rung phản hồi cảm ứng (Haptic Vibration)
+              </label>
               <div class="setting-sub">Rung nhẹ khi chạm nút và rung mạnh khi tiếp xúc bóng trúng điểm ngọt (Sweet Spot).</div>
             </div>
             <div class="setting-control">
@@ -576,7 +674,10 @@
 
           <div class="setting-item">
             <div class="setting-info">
-              <label for="setting-manual-movement" class="setting-label">🏃 Di chuyển thủ công kết hợp hỗ trợ (Manual Footwork)</label>
+              <label for="setting-manual-movement" class="setting-label">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17" cy="4" r="2"/><path d="m15 8-4 3 2 4 4 1M8 12l3-3 2 1M5 19l4-4M13 15l2 6"/></svg>
+                Di chuyển thủ công kết hợp hỗ trợ (Manual Footwork)
+              </label>
               <div class="setting-sub">Cho phép bạn tự do chạy khắp sân bằng phím WASD / Cần gạt, đồng thời hỗ trợ bắt bóng mượt mà.</div>
             </div>
             <div class="setting-control">
@@ -586,7 +687,10 @@
 
           <div class="setting-item">
             <div class="setting-info">
-              <label for="setting-move-speed" class="setting-label">⚡ Tốc độ di chuyển nhân vật</label>
+              <label for="setting-move-speed" class="setting-label">
+                <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Tốc độ di chuyển nhân vật
+              </label>
               <div class="setting-sub">Điều chỉnh tốc độ chạy trên sân (đã hiệu chỉnh vừa phải, không bị quá nhanh). Hiện tại: <span id="setting-speed-val" class="speed-val-badge">Chuẩn (1.0x)</span></div>
             </div>
             <div class="setting-control speed-slider-wrap">
@@ -604,7 +708,10 @@
       <!-- Controls Card Footer -->
       <div class="controls-card-footer">
         <button id="btn-close-controls" type="button" class="wii-ok-btn primary">
-          <span>✓ Đã hiểu & Tiếp tục chơi</span>
+          <span>
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Đã hiểu &amp; Tiếp tục chơi
+          </span>
         </button>
       </div>
     </div>
@@ -614,7 +721,10 @@
   <div id="companion-modal" class="wii-modal-backdrop hidden">
     <div class="wii-dialog-box wii-companion-clean-dialog">
       <div class="mp-dialog-header">
-        <h2 class="dialog-title">📱 Phone Controller</h2>
+        <h2 class="dialog-title">
+          <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Phone Controller
+        </h2>
         <span id="mp-active-status" class="mp-conn-tag">Scan QR</span>
       </div>
       <p class="dialog-desc">Scan with your phone camera</p>
@@ -634,28 +744,57 @@
     </div>
   </div>
 
-  <!-- Victory / Match Results Modal -->
+  <!-- Victory / Match Results Modal with Live 3D Winner Celebration Stage -->
   <div id="victory-modal" class="wii-modal-backdrop hidden">
-    <div class="wii-skill-card">
-      <div class="skill-card-header">Club Skill Rating</div>
-      <div class="skill-card-body">
-        <div class="skill-chart-frame">
-          <canvas id="skill-graph-canvas" width="280" height="200"></canvas>
+    <div id="victory-skill-card" class="wii-skill-card victory-pro-card">
+      <div class="victory-top-bar">
+        <div class="skill-card-header">
+          <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span>KẾT QUẢ TRẬN ĐẤU • PRO TOUR</span>
         </div>
+        <div id="victory-coin-reward-pill" class="victory-coin-reward-pill">
+          <svg class="coin-svg-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/><path d="M12 8v8M9.5 10.2h3.8a1.5 1.5 0 0 1 0 3H9.5h3.8a1.5 1.5 0 0 1 0 3H9.5" stroke="#fef08a" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span id="victory-coin-reward-text">+250 XU THƯỞNG</span>
+        </div>
+      </div>
+
+      <div class="skill-card-body victory-pro-body">
+        <!-- Live 3D Winning Character Celebration Podium -->
+        <div class="victory-3d-stage-wrap" id="victory-3d-stage-wrap">
+          <canvas id="victory-3d-canvas"></canvas>
+          <div class="victory-stage-badge">
+            <span id="victory-winner-tag" class="victory-winner-kicker">NHÀ VÔ ĐỊCH SÂN ĐẤU</span>
+            <strong id="victory-winner-3d-name" class="victory-winner-name">AMMAAR &amp; BOT MAYA</strong>
+          </div>
+          <div class="victory-pose-switcher" role="group" aria-label="Động tác ăn mừng chiến thắng">
+            <button type="button" class="victory-pose-btn active" data-victory-pose="jump">Nhảy Ăn Mừng</button>
+            <button type="button" class="victory-pose-btn" data-victory-pose="smash">Siêu Smash</button>
+            <button type="button" class="victory-pose-btn" data-victory-pose="spin">Xoay Vợt 360°</button>
+          </div>
+        </div>
+
+        <!-- Right Telemetry & Skill Rating Column -->
         <div class="skill-mii-summary">
           <div id="victory-result-banner" class="victory-result-banner">YOU WIN!</div>
+          <div id="victory-match-score" class="victory-match-score">Final Games: 2 - 0</div>
+
           <div class="skill-score-pill">
             <canvas id="victory-mii-icon" width="192" height="192"></canvas>
             <div class="skill-score-meta">
-              <div class="skill-rating-number" id="skill-rating-value">1120</div>
-              <div class="skill-player-name">Ammaar (+120)</div>
+              <div class="skill-rating-number" id="skill-rating-value">1145</div>
+              <div id="victory-skill-player-name" class="skill-player-name">Ammaar (+125 Điểm Kỹ Năng)</div>
             </div>
           </div>
-          <div id="victory-match-score" class="victory-match-score">Final Games: 2 - 0</div>
+
+          <div class="skill-chart-frame">
+            <div id="skill-graph-canvas" class="skill-radar-container"></div>
+          </div>
         </div>
       </div>
-      <div class="skill-card-footer">
-        <button id="btn-play-again" type="button" class="wii-footer-btn primary">Chơi lại (Play again)</button>
+
+      <div class="skill-card-footer victory-pro-footer">
+        <button id="btn-play-again" type="button" class="wii-footer-btn primary">Chơi lại (Play Again)</button>
+        <button id="btn-victory-open-shop" type="button" class="wii-footer-btn shop-btn">Cửa Hàng 3D</button>
         <button id="btn-return-title" type="button" class="wii-footer-btn secondary">Menu chính</button>
       </div>
     </div>
@@ -827,9 +966,9 @@
             </div>
             <div class="player-info-wrap">
               <div id="waiting-p1-name" class="waiting-player-name">Player 1</div>
-              <div class="waiting-serve-note">Quyền giao bóng trước</div>
+              <div class="waiting-serve-note" id="waiting-p1-squad">Đội hình: Ammaar + Bot Maya</div>
               <div class="player-status-tag ready">
-                Sẵn sàng thi đấu
+                Đã đồng bộ Nhân vật &amp; Bot
               </div>
             </div>
           </div>
@@ -837,7 +976,7 @@
           <!-- VS Badge -->
           <div class="waiting-vs-divider">
             <span class="vs-text">VS</span>
-            <span class="vs-sub">1V1</span>
+            <span class="vs-sub">2V2 BOT</span>
           </div>
 
           <!-- Player 2: Guest -->
@@ -848,7 +987,7 @@
             </div>
             <div class="player-info-wrap">
               <div id="waiting-p2-name" class="waiting-player-name empty">Đang chờ đối thủ...</div>
-              <div class="waiting-serve-note" id="waiting-p2-sub">Đỡ giao bóng</div>
+              <div class="waiting-serve-note" id="waiting-p2-sub">Đang chờ đồng bộ đội hình...</div>
               <div class="player-status-tag waiting" id="waiting-p2-status">
                 Chưa kết nối
               </div>
@@ -858,6 +997,12 @@
 
         <!-- Waiting Room Action Footer -->
         <div class="waiting-actions-area">
+          <div class="waiting-QuickShop-row">
+            <button type="button" id="btn-waiting-open-shop" class="btn-waiting-shop-sync">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/><path d="m13.8 13.8 7.2 7.2M7.5 3v12M3 7.5h12M17.5 17.5l2 2"/></svg>
+              <span>Đổi Nhân Vật &amp; Nâng Cấp Bot Đồng Đội (Đồng bộ Online)</span>
+            </button>
+          </div>
           <!-- Host Controls -->
           <div id="waiting-host-controls" class="waiting-role-controls">
             <button type="button" id="btn-waiting-start-match" class="btn-start-tennis-match disabled" disabled>
@@ -874,7 +1019,7 @@
           <!-- Guest Controls -->
           <div id="waiting-guest-controls" class="waiting-role-controls hidden">
             <div class="guest-waiting-banner">
-              <span>Đã kết nối vào phòng. Đang chờ chủ phòng bắt đầu trận đấu...</span>
+              <span>Đã kết nối và đồng bộ Nhân vật + Bot Đồng Đội. Đang chờ chủ phòng bắt đầu...</span>
             </div>
             <button type="button" id="btn-waiting-leave-room" class="btn-cancel-waiting-room">
               Rời phòng và quay lại sảnh
@@ -894,6 +1039,171 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 3D Character Shop & Pro Locker Room Studio Modal -->
+  <div id="character-shop-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="shop-modal-title">
+    <div class="wii-shop-card">
+      <!-- Top Broadcast Header Bar -->
+      <header class="shop-card-header">
+        <div class="shop-header-title-wrap">
+          <span class="shop-header-crest" aria-hidden="true">
+            <svg class="ui-svg-icon stroke icon-md" viewBox="0 0 24 24"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/><path d="m13.8 13.8 7.2 7.2M7.5 3v12M3 7.5h12M17.5 17.5l2 2"/></svg>
+          </span>
+          <div class="shop-title-col">
+            <span class="shop-kicker-label">ARGON PRO TOUR • LOCKER STUDIO</span>
+            <h2 id="shop-modal-title" class="shop-card-title">PHÒNG THAY ĐỒ &amp; ĐỘI HÌNH 3D</h2>
+          </div>
+        </div>
+
+        <!-- Integrated Squad Role Switcher -->
+        <div class="shop-unit-switcher-bar" role="tablist" aria-label="Chọn nhân vật tùy chỉnh">
+          <button type="button" class="shop-unit-btn active" data-shop-unit="player">
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="unit-title">Bạn<span class="unit-sub-desktop"> • Chủ Lực</span></span>
+            <span class="unit-ovr-tag" id="shop-unit-player-ovr">OVR 78</span>
+          </button>
+          <button type="button" class="shop-unit-btn" data-shop-unit="partner">
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2.5"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8.5 16h.01M15.5 16h.01M1 15h2M21 15h2"/></svg>
+            <span class="unit-title">Bot<span class="unit-sub-desktop"> Đồng Đội</span></span>
+            <span class="unit-ovr-tag partner" id="shop-unit-partner-ovr">AI Lv.2</span>
+          </button>
+          <button type="button" class="shop-unit-btn duo-mode-btn" data-shop-unit="duo">
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span class="unit-title">Đội Hình 3D</span>
+          </button>
+        </div>
+
+        <!-- Wallet & Actions -->
+        <div class="shop-header-right">
+          <div id="shop-coin-wallet-pill" class="shop-coin-pill" title="Xu thưởng tích lũy">
+            <svg class="coin-svg-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/><circle cx="12" cy="12" r="6.75" stroke="#fef08a" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M12 8v8M9.5 10.2h3.8a1.5 1.5 0 0 1 0 3H9.5h3.8a1.5 1.5 0 0 1 0 3H9.5" stroke="#fef08a" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="wallet-amount" data-shop-coins>2,400</span>
+            <span class="coin-unit">XU</span>
+          </div>
+          <button type="button" id="btn-shop-claim-coins" class="btn-claim-coins-pill" title="Nhận 2.500 Xu quỹ tập luyện & CLB miễn phí">
+            <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>2.500 XU</span>
+          </button>
+          <button type="button" id="btn-close-shop-x" class="shop-close-btn" aria-label="Đóng cửa hàng">
+            <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Split Workspace: Left 3D Stage + Active Loadout Bar | Right Editorial Catalog -->
+      <div class="shop-layout-grid">
+        <!-- Left Column: 3D Locker Room Turntable & 5-Slot Active Loadout Dock -->
+        <aside class="shop-stage-panel" id="shop-stage-panel">
+          <div class="shop-stage-viewport-wrap">
+            <canvas id="shop-3d-canvas"></canvas>
+
+            <!-- Athlete Broadcast Nameplate (Top-Left) -->
+            <div class="shop-stage-nameplate">
+              <div class="stage-name-row">
+                <span id="shop-preview-char-name" class="stage-name-text">AMMAAR</span>
+                <span id="shop-preview-rating" class="stage-ovr-badge">OVR 78</span>
+              </div>
+              <div id="shop-preview-role-badge" class="stage-role-text">ALL-ROUNDER · TIER 1 · TAY VỢT TOÀN DIỆN</div>
+            </div>
+
+            <!-- Stage Camera & Mobile Collapse Controls (Top-Right) -->
+            <div class="shop-stage-controls-top">
+              <button type="button" id="btn-shop-cam-zoom" class="stage-cam-btn" title="Đổi góc máy: Toàn thân / Cận cảnh">
+                <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                <span id="shop-cam-zoom-label">Góc Rộng</span>
+              </button>
+              <button type="button" id="btn-shop-toggle-stage-mobile" class="stage-cam-btn mobile-only-btn" title="Thu gọn / Mở rộng sân 3D">
+                <span id="shop-stage-collapse-label">Thu gọn 3D</span>
+              </button>
+              <div class="shop-stage-rotate-pill" aria-hidden="true">
+                <svg class="ui-svg-icon stroke icon-xs" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                <span>360°</span>
+              </div>
+            </div>
+
+            <!-- Live Animated Stat Telemetry Bars (Bottom-Left above Pose Bar) -->
+            <div id="shop-stage-stats-overlay" class="shop-stage-stats-overlay" aria-label="Chỉ số thực chiến">
+              <div class="stage-stat-line">
+                <span class="s-lbl">TỐC</span>
+                <div class="s-track"><div id="stage-bar-speed" class="s-fill speed" style="width:60%"></div></div>
+                <span id="stage-val-speed" class="s-num">60</span>
+              </div>
+              <div class="stage-stat-line">
+                <span class="s-lbl">LỰC</span>
+                <div class="s-track"><div id="stage-bar-power" class="s-fill power" style="width:60%"></div></div>
+                <span id="stage-val-power" class="s-num">60</span>
+              </div>
+              <div class="stage-stat-line">
+                <span class="s-lbl">XOÁY</span>
+                <div class="s-track"><div id="stage-bar-spin" class="s-fill spin" style="width:60%"></div></div>
+                <span id="stage-val-spin" class="s-num">60</span>
+              </div>
+              <div class="stage-stat-line">
+                <span class="s-lbl">P.XẠ</span>
+                <div class="s-track"><div id="stage-bar-reflex" class="s-fill reflex" style="width:60%"></div></div>
+                <span id="stage-val-reflex" class="s-num">60</span>
+              </div>
+            </div>
+
+            <!-- Action Animation Preview Bar (Bottom of Stage) -->
+            <div class="shop-pose-bar" role="group" aria-label="Xem trước động tác thi đấu">
+              <button type="button" class="shop-pose-btn active" data-shop-pose="idle">Đứng sân</button>
+              <button type="button" class="shop-pose-btn" data-shop-pose="forehand">Thuận tay</button>
+              <button type="button" class="shop-pose-btn" data-shop-pose="backhand">Trái tay</button>
+              <button type="button" class="shop-pose-btn" data-shop-pose="smash">Đập Smash</button>
+              <button type="button" class="shop-pose-btn" data-shop-pose="win">Ăn mừng</button>
+            </div>
+          </div>
+
+          <!-- 5-Slot Active Equipment Bag / Loadout Bar (Click any slot to jump to category) -->
+          <div id="shop-active-loadout-dock" class="shop-active-loadout-dock" aria-label="Trang bị đang mang">
+            <!-- Dynamically populated by CharacterShopUI._renderActiveLoadoutDock() -->
+          </div>
+        </aside>
+
+        <!-- Right Column: Editorial Pro Shop Catalog -->
+        <section class="shop-catalog-panel">
+          <nav class="shop-tabs-bar" role="tablist" aria-label="Danh mục cửa hàng">
+            <button type="button" class="shop-tab-btn active" data-shop-tab="upgrades">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Huấn Luyện &amp; AI</span>
+            </button>
+            <button type="button" class="shop-tab-btn" data-shop-tab="characters">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>
+              <span>Vận Động Viên</span>
+            </button>
+            <button type="button" class="shop-tab-btn" data-shop-tab="gear">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/><path d="m13.8 13.8 7.2 7.2M7.5 3v12M3 7.5h12M17.5 17.5l2 2"/></svg>
+              <span>Vợt &amp; Phụ Kiện</span>
+            </button>
+            <button type="button" class="shop-tab-btn" data-shop-tab="outfits">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+              <span>Trang Phục</span>
+            </button>
+            <button type="button" class="shop-tab-btn" data-shop-tab="vfx">
+              <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3zM5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
+              <span>Hiệu Ứng Đánh</span>
+            </button>
+          </nav>
+
+          <div id="shop-tab-content" class="shop-tab-content">
+            <!-- Rendered dynamically by CharacterShopUI -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Broadcast Footer Bar -->
+      <footer class="shop-card-footer">
+        <div class="shop-footer-status">
+          <span id="shop-footer-note">Đội hình tự động đồng bộ vào Trận Đấu &amp; Phòng Online 1v1</span>
+        </div>
+        <button type="button" id="btn-close-shop" class="btn-shop-apply">
+          <span>ÁP DỤNG ĐỘI HÌNH &amp; VÀO SÂN</span>
+          <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </footer>
     </div>
   </div>
 

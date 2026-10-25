@@ -3347,3 +3347,2253 @@ kbd {
   border-top: 1px solid #1e293b;
   background: #0d131c;
 }
+
+/* ============================================================
+   3D CHARACTER SHOP & UPGRADE STUDIO (FLAT DARK SPORTS)
+   ============================================================ */
+
+.highlight-shop {
+  background: #d97706 !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.highlight-shop:hover {
+  background: #f59e0b !important;
+}
+
+.shop-coin-mini {
+  background: #0b0f17;
+  color: #fbbf24;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 800;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.title-shop-cta {
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+
+.wii-shop-cta-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-radius: 6px;
+  background: #172030;
+  border: 1px solid #f59e0b;
+  color: #f8fafc;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.wii-shop-cta-btn:hover {
+  background: #1e293b;
+  border-color: #fbbf24;
+}
+
+.shop-cta-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fbbf24;
+}
+
+.shop-cta-badge {
+  background: #271e12;
+  border: 1px solid #d97706;
+  color: #fde68a;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   AAA PRO SPORTS LOCKER ROOM & SQUAD STUDIO (TOPSPIN 2K / TENNIS CLASH STYLE)
+   ========================================================================== */
+
+@keyframes shopModalReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes shopCardCascade {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.975);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes walletGoldPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.65);
+  }
+  45% {
+    transform: scale(1.08);
+    box-shadow: 0 0 22px 4px rgba(251, 191, 36, 0.45);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+}
+
+@keyframes coinFloaterRise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 4px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -10px) scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -44px) scale(0.95);
+  }
+}
+
+@keyframes ctaSheenSweep {
+  0% {
+    transform: translateX(-130%) skewX(-22deg);
+  }
+  45%, 100% {
+    transform: translateX(220%) skewX(-22deg);
+  }
+}
+
+@keyframes artworkFloatIdle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.shop-coin-floater {
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fde047;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 0 14px rgba(245, 158, 11, 0.65);
+  animation: coinFloaterRise 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+#character-shop-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  overflow: hidden;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#character-shop-modal.hidden {
+  display: none !important;
+}
+
+.wii-shop-card {
+  width: min(1180px, 96vw);
+  height: min(820px, 92vh);
+  max-height: 92vh;
+  background: #080c14;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: pan-y;
+  animation: shopModalReveal 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 1. Top Broadcast Header Bar (Unified 3-Zone Bar) */
+.shop-card-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 18px;
+  background: linear-gradient(180deg, #0d1422 0%, #090e18 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.shop-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.shop-header-crest {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shop-title-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.shop-kicker-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #34d399;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.shop-card-title {
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #f8fafc;
+  margin: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.15;
+}
+
+/* Integrated Squad Switcher inside Header */
+.shop-unit-switcher-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  background: #05080f;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 9px;
+}
+
+.shop-unit-btn {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.shop-unit-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.shop-unit-btn:active {
+  transform: scale(0.96);
+}
+
+.shop-unit-btn.active[data-shop-unit="player"] {
+  background: #10b981;
+  border-color: #34d399;
+  color: #04130d;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+}
+
+.shop-unit-btn.active[data-shop-unit="partner"] {
+  background: #06b6d4;
+  border-color: #22d3ee;
+  color: #041418;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.28);
+}
+
+.shop-unit-btn.active[data-shop-unit="duo"] {
+  background: #f59e0b;
+  border-color: #fbbf24;
+  color: #180d02;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.28);
+}
+
+.unit-ovr-tag {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.28);
+  color: #fde047;
+}
+
+.shop-unit-btn.active .unit-ovr-tag {
+  background: rgba(0, 0, 0, 0.72);
+  color: #fef08a;
+}
+
+.unit-ovr-tag.partner {
+  color: #67e8f9;
+}
+
+/* Header Right Wallet & Controls */
+.shop-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.shop-coin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #13110b;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 5px 11px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+
+.shop-coin-pill.wallet-pulse {
+  animation: walletGoldPulse 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shop-coin-pill .wallet-amount {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fbbf24;
+}
+
+.shop-coin-pill .coin-unit {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #d97706;
+}
+
+.btn-claim-coins-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 7px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease, color 0.14s ease;
+  white-space: nowrap;
+}
+
+.btn-claim-coins-pill:hover {
+  background: #10b981;
+  color: #04130d;
+  transform: translateY(-1px);
+}
+
+.btn-claim-coins-pill:active {
+  transform: scale(0.95);
+}
+
+.shop-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: #111827;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.shop-close-btn:hover {
+  background: #ef4444;
+  border-color: #f87171;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+/* 2. Main Split Workspace: Left 3D Stage (380px) | Right Catalog (1fr) */
+.shop-layout-grid {
+  display: grid;
+  grid-template-columns: 385px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Left Column: 3D Locker Room Turntable & 5-Slot Active Loadout Dock */
+.shop-stage-panel {
+  background: #060911;
+  border-right: 1px solid rgba(148, 163, 184, 0.14);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.shop-stage-viewport-wrap {
+  position: relative;
+  flex: 1 1 0%;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: radial-gradient(circle at 50% 35%, #132238 0%, #060911 100%);
+  user-select: none;
+}
+
+#shop-3d-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+#shop-3d-canvas:active {
+  cursor: grabbing;
+}
+
+/* Broadcast Athlete Nameplate (Top-Left) */
+.shop-stage-nameplate {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 6px 11px;
+  border-radius: 7px;
+  background: rgba(6, 10, 18, 0.78);
+  backdrop-filter: blur(8px);
+  border-left: 3px solid #10b981;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.stage-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stage-name-text {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.stage-ovr-badge {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #fde047;
+  letter-spacing: 0.04em;
+}
+
+.stage-role-text {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+/* Top-Right Stage Controls (Camera Zoom + 360 Watermark) */
+.shop-stage-controls-top {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.stage-cam-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: rgba(9, 14, 24, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.stage-cam-btn:hover,
+.stage-cam-btn.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.mobile-only-btn {
+  display: none;
+}
+
+.shop-stage-rotate-pill {
+  background: rgba(6, 10, 18, 0.65);
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Live Animated Stat Telemetry Overlay on Stage (Bottom-Left) */
+.shop-stage-stats-overlay {
+  position: absolute;
+  bottom: 46px;
+  left: 10px;
+  width: 148px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: rgba(6, 10, 18, 0.76);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.stage-stat-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stage-stat-line .s-lbl {
+  width: 28px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.stage-stat-line .s-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(30, 41, 59, 0.9);
+  overflow: hidden;
+}
+
+.stage-stat-line .s-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stage-stat-line .s-fill.speed {
+  background: #10b981;
+}
+.stage-stat-line .s-fill.power {
+  background: #f59e0b;
+}
+.stage-stat-line .s-fill.spin {
+  background: #38bdf8;
+}
+.stage-stat-line .s-fill.reflex {
+  background: #a855f7;
+}
+
+.stage-stat-line .s-num {
+  width: 18px;
+  text-align: right;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #f8fafc;
+}
+
+/* Pose Action Bar (Bottom of Stage) */
+.shop-pose-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  background: rgba(6, 10, 18, 0.88);
+  backdrop-filter: blur(8px);
+  padding: 3px;
+  border-radius: 7px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.shop-pose-btn {
+  padding: 5px 2px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.14s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-pose-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shop-pose-btn.active {
+  background: #10b981;
+  color: #04130d;
+  font-weight: 800;
+}
+
+/* 5-Slot Active Loadout Dock (Equipment Bag under 3D Stage) */
+.shop-active-loadout-dock {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.loadout-slot-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: #0c121e;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.16s ease, background 0.16s ease;
+  min-width: 0;
+}
+
+.loadout-slot-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.5);
+  background: #111a2c;
+}
+
+.loadout-slot-btn:active {
+  transform: scale(0.95);
+}
+
+.loadout-slot-btn.active-slot {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.loadout-slot-art {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.loadout-slot-art svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.loadout-slot-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.loadout-slot-meta .slot-kicker {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  line-height: 1;
+}
+
+.loadout-slot-meta .slot-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin-top: 2px;
+}
+
+/* 3. Right Column: Editorial Pro Shop Catalog */
+.shop-catalog-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #090d16;
+}
+
+.shop-tabs-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 18px;
+  background: #070b12;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shop-tabs-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.shop-tab-btn {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 13px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+
+.shop-tab-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.shop-tab-btn.active {
+  color: #34d399;
+  border-bottom-color: #10b981;
+  background: linear-gradient(180deg, transparent 0%, rgba(16, 185, 129, 0.08) 100%);
+}
+
+.shop-tab-content {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.shop-tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shop-tab-content::-webkit-scrollbar-track {
+  background: #070b12;
+}
+
+.shop-tab-content::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+
+/* Clean Editorial Section Blocks (No Outer Box-in-Box Clutter) */
+.shop-section-block {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.shop-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  flex-wrap: wrap;
+}
+
+.section-heading-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.section-index-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #34d399;
+  text-transform: uppercase;
+}
+
+.shop-section-title {
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #f8fafc;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.shop-section-sub {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+/* Bot AI Telemetry Strip */
+.bot-telemetry-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.telemetry-metric {
+  background: #0d1624;
+  border-left: 3px solid #06b6d4;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-metric .t-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #67e8f9;
+  letter-spacing: 0.06em;
+}
+
+.telemetry-metric .t-val {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+/* Upgrade Stats Grid & Rows */
+.upgrade-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.upgrade-stat-row {
+  background: #0e1524;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 11px;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+  animation: shopCardCascade 0.34s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--stagger-idx, 0) * 45ms);
+}
+
+.upgrade-stat-row:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.38);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.upgrade-stat-row.partner-card-theme {
+  border-color: rgba(6, 182, 212, 0.25);
+  background: #0b1623;
+}
+
+.upgrade-stat-row.special-skill-card {
+  border-color: rgba(245, 158, 11, 0.25);
+  background: #111522;
+}
+
+.upgrade-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upgrade-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.upgrade-stat-meta-inline {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.upgrade-stat-meta-inline.gold {
+  color: #fbbf24;
+}
+
+.upgrade-stat-lv {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #38bdf8;
+}
+
+.upgrade-stat-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.upgrade-stat-desc {
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.upgrade-segments-track {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.upgrade-segments-track.skill-track-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.upgrade-seg {
+  height: 6px;
+  border-radius: 2px;
+  background: #1e293b;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.upgrade-seg.filled {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+}
+
+.upgrade-seg.filled.bonus {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.upgrade-seg.filled.partner-seg {
+  background: #06b6d4;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+}
+
+.upgrade-stat-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 7px;
+  background: #2563eb;
+  border: 1px solid #3b82f6;
+  color: #ffffff;
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.upgrade-stat-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.upgrade-stat-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.upgrade-stat-btn.locked {
+  background: #161f30;
+  border-color: #263349;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.upgrade-stat-btn.maxed {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+  cursor: default;
+}
+
+/* 4. Pro Locker Room Item Cards (Characters, Outfits, Rackets, Gear, VFX) */
+.shop-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  gap: 14px;
+}
+
+.shop-cards-grid.rackets-grid {
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+}
+
+.shop-item-card {
+  position: relative;
+  background: #0e1524;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 11px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  animation: shopCardCascade 0.36s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--stagger-idx, 0) * 45ms);
+}
+
+.shop-item-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--card-accent, #38bdf8);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55);
+}
+
+.shop-item-card.active {
+  border-color: #10b981;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, #0e1726 100%);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.35), 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* Dedicated Artwork Showcase Box inside Every Card */
+.shop-card-visual-box {
+  position: relative;
+  width: 100%;
+  height: 108px;
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.14) 0%, rgba(7, 11, 20, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.shop-item-card:hover .shop-card-art-svg,
+.shop-item-card:hover .char-portrait-wrap {
+  animation: artworkFloatIdle 2.2s ease-in-out infinite;
+}
+
+.shop-card-art-svg {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55));
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shop-item-card:hover .shop-card-art-svg {
+  transform: scale(1.07);
+}
+
+/* Character Card Mii Portrait + OVR Lockup */
+.char-visual-box {
+  justify-content: space-between;
+  padding: 8px 14px;
+}
+
+.char-portrait-wrap {
+  width: 82px;
+  height: 82px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
+}
+
+.char-portrait-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.char-ovr-Lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.char-ovr-Lockup .ovr-num {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  color: #f8fafc;
+}
+
+.char-ovr-Lockup .ovr-lbl {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fbbf24;
+  margin-top: 2px;
+}
+
+/* Clean Inline Typography Metadata (No Pill Clutter) */
+.shop-item-meta-line {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.shop-item-name {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.shop-item-role {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-top: -3px;
+}
+
+.shop-item-desc {
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.shop-mini-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.mini-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.mini-bar-row > span {
+  width: 28px;
+}
+
+.mini-bar-track {
+  flex: 1;
+  height: 5px;
+  background: #1e293b;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+  border-radius: 3px;
+}
+
+.mini-bar-num {
+  width: 20px;
+  text-align: right;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: #cbd5e1;
+}
+
+.shop-item-actions {
+  margin-top: 4px;
+}
+
+.shop-item-actions.vfx-dual-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px;
+}
+
+.shop-action-btn {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 7px;
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: #172236;
+  color: #f8fafc;
+  transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.shop-action-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.shop-action-btn.preview-vfx-btn {
+  background: rgba(2, 132, 199, 0.16);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #7dd3fc;
+  padding: 0 11px;
+}
+
+.shop-action-btn.preview-vfx-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.shop-action-btn.select:hover {
+  background: #2563eb;
+  border-color: #60a5fa;
+  color: #ffffff;
+}
+
+.shop-action-btn.equipped {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: #10b981;
+  color: #6ee7b7;
+  cursor: default;
+}
+
+.shop-action-btn.buy {
+  background: #d97706;
+  border-color: #fbbf24;
+  color: #090601;
+}
+
+.shop-action-btn.buy:hover {
+  background: #f59e0b;
+  color: #000000;
+}
+
+.shop-action-btn.buy.locked {
+  background: #161f30;
+  border-color: #263349;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* 5. Clean Broadcast Footer Bar */
+.shop-card-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #070b12;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.shop-footer-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.btn-shop-apply {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 22px;
+  border-radius: 8px;
+  border: 1px solid #34d399;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #03120c;
+  font-family: "Barlow Condensed", "Plus Jakarta Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-shop-apply::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+  animation: ctaSheenSweep 3.8s infinite;
+  pointer-events: none;
+}
+
+.btn-shop-apply:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.45);
+}
+
+.btn-shop-apply:active {
+  transform: scale(0.97);
+}
+
+/* Waiting Room Squad Sync Button */
+.waiting-QuickShop-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.btn-waiting-shop-sync {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #0284c7;
+  background: #0c243c;
+  color: #7dd3fc;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-waiting-shop-sync:hover {
+  background: #0369a1;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN FOR MOBILE & TABLET (Max-width: 920px)
+   ========================================================================== */
+@media (max-width: 920px) {
+  #character-shop-modal {
+    padding: 3px;
+  }
+
+  .wii-shop-card {
+    width: 100vw;
+    height: 98.5vh;
+    max-height: 98.5vh;
+    border-radius: 10px;
+  }
+
+  /* 1. Ultra-compact 2-row Header on Mobile:
+     Row 1: Title + Coin Pill + +500 + Close X (single line, no wrapping)
+     Row 2: 3-Button Squad Switcher (BẠN | BOT ĐỒNG ĐỘI | SONG ĐẤU 3D) */
+  .shop-card-header {
+    flex-wrap: wrap;
+    padding: 6px 8px;
+    gap: 5px;
+  }
+
+  .shop-header-title-wrap {
+    flex: 1 1 0%;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .shop-header-crest,
+  .shop-kicker-label {
+    display: none;
+  }
+
+  .shop-card-title {
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+  }
+
+  .shop-header-right {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .shop-coin-pill {
+    padding: 3px 7px;
+    gap: 4px;
+    border-radius: 6px;
+  }
+
+  .shop-coin-pill .wallet-amount {
+    font-size: 12px;
+  }
+
+  .shop-coin-pill .coin-unit {
+    font-size: 10.5px;
+  }
+
+  .btn-claim-coins-pill {
+    height: 26px;
+    padding: 0 7px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+
+  .shop-close-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+  }
+
+  .shop-unit-switcher-bar {
+    order: 3;
+    width: 100%;
+    padding: 2px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .shop-unit-btn {
+    height: 27px;
+    padding: 0 4px;
+    font-size: 10.5px;
+    gap: 4px;
+  }
+
+  .unit-ovr-tag {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+
+  .unit-sub-desktop {
+    display: none;
+  }
+
+  .shop-layout-grid {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* 2. Decluttered 3D Stage on Mobile so the 3D Athlete is 100% Clear */
+  .shop-stage-panel {
+    flex: 0 0 auto;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    padding: 5px 8px;
+    gap: 4px;
+  }
+
+  .shop-stage-viewport-wrap {
+    height: 138px;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    transition: height 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Hide stat bars overlay & 360 badge on mobile so they never cover the 3D character */
+  .shop-stage-stats-overlay,
+  .shop-stage-rotate-pill,
+  .stage-role-text {
+    display: none !important;
+  }
+
+  .shop-stage-nameplate {
+    top: 6px;
+    left: 6px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: rgba(6, 10, 18, 0.72);
+  }
+
+  .stage-name-text {
+    font-size: 14px;
+  }
+
+  .stage-ovr-badge {
+    font-size: 11.5px;
+  }
+
+  .shop-stage-controls-top {
+    top: 6px;
+    right: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stage-cam-btn {
+    padding: 3px 7px;
+    font-size: 10px;
+    border-radius: 5px;
+  }
+
+  .mobile-only-btn {
+    display: inline-flex;
+  }
+
+  .shop-pose-bar {
+    bottom: 4px;
+    left: 6px;
+    right: 6px;
+    padding: 2px;
+    border-radius: 6px;
+  }
+
+  .shop-pose-btn {
+    padding: 3px 2px;
+    font-size: 9.5px;
+  }
+
+  .shop-stage-panel.stage-collapsed-mobile .shop-stage-viewport-wrap {
+    height: 36px;
+  }
+
+  .shop-stage-panel.stage-collapsed-mobile .shop-pose-bar,
+  .shop-stage-panel.stage-collapsed-mobile #shop-btn-cam-zoom,
+  .shop-stage-panel.stage-collapsed-mobile .shop-active-loadout-dock {
+    display: none !important;
+  }
+
+  /* 3. Sleek Horizontal 5-Slot Equipment Bar on Mobile */
+  .shop-active-loadout-dock {
+    gap: 4px;
+  }
+
+  .loadout-slot-btn {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 3px 5px;
+    gap: 4px;
+    border-radius: 6px;
+    height: 30px;
+  }
+
+  .loadout-slot-art {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .loadout-slot-meta {
+    align-items: flex-start;
+  }
+
+  .loadout-slot-meta .slot-kicker {
+    display: none;
+  }
+
+  .loadout-slot-meta .slot-value {
+    font-size: 9.5px;
+    margin-top: 0;
+  }
+
+  /* 4. Catalog & Upgrade Cards with Maximum Vertical Breathing Room */
+  .shop-catalog-panel {
+    flex: 1 1 0%;
+    min-height: 0;
+  }
+
+  .shop-tabs-bar {
+    padding: 0 6px;
+    gap: 2px;
+  }
+
+  .shop-tab-btn {
+    padding: 8px 9px;
+    font-size: 11px;
+    gap: 5px;
+  }
+
+  .shop-tab-content {
+    padding: 8px 8px 18px;
+    gap: 12px;
+  }
+
+  .shop-section-block {
+    gap: 8px;
+  }
+
+  .shop-section-header {
+    padding-bottom: 4px;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .section-index-tag {
+    display: none;
+  }
+
+  .shop-section-title {
+    font-size: 14px;
+  }
+
+  .shop-section-sub {
+    font-size: 11px;
+  }
+
+  .bot-telemetry-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .telemetry-metric {
+    padding: 5px 6px;
+  }
+
+  .telemetry-metric .t-label {
+    font-size: 9px;
+  }
+
+  .telemetry-metric .t-val {
+    font-size: 13px;
+  }
+
+  .upgrade-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .upgrade-stat-row {
+    padding: 9px 10px;
+    gap: 7px;
+    border-radius: 8px;
+  }
+
+  .upgrade-stat-label {
+    font-size: 12.5px;
+  }
+
+  .upgrade-stat-desc {
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+
+  .upgrade-stat-btn {
+    height: 30px;
+    font-size: 11.5px;
+    padding: 0 8px;
+  }
+
+  .shop-cards-grid,
+  .shop-cards-grid.rackets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .shop-card-visual-box {
+    height: 82px;
+  }
+
+  .shop-card-footer {
+    padding: 6px 8px;
+  }
+
+  .shop-footer-status {
+    display: none;
+  }
+
+  .btn-shop-apply {
+    width: 100%;
+    height: 34px;
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 520px) {
+  .upgrade-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .upgrade-stat-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .upgrade-stat-btn {
+    width: auto;
+    min-width: 118px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .shop-cards-grid,
+  .shop-cards-grid.rackets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .shop-item-card {
+    padding: 8px;
+    gap: 5px;
+  }
+
+  .shop-card-visual-box {
+    height: 74px;
+    padding: 5px;
+  }
+
+  .shop-card-art-svg {
+    width: 64px;
+    height: 64px;
+  }
+
+  .char-portrait-wrap {
+    width: 58px;
+    height: 58px;
+  }
+
+  .char-ovr-Lockup .ovr-num {
+    font-size: 28px;
+  }
+
+  .shop-item-name {
+    font-size: 12.5px;
+  }
+
+  .shop-item-desc {
+    font-size: 10.5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .shop-action-btn {
+    height: 30px;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+}
+
+/* Vector SVG Icon System */
+.ui-svg-icon {
+  display: inline-block;
+  vertical-align: -0.18em;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.ui-svg-icon.stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ui-svg-icon.icon-xs {
+  width: 12px;
+  height: 12px;
+}
+
+.ui-svg-icon.icon-sm {
+  width: 15px;
+  height: 15px;
+}
+
+.ui-svg-icon.icon-md {
+  width: 18px;
+  height: 18px;
+}
+
+.ui-svg-icon.icon-lg {
+  width: 22px;
+  height: 22px;
+}
+
+.coin-svg-icon {
+  display: inline-block;
+  vertical-align: -0.18em;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.shop-tab-btn .ui-svg-icon {
+  margin-right: 0;
+  vertical-align: -0.18em;
+}
+
+.shop-unit-btn .ui-svg-icon {
+  margin-right: 0;
+  vertical-align: -0.16em;
+}
+
+.setting-label .ui-svg-icon {
+  margin-right: 6px;
+  color: #38bdf8;
+  vertical-align: -0.18em;
+}
+
+.dialog-title .ui-svg-icon {
+  margin-right: 6px;
+  color: #38bdf8;
+  vertical-align: -0.16em;
+}
+
+.wii-ok-btn .ui-svg-icon {
+  margin-right: 6px;
+  vertical-align: -0.16em;
+}
+
+/* ============================================================================
+   3D VICTORY CELEBRATION MODAL & POSE STAGE + COIN REWARDS + CAMERA SHAKE
+   ============================================================================ */
+
+@keyframes courtScreenShake {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  18% { transform: translate3d(-5px, 4px, 0) rotate(-0.35deg); }
+  36% { transform: translate3d(5px, -4px, 0) rotate(0.35deg); }
+  54% { transform: translate3d(-4px, -2px, 0) rotate(-0.22deg); }
+  72% { transform: translate3d(3px, 3px, 0) rotate(0.18deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+.court-shake-active {
+  animation: courtScreenShake 0.26s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Floating Coin Reward Notifications */
+.coin-reward-float-layer {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 9800;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.coin-reward-float-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.94));
+  border: 1.5px solid #facc15;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px rgba(250, 204, 21, 0.35);
+  color: #fef08a;
+  font-family: "Barlow Condensed", "Outfit", sans-serif;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  animation: coinFloatPopIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.38s ease, transform 0.38s ease;
+}
+
+.coin-reward-float-pill.fade-out {
+  opacity: 0;
+  transform: translateY(-16px) scale(0.94);
+}
+
+.coin-float-amount {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #fde047;
+  text-shadow: 0 1px 6px rgba(250, 204, 21, 0.45);
+}
+
+.coin-float-reason {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #e2e8f0;
+  padding-left: 8px;
+  border-left: 1px solid rgba(250, 204, 21, 0.35);
+}
+
+@keyframes coinFloatPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.82);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Upgraded Victory Results Card with 3D Champion Stage */
+.victory-pro-card {
+  width: min(560px, 94vw) !important;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 16px 18px !important;
+  gap: 12px !important;
+}
+
+.victory-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.victory-coin-reward-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #422006 0%, #713f12 100%);
+  border: 1.5px solid #facc15;
+  color: #fef08a;
+  font-family: "Barlow Condensed", "Outfit", sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 14px rgba(250, 204, 21, 0.28);
+  animation: coinFloatPopIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.victory-coin-svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.victory-3d-stage-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, #1e293b 0%, #090d16 78%);
+  border: 1.5px solid rgba(250, 204, 21, 0.38);
+  box-shadow: inset 0 0 32px rgba(56, 189, 248, 0.14), 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+#victory-3d-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.victory-3d-stage-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.victory-winner-3d-name {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(9, 13, 22, 0.78);
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  color: #fde047;
+  font-family: "Barlow Condensed", "Outfit", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.victory-pose-switcher {
+  align-self: center;
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(9, 13, 22, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  pointer-events: auto;
+}
+
+.victory-pose-btn {
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #cbd5e1;
+  font-family: "Barlow Condensed", "Outfit", sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.victory-pose-btn:hover {
+  color: #ffffff;
+  background: rgba(56, 189, 248, 0.16);
+}
+
+.victory-pose-btn.active {
+  background: linear-gradient(135deg, #facc15, #eab308);
+  color: #0f172a;
+  border-color: #fef08a;
+  box-shadow: 0 2px 10px rgba(250, 204, 21, 0.35);
+}
+
+.victory-shop-cta {
+  background: linear-gradient(180deg, #facc15 0%, #eab308 100%) !important;
+  color: #0f172a !important;
+  border-color: #fef08a !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 640px) {
+  .victory-3d-stage-wrap {
+    height: 175px;
+  }
+  .victory-pro-card {
+    padding: 12px 12px !important;
+    gap: 8px !important;
+  }
+  .coin-reward-float-layer {
+    top: 62px;
+    right: 10px;
+  }
+}
+
+/* ============================================================================
+   8-MAP 3D STADIUM SELECTOR & D3 SKILL RADAR CHART
+   ============================================================================ */
+
+.court-map-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 6px;
+}
+
+@media (max-width: 560px) {
+  .court-map-selector-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.court-map-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  background: #161f2e;
+  border: 1.5px solid #29384d;
+  color: #e2e8f0;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+
+.court-map-card:hover {
+  transform: translateY(-1px);
+  border-color: #38bdf8;
+  background: #1c283c;
+}
+
+.court-map-card.selected {
+  background: linear-gradient(135deg, #172554, #0f172a);
+  border-color: #facc15;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.32);
+}
+
+.map-swatch-preview {
+  width: 26px;
+  height: 32px;
+  border-radius: 5px;
+  border: 1.5px solid #ffffff;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
+.map-swatch-line {
+  width: 80%;
+  height: 1.5px;
+  display: block;
+  opacity: 0.9;
+}
+
+.map-card-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.map-card-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-card-sub {
+  font-size: 9.5px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.skill-chart-frame {
+  background: #0f172a !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+  border-radius: 12px !important;
+  padding: 6px !important;
+}
+
+.skill-radar-container {
+  width: 100%;
+  min-height: 176px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+

@@ -1,3 +1,4 @@
+import * as d3 from "d3";
 import { renderAllHudMiiAvatars as renderMiiAvatars, renderMiiAvatar as renderSingleMii } from "./mii_avatars.js";
 
 export class HudUI {
@@ -394,6 +395,24 @@ export class HudUI {
         this.showTitleModal();
       });
     }
+
+    const btnVictoryShop = document.getElementById("btn-victory-open-shop");
+    if (btnVictoryShop) {
+      btnVictoryShop.addEventListener("click", () => {
+        this.hideVictoryModal();
+        window.__argonTennis?.characterShopUI?.openShop?.("upgrades");
+      });
+    }
+
+    document.querySelectorAll("[data-victory-pose]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const pose = btn.getAttribute("data-victory-pose") || "jump";
+        document.querySelectorAll("[data-victory-pose]").forEach((b) => {
+          b.classList.toggle("active", b === btn);
+        });
+        window.__argonTennis?.characterShopUI?.setVictoryPose?.(pose);
+      });
+    });
   }
 
   openControlsModal(defaultTab = null) {
@@ -477,81 +496,261 @@ export class HudUI {
 
   hideVictoryModal() {
     if (this.elVictoryModal) this.elVictoryModal.classList.add("hidden");
+    window.__argonTennis?.characterShopUI?.stopVictoryModal3D?.();
   }
 
-  showVictoryModal({ playerWon, playerGames, opponentGames }) {
+  showVictoryModal({ playerWon, playerGames, opponentGames, coinsEarned = 0, isOnline = false }) {
     if (!this.elVictoryModal) return;
     const banner = document.getElementById("victory-result-banner");
     const scoreText = document.getElementById("victory-match-score");
     const skillValue = document.getElementById("skill-rating-value");
+    const coinText = document.getElementById("victory-coin-reward-text");
+    const winnerNameEl = document.getElementById("victory-winner-3d-name");
+    const skillPlayerNameEl = document.getElementById("victory-skill-player-name");
 
     if (banner) {
-      banner.textContent = playerWon ? "YOU WIN!" : "TRY AGAIN!";
+      banner.textContent = playerWon ? "CHIẾN THẮNG!" : "HOÀN THÀNH TRẬN ĐẤU!";
       banner.style.color = playerWon ? "#ffea28" : "#9ad4ff";
     }
     if (scoreText) {
-      scoreText.textContent = `Final Games: ${playerGames} - ${opponentGames}`;
+      scoreText.textContent = `Tỷ Số Set: ${playerGames} - ${opponentGames}`;
     }
-    const finalRating = playerWon ? 1145 : 1020;
+    if (coinText) {
+      const rewardAmt = coinsEarned > 0 ? coinsEarned : playerWon ? (isOnline ? 500 : 350) : 120;
+      coinText.textContent = `+${rewardAmt.toLocaleString("vi-VN")} XU THƯỞNG${isOnline ? " ONLINE" : ""}`;
+    }
+
+    const shop = window.__argonTennis?.characterShop;
+    if (shop) {
+      const pChar = shop.getSelectedCharacter("player");
+      const bChar = shop.getSelectedCharacter("partner");
+      if (winnerNameEl) {
+        winnerNameEl.textContent = playerWon
+          ? `${pChar.name} & Bot ${bChar.name} · VÔ ĐỊCH!`
+          : `${pChar.name} & Bot ${bChar.name}`;
+      }
+      if (skillPlayerNameEl) {
+        skillPlayerNameEl.textContent = pChar.name;
+      }
+    }
+
+    const finalRating = playerWon ? 1165 : 1030;
     if (skillValue) skillValue.textContent = String(finalRating);
+
+    document.querySelectorAll("[data-victory-pose]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-victory-pose") === "jump");
+    });
 
     this._drawSkillGraph(playerWon);
     this.elVictoryModal.classList.remove("hidden");
+
+    setTimeout(() => {
+      window.__argonTennis?.characterShopUI?.startVictoryModal3D?.({
+        playerWon,
+        playerGames,
+        opponentGames,
+        coinsEarned
+      });
+    }, 30);
   }
 
   _drawSkillGraph(won) {
-    const canvas = document.getElementById("skill-graph-canvas");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width, h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#f8fbff";
-    ctx.fillRect(0, 0, w, h);
+    let container = document.getElementById("skill-graph-canvas");
+    if (!container) return;
 
-    ctx.strokeStyle = "#d0dce8";
-    ctx.lineWidth = 1;
-    for (let y = 25; y < h; y += 35) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
+    // Ensure #skill-graph-canvas can host D3 SVG elements cleanly even if originally a <canvas>
+    if (container.tagName === "CANVAS") {
+      const replacement = document.createElement("div");
+      replacement.id = "skill-graph-canvas";
+      replacement.className = container.className || "skill-radar-container";
+      container.replaceWith(replacement);
+      container = replacement;
     }
 
-    const proLineY = h * 0.56;
-    ctx.strokeStyle = "#9aaab8";
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(0, proLineY);
-    ctx.lineTo(w, proLineY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = "#6c7c8c";
-    ctx.font = "bold 11px sans-serif";
-    ctx.fillText("PRO 1000", 8, proLineY - 5);
+    const shop = window.__argonTennis?.characterShop;
+    const mods = shop?.getEffectivePlayerModifiers?.() || {};
 
-    const pts = won ? [0.74, 0.66, 0.58, 0.45, 0.24] : [0.74, 0.66, 0.58, 0.52, 0.55];
-    ctx.strokeStyle = "#1f96f2";
-    ctx.lineWidth = 3.5;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.beginPath();
-    pts.forEach((p, i) => {
-      const x = 24 + (i / (pts.length - 1)) * (w - 48);
-      const y = h * p;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+    // Normalize player's effective performance stats to a 0-100 radar scale
+    const normStat = (pts, fallback) => {
+      const raw = Number(pts) || fallback;
+      return Math.max(38, Math.min(100, Math.round(35 + raw * 1.65 + (won ? 8 : 0))));
+    };
+
+    const playerStats = {
+      Speed: normStat(mods.speedPoints, won ? 84 : 72),
+      Power: normStat(mods.powerPoints, won ? 88 : 74),
+      Spin: normStat(mods.spinPoints, won ? 82 : 70),
+      Reflex: normStat(mods.reflexPoints, won ? 86 : 73)
+    };
+
+    const matchAverageStats = {
+      Speed: 66,
+      Power: 64,
+      Spin: 62,
+      Reflex: 65
+    };
+
+    const axes = [
+      { key: "Speed", label: "Speed" },
+      { key: "Power", label: "Power" },
+      { key: "Spin", label: "Spin" },
+      { key: "Reflex", label: "Reflex" }
+    ];
+
+    const width = 280;
+    const height = 176;
+    const centerX = width / 2;
+    const centerY = height / 2 + 6;
+    const radius = 54;
+
+    const root = d3.select(container);
+    root.selectAll("*").remove();
+
+    const svg = root
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", height)
+      .style("display", "block")
+      .style("overflow", "visible");
+
+    // Background card rect
+    svg
+      .append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("rx", 10)
+      .attr("fill", "#0f172a");
+
+    // Header & Legend row
+    const legend = svg.append("g").attr("transform", "translate(10, 14)");
+    legend
+      .append("circle")
+      .attr("cx", 5)
+      .attr("cy", -3)
+      .attr("r", 4)
+      .attr("fill", "#38bdf8");
+    legend
+      .append("text")
+      .attr("x", 13)
+      .attr("y", 0)
+      .attr("fill", "#e2e8f0")
+      .attr("font-size", "9.5px")
+      .attr("font-weight", "800")
+      .text("Player Stats");
+
+    legend
+      .append("circle")
+      .attr("cx", 92)
+      .attr("cy", -3)
+      .attr("r", 4)
+      .attr("fill", "#facc15");
+    legend
+      .append("text")
+      .attr("x", 100)
+      .attr("y", 0)
+      .attr("fill", "#cbd5e1")
+      .attr("font-size", "9.5px")
+      .attr("font-weight", "700")
+      .text("Match Avg");
+
+    const rScale = d3.scaleLinear().domain([0, 100]).range([0, radius]);
+    const angleSlice = (Math.PI * 2) / axes.length;
+
+    const radarGroup = svg
+      .append("g")
+      .attr("transform", `translate(${centerX}, ${centerY})`);
+
+    // Concentric radar grid polygons
+    const levels = [25, 50, 75, 100];
+    levels.forEach((lvl) => {
+      const r = rScale(lvl);
+      const pts = axes
+        .map((_, i) => {
+          const angle = i * angleSlice - Math.PI / 2;
+          return `${(Math.cos(angle) * r).toFixed(1)},${(Math.sin(angle) * r).toFixed(1)}`;
+        })
+        .join(" ");
+
+      radarGroup
+        .append("polygon")
+        .attr("points", pts)
+        .attr("fill", lvl === 100 ? "rgba(30, 41, 59, 0.45)" : "none")
+        .attr("stroke", "rgba(148, 163, 184, 0.25)")
+        .attr("stroke-width", 1);
     });
-    ctx.stroke();
 
-    const lastX = w - 24;
-    const lastY = h * pts[pts.length - 1];
-    ctx.fillStyle = "#ffea28";
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#006cc4";
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
+    // Axis spokes and outer labels
+    axes.forEach((axis, i) => {
+      const angle = i * angleSlice - Math.PI / 2;
+      const x2 = Math.cos(angle) * radius;
+      const y2 = Math.sin(angle) * radius;
+
+      radarGroup
+        .append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", x2)
+        .attr("y2", y2)
+        .attr("stroke", "rgba(148, 163, 184, 0.35)")
+        .attr("stroke-width", 1);
+
+      const labelR = radius + 19;
+      const lx = Math.cos(angle) * labelR;
+      const ly = Math.sin(angle) * labelR;
+
+      radarGroup
+        .append("text")
+        .attr("x", lx)
+        .attr("y", ly + 3)
+        .attr("text-anchor", Math.abs(lx) < 5 ? "middle" : lx > 0 ? "start" : "end")
+        .attr("fill", "#f8fafc")
+        .attr("font-size", "10px")
+        .attr("font-weight", "800")
+        .text(`${axis.label} (${playerStats[axis.key]})`);
+    });
+
+    const radarLine = d3
+      .lineRadial()
+      .radius((d) => rScale(d.value))
+      .angle((_, i) => i * angleSlice)
+      .curve(d3.curveLinearClosed);
+
+    const avgDataset = axes.map((a) => ({ axis: a.key, value: matchAverageStats[a.key] }));
+    const playerDataset = axes.map((a) => ({ axis: a.key, value: playerStats[a.key] }));
+
+    // Match Average polygon
+    radarGroup
+      .append("path")
+      .datum(avgDataset)
+      .attr("d", radarLine)
+      .attr("fill", "rgba(250, 204, 21, 0.16)")
+      .attr("stroke", "#facc15")
+      .attr("stroke-width", 1.75)
+      .attr("stroke-dasharray", "3,3");
+
+    // Player Performance polygon
+    radarGroup
+      .append("path")
+      .datum(playerDataset)
+      .attr("d", radarLine)
+      .attr("fill", "rgba(56, 189, 248, 0.34)")
+      .attr("stroke", "#38bdf8")
+      .attr("stroke-width", 2.4);
+
+    // Player data vertices
+    radarGroup
+      .selectAll(".radar-vertex-player")
+      .data(playerDataset)
+      .enter()
+      .append("circle")
+      .attr("class", "radar-vertex-player")
+      .attr("cx", (d, i) => Math.cos(i * angleSlice - Math.PI / 2) * rScale(d.value))
+      .attr("cy", (d, i) => Math.sin(i * angleSlice - Math.PI / 2) * rScale(d.value))
+      .attr("r", 3.6)
+      .attr("fill", "#38bdf8")
+      .attr("stroke", "#ffffff")
+      .attr("stroke-width", 1.4);
   }
 
   configureGameBubbles(targetWins = 2) {
@@ -601,15 +800,28 @@ export class HudUI {
 
   updateServerTag(pos, visible) {
     if (!this.elServerTag) return;
-    if (!visible || !pos || !pos.visible) {
-      this.elServerTag.classList.add("hidden");
+    const isVis = !!(visible && pos && pos.visible);
+    if (!isVis) {
+      if (this._serverTagVis !== false) {
+        this._serverTagVis = false;
+        this.elServerTag.classList.add("hidden");
+      }
       return;
     }
-    this.elServerTag.classList.remove("hidden");
-    const cx = Math.max(80, Math.min(window.innerWidth - 80, pos.x));
-    const cy = Math.max(95, Math.min(window.innerHeight - 90, pos.y));
-    this.elServerTag.style.left = `${cx.toFixed(1)}px`;
-    this.elServerTag.style.top = `${cy.toFixed(1)}px`;
+    if (this._serverTagVis !== true) {
+      this._serverTagVis = true;
+      this.elServerTag.classList.remove("hidden");
+    }
+    const cx = Math.round(Math.max(80, Math.min(window.innerWidth - 80, pos.x)));
+    const cy = Math.round(Math.max(95, Math.min(window.innerHeight - 90, pos.y)));
+    if (this._serverTagX !== cx) {
+      this._serverTagX = cx;
+      this.elServerTag.style.left = `${cx}px`;
+    }
+    if (this._serverTagY !== cy) {
+      this._serverTagY = cy;
+      this.elServerTag.style.top = `${cy}px`;
+    }
   }
 
   updatePlayerNameplate(pos, visible) {
@@ -692,11 +904,20 @@ export class HudUI {
 
   updateTimingGauge({ cursorNormalized = 0.5, modeTitle = "SWING TIMING", speedText = "READY" }) {
     if (this.elTimingCursor) {
-      const pct = Math.max(4, Math.min(96, cursorNormalized * 100));
-      this.elTimingCursor.style.left = `${pct.toFixed(1)}%`;
+      const pct = Math.max(4, Math.min(96, cursorNormalized * 100)).toFixed(1);
+      if (this._lastGaugePct !== pct) {
+        this._lastGaugePct = pct;
+        this.elTimingCursor.style.left = `${pct}%`;
+      }
     }
-    if (this.elGaugeModeTitle) this.elGaugeModeTitle.textContent = modeTitle;
-    if (this.elGaugeSpeedReadout) this.elGaugeSpeedReadout.textContent = speedText;
+    if (this.elGaugeModeTitle && this._lastGaugeTitle !== modeTitle) {
+      this._lastGaugeTitle = modeTitle;
+      this.elGaugeModeTitle.textContent = modeTitle;
+    }
+    if (this.elGaugeSpeedReadout && this._lastGaugeSpeed !== speedText) {
+      this._lastGaugeSpeed = speedText;
+      this.elGaugeSpeedReadout.textContent = speedText;
+    }
   }
 
   updateAudioStatus({ playing, trackName }) {

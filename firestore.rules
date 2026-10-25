@@ -46,5 +46,11 @@ service cloud.firestore {
       // Delete: allow host to cancel/clean up their room
       allow delete: if true;
     }
+
+    // Custom Clubs & Club Tournaments
+    match /clubs/{clubId} {
+      allow read: if true;
+      allow write: if clubId is string && clubId.size() >= 2 && clubId.size() <= 96;
+    }
   }
 }

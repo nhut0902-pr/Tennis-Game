@@ -1,1 +1,1020 @@
-export const LYRIA_TRACKS={menu_theme:{id:"menu_theme",title:"Argon Club Plaza Breeze (Lyria 3)",subtitle:"Title & Club Select Theme",src:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/menu_theme.mp3",loop:!0,baseVolume:.42},court_intro:{id:"court_intro",title:"Center Court Flyover (Lyria 3)",subtitle:"Stadium Intro Fanfare",src:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/court_intro.mp3",loop:!1,baseVolume:.48},match_rally:{id:"match_rally",title:"Sunny Baseline Rally (Lyria 3)",subtitle:"Active Match Atmosphere",src:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/match_rally.mp3",loop:!0,baseVolume:.34},victory_fanfare:{id:"victory_fanfare",title:"Grand Slam Trophy (Lyria 3)",subtitle:"Match Victory Celebration",src:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/victory_fanfare.mp3",loop:!1,baseVolume:.5}};const x={title:"menu_theme",menu:"menu_theme",select:"menu_theme",intro:"court_intro",court_intro:"court_intro",flyover:"court_intro",start:"court_intro",serve:"match_rally",serve_wait:"match_rally",serve_toss:"match_rally",rally:"match_rally",playing:"match_rally",match:"match_rally",point:"match_rally",gamepoint:"match_rally",replay:"match_rally",victory:"victory_fanfare",win:"victory_fanfare",game_won:"victory_fanfare",match_over:"victory_fanfare",celebration:"victory_fanfare",menu_theme:"menu_theme",match_rally:"match_rally",victory_fanfare:"victory_fanfare"};export const GEMINI_TTS_CLIPS={start:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_start.mp3",match_start:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_start.mp3","game point":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_point.mp3",game_point:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_point.mp3","break point":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/break_point.mp3",break_point:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/break_point.mp3","match point":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_point.mp3",match_point:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_point.mp3",game:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_won.mp3","game!":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_won.mp3",game_won:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_won.mp3","game set and match":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_set_match.mp3",game_set_match:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_set_match.mp3",out:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_out.mp3",call_out:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_out.mp3",net:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_net.mp3",call_net:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_net.mp3","nice shot!":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_nice_shot.mp3","nice shot":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_nice_shot.mp3",call_nice_shot:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_nice_shot.mp3","power serve":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_serve.mp3","power serve!":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_serve.mp3",call_power_serve:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_serve.mp3",smash:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_smash.mp3",call_power_smash:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_smash.mp3",replay:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_replay.mp3",call_replay:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_replay.mp3","15 - 00":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_00.mp3","30 - 00":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_00.mp3","40 - 00":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_40_00.mp3","00 - 15":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_00_15.mp3","00 - 30":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_00_30.mp3","00 - 40":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_00_40.mp3","15 - 15":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_15.mp3","30 - 15":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_15.mp3","40 - 15":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_40_15.mp3","15 - 30":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_30.mp3","30 - 30":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_30.mp3","40 - 30":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_40_30.mp3","15 - 40":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_40.mp3","30 - 40":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_40.mp3",deuce:"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_deuce.mp3","ad in":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_ad_in.mp3","ad out":"https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_ad_out.mp3"};export class AudioEngine{constructor(s={}){this.ctx=null,this.masterGain=null,this.sfxGain=null,this.reverbSend=null,this.muted=!!(s.muted??!1),this.musicVolume=Number(s.musicVolume??.65),this.sfxVolume=Number(s.sfxVolume??.85),this.audioElements=new Map,this.ttsAudioElements=new Map,this._activeVoiceAudio=null,this._voiceTimers=[],this.currentTrackId=null,this.desiredTrackId="menu_theme",this.unlocked=!1,this.onTrackChange=typeof s.onTrackChange=="function"?s.onTrackChange:null,this._noiseBuffer=null,this._pinkNoiseBuffer=null,this._fadeTimers=new Map,this._preloadTracks(),this._preloadTtsClips(),this._attachAutoplayUnlock()}_preloadTracks(){for(const[s,t]of Object.entries(LYRIA_TRACKS)){const e=new Audio;e.src=t.src,e.loop=t.loop,e.preload="auto",e.volume=0,e.crossOrigin="anonymous",s==="court_intro"&&e.addEventListener("ended",()=>{this.currentTrackId==="court_intro"&&this.playMusicForState("rally")}),this.audioElements.set(s,e)}}_preloadTtsClips(){const s=new Set(Object.values(GEMINI_TTS_CLIPS));for(const t of s){const e=new Audio;e.src=t,e.preload="auto",e.volume=Math.min(1,this.sfxVolume),this.ttsAudioElements.set(t,e)}}_attachAutoplayUnlock(){const s=()=>{this.unlock()};window.addEventListener("pointerdown",s,{passive:!0}),window.addEventListener("keydown",s,{passive:!0}),window.addEventListener("touchstart",s,{passive:!0})}_ensureContext(){if(!this.ctx){const s=window.AudioContext||window.webkitAudioContext;if(!s)return null;this.ctx=new s,this.masterGain=this.ctx.createGain(),this.masterGain.gain.value=this.muted?0:1,this.masterGain.connect(this.ctx.destination),this.sfxGain=this.ctx.createGain(),this.sfxGain.gain.value=this.sfxVolume,this.sfxGain.connect(this.masterGain);const t=this.ctx.createDelay(.5);t.delayTime.value=.095;const e=this.ctx.createGain();e.gain.value=.24;const a=this.ctx.createBiquadFilter();a.type="lowpass",a.frequency.value=3200,this.reverbSend=this.ctx.createGain(),this.reverbSend.gain.value=.22,this.reverbSend.connect(t),t.connect(a),a.connect(e),e.connect(t),a.connect(this.masterGain),this._buildNoiseBuffers()}return this.ctx.state==="suspended"&&this.ctx.resume().catch(()=>{}),this.ctx}_buildNoiseBuffers(){if(!this.ctx)return;const s=this.ctx.sampleRate,t=s*2;this._noiseBuffer=this.ctx.createBuffer(1,t,s);const e=this._noiseBuffer.getChannelData(0);for(let l=0;l<t;l++)e[l]=Math.random()*2-1;this._pinkNoiseBuffer=this.ctx.createBuffer(1,t,s);const a=this._pinkNoiseBuffer.getChannelData(0);let i=0,o=0,n=0,r=0,m=0,p=0,u=0;for(let l=0;l<t;l++){const c=Math.random()*2-1;i=.99886*i+c*.0555179,o=.99332*o+c*.0750759,n=.969*n+c*.153852,r=.8665*r+c*.3104856,m=.55*m+c*.5329522,p=-.7616*p-c*.016898,a[l]=(i+o+n+r+m+p+u+c*.5362)*.045,u=c*.115926}}unlock(){if(this._ensureContext(),this.unlocked=!0,this.desiredTrackId&&!this.muted){const s=this.audioElements.get(this.currentTrackId||this.desiredTrackId);(!s||s.paused)&&this._crossfadeToTrack(this.desiredTrackId)}}playMusicForState(s){const t=String(s||"rally").toLowerCase().trim(),e=x[t]||"match_rally";if(this.desiredTrackId=e,this.currentTrackId===e){const a=this.audioElements.get(e);return a&&a.paused&&!this.muted&&a.play().catch(()=>{}),this.getCurrentTrackInfo()}return this._crossfadeToTrack(e),this.getCurrentTrackInfo()}_crossfadeToTrack(s){const t=this.currentTrackId;if(this.currentTrackId=s,t&&t!==s){const o=this.audioElements.get(t);o&&this._fadeAudio(o,0,420,!0)}const e=this.audioElements.get(s),a=LYRIA_TRACKS[s];if(e&&a){const o=this.muted?0:Math.min(1,a.baseVolume*this.musicVolume);if(!a.loop)try{e.currentTime=0}catch{}e.play().then(()=>{this._fadeAudio(e,o,480,!1)}).catch(()=>{})}const i=this.getCurrentTrackInfo();this._updateHudMusicBadge(i),typeof this.onTrackChange=="function"&&this.onTrackChange(i)}_fadeAudio(s,t,e,a=!1){this._fadeTimers.has(s)&&clearInterval(this._fadeTimers.get(s));const i=12,o=Math.max(16,Math.floor(e/i)),n=s.volume;let r=0;const m=setInterval(()=>{r++;const p=r/i;s.volume=Math.max(0,Math.min(1,n+(t-n)*p)),r>=i&&(clearInterval(m),this._fadeTimers.delete(s),s.volume=Math.max(0,Math.min(1,t)),a&&t<=.001&&s.pause())},o);this._fadeTimers.set(s,m)}getCurrentTrackInfo(){const s=this.currentTrackId||this.desiredTrackId||"menu_theme";return{...LYRIA_TRACKS[s]||LYRIA_TRACKS.menu_theme,muted:this.muted,musicVolume:this.musicVolume}}setMuted(s){this.muted=!!s,this.masterGain&&this.ctx&&this.masterGain.gain.setValueAtTime(this.muted?0:1,this.ctx.currentTime);const t=this.audioElements.get(this.currentTrackId||this.desiredTrackId),e=LYRIA_TRACKS[this.currentTrackId||this.desiredTrackId];return t&&e&&(this.muted?t.volume=0:(t.volume=Math.min(1,e.baseVolume*this.musicVolume),t.paused&&t.play().catch(()=>{}))),this._updateHudMusicBadge(this.getCurrentTrackInfo()),this.muted}toggleMute(){return this.setMuted(!this.muted)}setMusicVolume(s){if(this.musicVolume=Math.max(0,Math.min(1,Number(s))),!this.muted&&this.currentTrackId){const t=this.audioElements.get(this.currentTrackId),e=LYRIA_TRACKS[this.currentTrackId];t&&e&&(t.volume=Math.min(1,e.baseVolume*this.musicVolume))}}setSfxVolume(s){this.sfxVolume=Math.max(0,Math.min(1,Number(s))),this.sfxGain&&this.ctx&&this.sfxGain.gain.setValueAtTime(this.sfxVolume,this.ctx.currentTime)}_updateHudMusicBadge(s){const t=document.getElementById("hud-music-title")||document.getElementById("music-track-label");t&&s&&(t.textContent=s.muted?`\u{1F507} ${s.title}`:`\u266A ${s.title}`)}playSwingWhoosh(s=1){if(this.muted)return;const t=this._ensureContext();if(!t||!this._pinkNoiseBuffer)return;const e=t.currentTime,a=Math.max(.6,Math.min(1.8,Number(s||1))),i=.16,o=t.createBufferSource();o.buffer=this._pinkNoiseBuffer;const n=t.createBiquadFilter();n.type="bandpass",n.Q.setValueAtTime(1.6,e),n.frequency.setValueAtTime(320*a,e),n.frequency.exponentialRampToValueAtTime(1380*a,e+i*.55),n.frequency.exponentialRampToValueAtTime(420,e+i);const r=t.createGain();r.gain.setValueAtTime(.001,e),r.gain.linearRampToValueAtTime(.11*Math.min(1.2,a),e+.025),r.gain.exponentialRampToValueAtTime(.001,e+i),o.connect(n).connect(r).connect(this.sfxGain),o.start(e,Math.random()*.5,i+.02);const m=t.createOscillator(),p=t.createGain();m.type="sine",m.frequency.setValueAtTime(175*a,e),m.frequency.exponentialRampToValueAtTime(92,e+i),p.gain.setValueAtTime(.001,e),p.gain.linearRampToValueAtTime(.055,e+.02),p.gain.exponentialRampToValueAtTime(.001,e+i),m.connect(p).connect(this.sfxGain),m.start(e),m.stop(e+i+.01)}playRacketHit(s="topspin",t="good"){if(this.muted)return;const e=this._ensureContext();if(!e||!this._noiseBuffer)return;const a=e.currentTime,i=String(s||"topspin").toLowerCase(),o=i==="smash"||i==="power_smash",n=t==="perfect"||t==="sweet_spot"||o,r=e.createBufferSource();r.buffer=this._noiseBuffer;const m=e.createBiquadFilter();m.type="bandpass",m.frequency.setValueAtTime(i==="slice"?3600:2450,a),m.Q.setValueAtTime(1.75,a);const p=e.createGain();p.gain.setValueAtTime(.001,a),p.gain.linearRampToValueAtTime(o?.14:.1,a+.004),p.gain.exponentialRampToValueAtTime(.001,a+.028),r.connect(m).connect(p).connect(this.sfxGain),r.start(a,Math.random()*.5,.035);let u=320,l=132,c=.14;i==="slice"?(u=460,l=185,c=.16):i==="lob"?(u=250,l=165,c=.19):o&&(u=395,l=98,c=.21);const h=e.createOscillator(),f=e.createOscillator();h.type="triangle",f.type="sine",f.detune.setValueAtTime(12,a),h.frequency.setValueAtTime(u,a),h.frequency.exponentialRampToValueAtTime(l,a+c),f.frequency.setValueAtTime(u*1.5,a),f.frequency.exponentialRampToValueAtTime(l,a+c*.85);const T=e.createGain();T.gain.setValueAtTime(.001,a),T.gain.linearRampToValueAtTime(o?.13:.095,a+.006),T.gain.exponentialRampToValueAtTime(.001,a+c),h.connect(T),f.connect(T),T.connect(this.sfxGain),this.reverbSend&&T.connect(this.reverbSend),h.start(a),f.start(a),h.stop(a+c+.01),f.stop(a+c+.01),n&&[523.25,659.25,783.99,1046.5].forEach((A,V)=>{const d=a+V*.026,g=e.createOscillator(),y=e.createOscillator();g.type="sine",y.type="triangle",y.detune.setValueAtTime(10,d),g.frequency.setValueAtTime(A,d),y.frequency.setValueAtTime(A,d);const _=e.createGain();_.gain.setValueAtTime(.001,d),_.gain.linearRampToValueAtTime(.048,d+.006),_.gain.exponentialRampToValueAtTime(8e-4,d+.24),g.connect(_),y.connect(_),_.connect(this.sfxGain),this.reverbSend&&_.connect(this.reverbSend),g.start(d),y.start(d),g.stop(d+.25),y.stop(d+.25)})}playBallBounce(s=1){if(this.muted)return;const t=this._ensureContext();if(!t)return;const e=t.currentTime,a=Math.max(.4,Math.min(1.2,Number(s||1))),i=t.createOscillator(),o=t.createGain();if(i.type="sine",i.frequency.setValueAtTime(140,e),i.frequency.exponentialRampToValueAtTime(55,e+.095),o.gain.setValueAtTime(.001,e),o.gain.linearRampToValueAtTime(.11*a,e+.005),o.gain.exponentialRampToValueAtTime(.001,e+.1),i.connect(o).connect(this.sfxGain),i.start(e),i.stop(e+.11),this._pinkNoiseBuffer){const n=t.createBufferSource();n.buffer=this._pinkNoiseBuffer;const r=t.createBiquadFilter();r.type="lowpass",r.frequency.setValueAtTime(950,e);const m=t.createGain();m.gain.setValueAtTime(.001,e),m.gain.linearRampToValueAtTime(.045*a,e+.004),m.gain.exponentialRampToValueAtTime(.001,e+.04),n.connect(r).connect(m).connect(this.sfxGain),n.start(e,Math.random()*.4,.05)}}playNetCord(){if(this.muted)return;const s=this._ensureContext();if(!s)return;const t=s.currentTime,e=s.createOscillator(),a=s.createGain();e.type="triangle",e.frequency.setValueAtTime(98,t),e.frequency.exponentialRampToValueAtTime(42,t+.13);const i=s.createBiquadFilter();if(i.type="lowpass",i.frequency.setValueAtTime(360,t),a.gain.setValueAtTime(.001,t),a.gain.linearRampToValueAtTime(.11,t+.006),a.gain.exponentialRampToValueAtTime(.001,t+.14),e.connect(i).connect(a).connect(this.sfxGain),e.start(t),e.stop(t+.15),this._noiseBuffer){const o=s.createBufferSource();o.buffer=this._noiseBuffer;const n=s.createBiquadFilter();n.type="bandpass",n.frequency.setValueAtTime(620,t),n.Q.setValueAtTime(2.2,t);const r=s.createGain();r.gain.setValueAtTime(.001,t),r.gain.linearRampToValueAtTime(.065,t+.005),r.gain.exponentialRampToValueAtTime(.001,t+.075),o.connect(n).connect(r).connect(this.sfxGain),o.start(t,.1,.085)}}playServeToss(){if(this.muted)return;const s=this._ensureContext();if(!s)return;const t=s.currentTime,e=.22,a=s.createOscillator(),i=s.createOscillator();a.type="sine",i.type="sine",i.detune.setValueAtTime(9,t),a.frequency.setValueAtTime(290,t),a.frequency.exponentialRampToValueAtTime(680,t+e),i.frequency.setValueAtTime(290,t),i.frequency.exponentialRampToValueAtTime(680,t+e);const o=s.createGain();o.gain.setValueAtTime(.001,t),o.gain.linearRampToValueAtTime(.075,t+.025),o.gain.exponentialRampToValueAtTime(.001,t+e),a.connect(o),i.connect(o),o.connect(this.sfxGain),a.start(t),i.start(t),a.stop(t+e+.01),i.stop(t+e+.01)}playCrowdReaction(s="cheer"){if(this.muted)return;const t=this._ensureContext();if(!t||!this._pinkNoiseBuffer)return;const e=t.currentTime,a=String(s||"cheer").toLowerCase();if(a==="gasp"||a==="ooh"){const u=t.createBufferSource();u.buffer=this._pinkNoiseBuffer;const l=t.createBiquadFilter();l.type="bandpass",l.Q.setValueAtTime(2.4,e),l.frequency.setValueAtTime(720,e),l.frequency.exponentialRampToValueAtTime(410,e+.55);const c=t.createGain();c.gain.setValueAtTime(.001,e),c.gain.linearRampToValueAtTime(.09,e+.08),c.gain.exponentialRampToValueAtTime(.001,e+.55),u.connect(l).connect(c).connect(this.sfxGain),this.reverbSend&&c.connect(this.reverbSend),u.start(e,0,.55+.05);return}const i=a==="polite_clap"?.85:1.35,o=t.createBufferSource();o.buffer=this._pinkNoiseBuffer;const n=t.createBiquadFilter();n.type="bandpass",n.Q.setValueAtTime(1.1,e),n.frequency.setValueAtTime(650,e),n.frequency.exponentialRampToValueAtTime(1250,e+i*.35),n.frequency.exponentialRampToValueAtTime(780,e+i);const r=t.createGain();r.gain.setValueAtTime(.001,e),r.gain.linearRampToValueAtTime(a==="polite_clap"?.075:.115,e+.14),r.gain.exponentialRampToValueAtTime(.001,e+i),o.connect(n).connect(r).connect(this.sfxGain),this.reverbSend&&r.connect(this.reverbSend),o.start(e,0,i+.05);const m=a==="polite_clap"?10:18;for(let p=0;p<m;p++){const u=e+.03+p/m*(i*.78)+Math.random()*.035,l=t.createBufferSource();l.buffer=this._noiseBuffer;const c=t.createBiquadFilter();c.type="bandpass",c.frequency.setValueAtTime(1400+Math.random()*900,u),c.Q.setValueAtTime(1.9,u);const h=t.createGain();h.gain.setValueAtTime(.001,u),h.gain.linearRampToValueAtTime(.038,u+.003),h.gain.exponentialRampToValueAtTime(.001,u+.026),l.connect(c).connect(h).connect(this.sfxGain),l.start(u,Math.random()*.8,.03)}a==="cheer"&&[261.63,329.63,392].forEach((u,l)=>{const c=t.createOscillator();c.type="triangle",c.detune.setValueAtTime((l-1)*11,e),c.frequency.setValueAtTime(u,e);const h=t.createGain();h.gain.setValueAtTime(.001,e),h.gain.linearRampToValueAtTime(.025,e+.12),h.gain.exponentialRampToValueAtTime(8e-4,e+.75),c.connect(h).connect(this.sfxGain),this.reverbSend&&h.connect(this.reverbSend),c.start(e),c.stop(e+.78)})}announceScore(s,{delayMs:t=0,playChime:e=!0}={}){if(this.muted||!s)return;const a=String(s).trim(),i=this._ensureContext();if(i&&e){const o=i.currentTime+t/1e3;(/game|match|deuce|win|nice|power|smash/i.test(a)?[587.33,739.99,880]:[523.25,659.25]).forEach((m,p)=>{const u=o+p*.065,l=i.createOscillator(),c=i.createOscillator();l.type="sine",c.type="triangle",c.detune.setValueAtTime(10,u),l.frequency.setValueAtTime(m,u),c.frequency.setValueAtTime(m,u);const h=i.createGain();h.gain.setValueAtTime(.001,u),h.gain.linearRampToValueAtTime(.055,u+.008),h.gain.exponentialRampToValueAtTime(8e-4,u+.24),l.connect(h),c.connect(h),h.connect(this.sfxGain),this.reverbSend&&h.connect(this.reverbSend),l.start(u),c.start(u),l.stop(u+.26),c.stop(u+.26)})}this.playVoiceCallout(a,{delayMs:t,clearQueue:t===0})}playVoiceCallout(s,{delayMs:t=0,clearQueue:e=!1}={}){if(this.muted||!s)return;const a=String(s).trim().toLowerCase(),i=GEMINI_TTS_CLIPS[a];e&&this._voiceTimers.length>0&&(this._voiceTimers.forEach(n=>clearTimeout(n)),this._voiceTimers=[]);const o=()=>{if(!this.muted){if(i)try{this._activeVoiceAudio&&!this._activeVoiceAudio.paused&&(this._activeVoiceAudio.pause(),this._activeVoiceAudio.currentTime=0);let n=this.ttsAudioElements.get(i);n||(n=new Audio(i),this.ttsAudioElements.set(i,n)),n.currentTime=0,n.volume=Math.min(1,this.sfxVolume*.98),this._activeVoiceAudio=n,n.play().catch(()=>{});return}catch{}if(typeof window<"u"&&"speechSynthesis"in window)try{window.speechSynthesis.cancel();const n=String(s).replace(/\b00\b/g,"Love").replace(/\s*-\s*/g," ").replace(/!/g,""),r=new SpeechSynthesisUtterance(n);r.rate=1.06,r.pitch=1.04,r.volume=Math.min(1,this.sfxVolume*.9),window.speechSynthesis.speak(r)}catch{}}};if(t>0){const n=setTimeout(o,t);this._voiceTimers.push(n)}else o()}playUiClick(){if(this.muted)return;const s=this._ensureContext();if(!s)return;const t=s.currentTime,e=s.createOscillator(),a=s.createGain();e.type="sine",e.frequency.setValueAtTime(660,t),e.frequency.exponentialRampToValueAtTime(880,t+.045),a.gain.setValueAtTime(.001,t),a.gain.linearRampToValueAtTime(.05,t+.004),a.gain.exponentialRampToValueAtTime(.001,t+.05),e.connect(a).connect(this.sfxGain),e.start(t),e.stop(t+.055)}}export default AudioEngine;
+export const LYRIA_TRACKS = {
+  menu_theme: {
+    id: "menu_theme",
+    title: "Argon Club Plaza Breeze (Lyria 3)",
+    subtitle: "Title & Club Select Theme",
+    src: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/menu_theme.mp3",
+    loop: true,
+    baseVolume: 0.42
+  },
+  court_intro: {
+    id: "court_intro",
+    title: "Center Court Flyover (Lyria 3)",
+    subtitle: "Stadium Intro Fanfare",
+    src: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/court_intro.mp3",
+    loop: false,
+    baseVolume: 0.48
+  },
+  match_rally: {
+    id: "match_rally",
+    title: "Sunny Baseline Rally (Lyria 3)",
+    subtitle: "Active Match Atmosphere",
+    src: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/match_rally.mp3",
+    loop: true,
+    baseVolume: 0.34
+  },
+  victory_fanfare: {
+    id: "victory_fanfare",
+    title: "Grand Slam Trophy (Lyria 3)",
+    subtitle: "Match Victory Celebration",
+    src: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/victory_fanfare.mp3",
+    loop: false,
+    baseVolume: 0.5
+  }
+};
+
+const STATE_TO_TRACK = {
+  title: "menu_theme",
+  menu: "menu_theme",
+  select: "menu_theme",
+  intro: "court_intro",
+  court_intro: "court_intro",
+  flyover: "court_intro",
+  start: "court_intro",
+  serve: "match_rally",
+  serve_wait: "match_rally",
+  serve_toss: "match_rally",
+  rally: "match_rally",
+  playing: "match_rally",
+  match: "match_rally",
+  point: "match_rally",
+  gamepoint: "match_rally",
+  replay: "match_rally",
+  victory: "victory_fanfare",
+  win: "victory_fanfare",
+  game_won: "victory_fanfare",
+  match_over: "victory_fanfare",
+  celebration: "victory_fanfare",
+  menu_theme: "menu_theme",
+  match_rally: "match_rally",
+  victory_fanfare: "victory_fanfare"
+};
+
+export const GEMINI_TTS_CLIPS = {
+  start: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_start.mp3",
+  match_start: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_start.mp3",
+  "game point": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_point.mp3",
+  game_point: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_point.mp3",
+  "break point": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/break_point.mp3",
+  break_point: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/break_point.mp3",
+  "match point": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_point.mp3",
+  match_point: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/match_point.mp3",
+  game: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_won.mp3",
+  "game!": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_won.mp3",
+  game_won: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_won.mp3",
+  "game set and match": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_set_match.mp3",
+  game_set_match: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/game_set_match.mp3",
+  out: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_out.mp3",
+  call_out: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_out.mp3",
+  net: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_net.mp3",
+  call_net: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_net.mp3",
+  "nice shot!": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_nice_shot.mp3",
+  "nice shot": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_nice_shot.mp3",
+  call_nice_shot: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_nice_shot.mp3",
+  "power serve": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_serve.mp3",
+  "power serve!": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_serve.mp3",
+  call_power_serve: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_serve.mp3",
+  smash: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_smash.mp3",
+  call_power_smash: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_power_smash.mp3",
+  replay: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_replay.mp3",
+  call_replay: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/call_replay.mp3",
+  "15 - 00": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_00.mp3",
+  "30 - 00": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_00.mp3",
+  "40 - 00": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_40_00.mp3",
+  "00 - 15": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_00_15.mp3",
+  "00 - 30": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_00_30.mp3",
+  "00 - 40": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_00_40.mp3",
+  "15 - 15": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_15.mp3",
+  "30 - 15": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_15.mp3",
+  "40 - 15": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_40_15.mp3",
+  "15 - 30": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_30.mp3",
+  "30 - 30": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_30.mp3",
+  "40 - 30": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_40_30.mp3",
+  "15 - 40": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_15_40.mp3",
+  "30 - 40": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_30_40.mp3",
+  deuce: "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_deuce.mp3",
+  "ad in": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_ad_in.mp3",
+  "ad out": "https://www.gstatic.com/aistudio/starter-apps/tennis/audio/tts/score_ad_out.mp3"
+};
+
+export class AudioEngine {
+  constructor(options = {}) {
+    this.ctx = null;
+    this.masterGain = null;
+    this.sfxGain = null;
+    this.reverbSend = null;
+    this.muted = Boolean(options.muted ?? false);
+    this.musicVolume = Number(options.musicVolume ?? 0.65);
+    this.sfxVolume = Number(options.sfxVolume ?? 0.85);
+    this.audioElements = new Map();
+    this.ttsAudioElements = new Map();
+    this._activeVoiceAudio = null;
+    this._voiceTimers = [];
+    this.currentTrackId = null;
+    this.desiredTrackId = "menu_theme";
+    this.unlocked = false;
+    this.onTrackChange = typeof options.onTrackChange === "function" ? options.onTrackChange : null;
+    this._noiseBuffer = null;
+    this._pinkNoiseBuffer = null;
+    this._fadeTimers = new Map();
+    this._lastHoverSoundAt = 0;
+
+    this._preloadTracks();
+    this._preloadTtsClips();
+    this._attachAutoplayUnlock();
+    this._attachGlobalUiSoundListeners();
+  }
+
+  _preloadTracks() {
+    for (const [key, track] of Object.entries(LYRIA_TRACKS)) {
+      const audio = new Audio();
+      audio.src = track.src;
+      audio.loop = track.loop;
+      audio.preload = "auto";
+      audio.volume = 0;
+      audio.crossOrigin = "anonymous";
+      if (key === "court_intro") {
+        audio.addEventListener("ended", () => {
+          if (this.currentTrackId === "court_intro") {
+            this.playMusicForState("rally");
+          }
+        });
+      }
+      this.audioElements.set(key, audio);
+    }
+  }
+
+  _preloadTtsClips() {
+    const urls = new Set(Object.values(GEMINI_TTS_CLIPS));
+    for (const url of urls) {
+      const audio = new Audio();
+      audio.src = url;
+      audio.preload = "auto";
+      audio.volume = Math.min(1, this.sfxVolume);
+      this.ttsAudioElements.set(url, audio);
+    }
+  }
+
+  _attachAutoplayUnlock() {
+    const unlockHandler = () => {
+      this.unlock();
+    };
+    window.addEventListener("pointerdown", unlockHandler, { passive: true });
+    window.addEventListener("keydown", unlockHandler, { passive: true });
+    window.addEventListener("touchstart", unlockHandler, { passive: true });
+  }
+
+  _attachGlobalUiSoundListeners() {
+    if (typeof document === "undefined") return;
+
+    // Global delegated click sound for buttons across the entire game
+    document.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (this.muted) return;
+        const btn = e.target?.closest?.(
+          "button, [role='button'], .wii-btn, .mode-card, .camera-pill, .shot-btn"
+        );
+        if (!btn || btn.disabled) return;
+        // Skip if button has its own specialized shop sound handler
+        if (
+          btn.hasAttribute("data-upgrade-stat") ||
+          btn.hasAttribute("data-upgrade-skill") ||
+          btn.hasAttribute("data-upgrade-partner-ai") ||
+          btn.hasAttribute("data-char-action") ||
+          btn.hasAttribute("data-outfit-action") ||
+          btn.hasAttribute("data-racket-action") ||
+          btn.hasAttribute("data-acc-action") ||
+          btn.hasAttribute("data-vfx-action") ||
+          btn.id === "btn-shop-claim-coins"
+        ) {
+          return;
+        }
+
+        if (btn.hasAttribute("data-shop-tab") || btn.hasAttribute("data-loadout-slot")) {
+          this.playUiClick("tab");
+        } else if (btn.hasAttribute("data-shop-unit")) {
+          this.playUiClick("unit");
+        } else if (btn.hasAttribute("data-shop-pose") || btn.id === "btn-shop-cam-zoom") {
+          this.playUiClick("camera");
+        } else {
+          this.playUiClick("default");
+        }
+      },
+      { passive: true }
+    );
+
+    // Subtle hover tick on desktop pointer devices
+    document.addEventListener(
+      "pointerover",
+      (e) => {
+        if (this.muted || e.pointerType === "touch") return;
+        const target = e.target?.closest?.(
+          "button:not(:disabled), .shop-item-card, .upgrade-stat-row, .loadout-slot-btn"
+        );
+        if (!target) return;
+        const related = e.relatedTarget;
+        if (related && target.contains(related)) return;
+        const now = performance.now();
+        if (now - this._lastHoverSoundAt < 55) return;
+        this._lastHoverSoundAt = now;
+        this.playUiHover();
+      },
+      { passive: true }
+    );
+  }
+
+  _ensureContext() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      this.ctx = new AudioCtx();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = this.muted ? 0 : 1;
+      this.masterGain.connect(this.ctx.destination);
+
+      this.sfxGain = this.ctx.createGain();
+      this.sfxGain.gain.value = this.sfxVolume;
+      this.sfxGain.connect(this.masterGain);
+
+      const delay = this.ctx.createDelay(0.5);
+      delay.delayTime.value = 0.095;
+      const feedback = this.ctx.createGain();
+      feedback.gain.value = 0.24;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 3200;
+
+      this.reverbSend = this.ctx.createGain();
+      this.reverbSend.gain.value = 0.22;
+      this.reverbSend.connect(delay);
+      delay.connect(filter);
+      filter.connect(feedback);
+      feedback.connect(delay);
+      filter.connect(this.masterGain);
+
+      this._buildNoiseBuffers();
+    }
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+    return this.ctx;
+  }
+
+  _buildNoiseBuffers() {
+    if (!this.ctx) return;
+    const sr = this.ctx.sampleRate;
+    const len = sr * 2;
+    this._noiseBuffer = this.ctx.createBuffer(1, len, sr);
+    const white = this._noiseBuffer.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      white[i] = Math.random() * 2 - 1;
+    }
+
+    this._pinkNoiseBuffer = this.ctx.createBuffer(1, len, sr);
+    const pink = this._pinkNoiseBuffer.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + w * 0.0555179;
+      b1 = 0.99332 * b1 + w * 0.0750759;
+      b2 = 0.96900 * b2 + w * 0.1538520;
+      b3 = 0.86650 * b3 + w * 0.3104856;
+      b4 = 0.55000 * b4 + w * 0.5329522;
+      b5 = -0.7616 * b5 - w * 0.0168980;
+      pink[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.045;
+      b6 = w * 0.115926;
+    }
+  }
+
+  unlock() {
+    this._ensureContext();
+    this.unlocked = true;
+    if (this.desiredTrackId && !this.muted) {
+      const currentAudio = this.audioElements.get(this.currentTrackId || this.desiredTrackId);
+      if (!currentAudio || currentAudio.paused) {
+        this._crossfadeToTrack(this.desiredTrackId);
+      }
+    }
+  }
+
+  playMusicForState(stateName) {
+    const key = String(stateName || "rally").toLowerCase().trim();
+    const targetTrack = STATE_TO_TRACK[key] || "match_rally";
+    this.desiredTrackId = targetTrack;
+    if (this.currentTrackId === targetTrack) {
+      const audio = this.audioElements.get(targetTrack);
+      if (audio && audio.paused && !this.muted) {
+        audio.play().catch(() => {});
+      }
+      return this.getCurrentTrackInfo();
+    }
+    this._crossfadeToTrack(targetTrack);
+    return this.getCurrentTrackInfo();
+  }
+
+  _crossfadeToTrack(nextTrackId) {
+    const prevTrackId = this.currentTrackId;
+    this.currentTrackId = nextTrackId;
+    if (prevTrackId && prevTrackId !== nextTrackId) {
+      const prevAudio = this.audioElements.get(prevTrackId);
+      if (prevAudio) this._fadeAudio(prevAudio, 0, 420, true);
+    }
+    const nextAudio = this.audioElements.get(nextTrackId);
+    const meta = LYRIA_TRACKS[nextTrackId];
+    if (nextAudio && meta) {
+      const targetVol = this.muted ? 0 : Math.min(1, meta.baseVolume * this.musicVolume);
+      if (!meta.loop) {
+        try {
+          nextAudio.currentTime = 0;
+        } catch {}
+      }
+      nextAudio
+        .play()
+        .then(() => {
+          this._fadeAudio(nextAudio, targetVol, 480, false);
+        })
+        .catch(() => {});
+    }
+    const info = this.getCurrentTrackInfo();
+    this._updateHudMusicBadge(info);
+    if (typeof this.onTrackChange === "function") {
+      this.onTrackChange(info);
+    }
+  }
+
+  _fadeAudio(audioEl, targetVol, durationMs, pauseOnZero = false) {
+    if (this._fadeTimers.has(audioEl)) {
+      clearInterval(this._fadeTimers.get(audioEl));
+    }
+    const steps = 12;
+    const stepMs = Math.max(16, Math.floor(durationMs / steps));
+    const startVol = audioEl.volume;
+    let count = 0;
+    const timer = setInterval(() => {
+      count++;
+      const t = count / steps;
+      audioEl.volume = Math.max(0, Math.min(1, startVol + (targetVol - startVol) * t));
+      if (count >= steps) {
+        clearInterval(timer);
+        this._fadeTimers.delete(audioEl);
+        audioEl.volume = Math.max(0, Math.min(1, targetVol));
+        if (pauseOnZero && targetVol <= 0.001) {
+          audioEl.pause();
+        }
+      }
+    }, stepMs);
+    this._fadeTimers.set(audioEl, timer);
+  }
+
+  getCurrentTrackInfo() {
+    const id = this.currentTrackId || this.desiredTrackId || "menu_theme";
+    return {
+      ...(LYRIA_TRACKS[id] || LYRIA_TRACKS.menu_theme),
+      muted: this.muted,
+      musicVolume: this.musicVolume
+    };
+  }
+
+  setMuted(muted) {
+    this.muted = Boolean(muted);
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setValueAtTime(this.muted ? 0 : 1, this.ctx.currentTime);
+    }
+    const activeId = this.currentTrackId || this.desiredTrackId;
+    const audio = this.audioElements.get(activeId);
+    const meta = LYRIA_TRACKS[activeId];
+    if (audio && meta) {
+      if (this.muted) {
+        audio.volume = 0;
+      } else {
+        audio.volume = Math.min(1, meta.baseVolume * this.musicVolume);
+        if (audio.paused) audio.play().catch(() => {});
+      }
+    }
+    this._updateHudMusicBadge(this.getCurrentTrackInfo());
+    return this.muted;
+  }
+
+  toggleMute() {
+    return this.setMuted(!this.muted);
+  }
+
+  setMusicVolume(vol) {
+    this.musicVolume = Math.max(0, Math.min(1, Number(vol)));
+    if (!this.muted && this.currentTrackId) {
+      const audio = this.audioElements.get(this.currentTrackId);
+      const meta = LYRIA_TRACKS[this.currentTrackId];
+      if (audio && meta) {
+        audio.volume = Math.min(1, meta.baseVolume * this.musicVolume);
+      }
+    }
+  }
+
+  setSfxVolume(vol) {
+    this.sfxVolume = Math.max(0, Math.min(1, Number(vol)));
+    if (this.sfxGain && this.ctx) {
+      this.sfxGain.gain.setValueAtTime(this.sfxVolume, this.ctx.currentTime);
+    }
+  }
+
+  _updateHudMusicBadge(info) {
+    const el = document.getElementById("hud-music-title") || document.getElementById("music-track-label");
+    if (el && info) {
+      el.textContent = info.muted ? `Tắt tiếng: ${info.title}` : `♪ ${info.title}`;
+    }
+  }
+
+  playSwingWhoosh(intensity = 1) {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx || !this._pinkNoiseBuffer) return;
+    const now = ctx.currentTime;
+    const mult = Math.max(0.6, Math.min(1.8, Number(intensity || 1)));
+    const dur = 0.16;
+    const src = ctx.createBufferSource();
+    src.buffer = this._pinkNoiseBuffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.setValueAtTime(1.6, now);
+    filter.frequency.setValueAtTime(320 * mult, now);
+    filter.frequency.exponentialRampToValueAtTime(1380 * mult, now + dur * 0.55);
+    filter.frequency.exponentialRampToValueAtTime(420, now + dur);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.11 * Math.min(1.2, mult), now + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(filter).connect(gain).connect(this.sfxGain);
+    src.start(now, Math.random() * 0.5, dur + 0.02);
+
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(175 * mult, now);
+    osc.frequency.exponentialRampToValueAtTime(92, now + dur);
+    oscGain.gain.setValueAtTime(0.001, now);
+    oscGain.gain.linearRampToValueAtTime(0.055, now + 0.02);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc.connect(oscGain).connect(this.sfxGain);
+    osc.start(now);
+    osc.stop(now + dur + 0.01);
+  }
+
+  playRacketHit(shotType = "topspin", timing = "good") {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx || !this._noiseBuffer) return;
+    const now = ctx.currentTime;
+    const type = String(shotType || "topspin").toLowerCase();
+    const isSmash = type === "smash" || type === "power_smash";
+    const isSweet = timing === "perfect" || timing === "sweet_spot" || isSmash;
+
+    const src = ctx.createBufferSource();
+    src.buffer = this._noiseBuffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(type === "slice" ? 3600 : 2450, now);
+    filter.Q.setValueAtTime(1.75, now);
+
+    const nGain = ctx.createGain();
+    nGain.gain.setValueAtTime(0.001, now);
+    nGain.gain.linearRampToValueAtTime(isSmash ? 0.14 : 0.1, now + 0.004);
+    nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.028);
+    src.connect(filter).connect(nGain).connect(this.sfxGain);
+    src.start(now, Math.random() * 0.5, 0.035);
+
+    let fStart = 320, fEnd = 132, dur = 0.14;
+    if (type === "slice") {
+      fStart = 460;
+      fEnd = 185;
+      dur = 0.16;
+    } else if (type === "lob") {
+      fStart = 250;
+      fEnd = 165;
+      dur = 0.19;
+    } else if (isSmash) {
+      fStart = 395;
+      fEnd = 98;
+      dur = 0.21;
+    }
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    osc1.type = "triangle";
+    osc2.type = "sine";
+    osc2.detune.setValueAtTime(12, now);
+    osc1.frequency.setValueAtTime(fStart, now);
+    osc1.frequency.exponentialRampToValueAtTime(fEnd, now + dur);
+    osc2.frequency.setValueAtTime(fStart * 1.5, now);
+    osc2.frequency.exponentialRampToValueAtTime(fEnd, now + dur * 0.85);
+
+    const bodyGain = ctx.createGain();
+    bodyGain.gain.setValueAtTime(0.001, now);
+    bodyGain.gain.linearRampToValueAtTime(isSmash ? 0.13 : 0.095, now + 0.006);
+    bodyGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc1.connect(bodyGain);
+    osc2.connect(bodyGain);
+    bodyGain.connect(this.sfxGain);
+    if (this.reverbSend) bodyGain.connect(this.reverbSend);
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + dur + 0.01);
+    osc2.stop(now + dur + 0.01);
+
+    if (isSweet) {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+        const t0 = now + idx * 0.026;
+        const c1 = ctx.createOscillator();
+        const c2 = ctx.createOscillator();
+        c1.type = "sine";
+        c2.type = "triangle";
+        c2.detune.setValueAtTime(10, t0);
+        c1.frequency.setValueAtTime(freq, t0);
+        c2.frequency.setValueAtTime(freq, t0);
+        const cg = ctx.createGain();
+        cg.gain.setValueAtTime(0.001, t0);
+        cg.gain.linearRampToValueAtTime(0.048, t0 + 0.006);
+        cg.gain.exponentialRampToValueAtTime(0.0008, t0 + 0.24);
+        c1.connect(cg);
+        c2.connect(cg);
+        cg.connect(this.sfxGain);
+        if (this.reverbSend) cg.connect(this.reverbSend);
+        c1.start(t0);
+        c2.start(t0);
+        c1.stop(t0 + 0.25);
+        c2.stop(t0 + 0.25);
+      });
+    }
+  }
+
+  playBallBounce(intensity = 1) {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const mult = Math.max(0.4, Math.min(1.2, Number(intensity || 1)));
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(55, now + 0.095);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.11 * mult, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc.connect(gain).connect(this.sfxGain);
+    osc.start(now);
+    osc.stop(now + 0.11);
+
+    if (this._pinkNoiseBuffer) {
+      const src = ctx.createBufferSource();
+      src.buffer = this._pinkNoiseBuffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(950, now);
+      const nGain = ctx.createGain();
+      nGain.gain.setValueAtTime(0.001, now);
+      nGain.gain.linearRampToValueAtTime(0.045 * mult, now + 0.004);
+      nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      src.connect(filter).connect(nGain).connect(this.sfxGain);
+      src.start(now, Math.random() * 0.4, 0.05);
+    }
+  }
+
+  playNetCord() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(98, now);
+    osc.frequency.exponentialRampToValueAtTime(42, now + 0.13);
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(360, now);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.11, now + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    osc.connect(filter).connect(gain).connect(this.sfxGain);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  playServeToss() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const dur = 0.22;
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    osc1.type = "sine";
+    osc2.type = "sine";
+    osc2.detune.setValueAtTime(9, now);
+    osc1.frequency.setValueAtTime(290, now);
+    osc1.frequency.exponentialRampToValueAtTime(680, now + dur);
+    osc2.frequency.setValueAtTime(290, now);
+    osc2.frequency.exponentialRampToValueAtTime(680, now + dur);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.075, now + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.sfxGain);
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + dur + 0.01);
+    osc2.stop(now + dur + 0.01);
+  }
+
+  playCrowdReaction(type = "cheer") {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx || !this._pinkNoiseBuffer) return;
+    const now = ctx.currentTime;
+    const kind = String(type || "cheer").toLowerCase();
+    if (kind === "gasp" || kind === "ooh") {
+      const src = ctx.createBufferSource();
+      src.buffer = this._pinkNoiseBuffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.Q.setValueAtTime(2.4, now);
+      filter.frequency.setValueAtTime(720, now);
+      filter.frequency.exponentialRampToValueAtTime(410, now + 0.55);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.09, now + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+      src.connect(filter).connect(gain).connect(this.sfxGain);
+      if (this.reverbSend) gain.connect(this.reverbSend);
+      src.start(now, 0, 0.6);
+      return;
+    }
+
+    const dur = kind === "polite_clap" ? 0.85 : 1.35;
+    const src = ctx.createBufferSource();
+    src.buffer = this._pinkNoiseBuffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.setValueAtTime(1.1, now);
+    filter.frequency.setValueAtTime(650, now);
+    filter.frequency.exponentialRampToValueAtTime(1250, now + dur * 0.35);
+    filter.frequency.exponentialRampToValueAtTime(780, now + dur);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(kind === "polite_clap" ? 0.075 : 0.115, now + 0.14);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(filter).connect(gain).connect(this.sfxGain);
+    if (this.reverbSend) gain.connect(this.reverbSend);
+    src.start(now, 0, dur + 0.05);
+  }
+
+  announceScore(text, { delayMs = 0, playChime = true } = {}) {
+    if (this.muted || !text) return;
+    const clean = String(text).trim();
+    const ctx = this._ensureContext();
+    if (ctx && playChime) {
+      const t0 = ctx.currentTime + delayMs / 1000;
+      const notes = /game|match|deuce|win|nice|power|smash/i.test(clean)
+        ? [587.33, 739.99, 880]
+        : [523.25, 659.25];
+      notes.forEach((freq, idx) => {
+        const start = t0 + idx * 0.065;
+        const o1 = ctx.createOscillator();
+        const o2 = ctx.createOscillator();
+        o1.type = "sine";
+        o2.type = "triangle";
+        o2.detune.setValueAtTime(10, start);
+        o1.frequency.setValueAtTime(freq, start);
+        o2.frequency.setValueAtTime(freq, start);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.001, start);
+        g.gain.linearRampToValueAtTime(0.055, start + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0008, start + 0.24);
+        o1.connect(g);
+        o2.connect(g);
+        g.connect(this.sfxGain);
+        if (this.reverbSend) g.connect(this.reverbSend);
+        o1.start(start);
+        o2.start(start);
+        o1.stop(start + 0.26);
+        o2.stop(start + 0.26);
+      });
+    }
+    this.playVoiceCallout(clean, { delayMs, clearQueue: delayMs === 0 });
+  }
+
+  playVoiceCallout(text, { delayMs = 0, clearQueue = false } = {}) {
+    if (this.muted || !text) return;
+    const key = String(text).trim().toLowerCase();
+    const clipUrl = GEMINI_TTS_CLIPS[key];
+    if (clearQueue && this._voiceTimers.length > 0) {
+      this._voiceTimers.forEach((t) => clearTimeout(t));
+      this._voiceTimers = [];
+    }
+    const trigger = () => {
+      if (this.muted) return;
+      if (clipUrl) {
+        try {
+          if (this._activeVoiceAudio && !this._activeVoiceAudio.paused) {
+            this._activeVoiceAudio.pause();
+            this._activeVoiceAudio.currentTime = 0;
+          }
+          let audio = this.ttsAudioElements.get(clipUrl);
+          if (!audio) {
+            audio = new Audio(clipUrl);
+            this.ttsAudioElements.set(clipUrl, audio);
+          }
+          audio.currentTime = 0;
+          audio.volume = Math.min(1, this.sfxVolume * 0.98);
+          this._activeVoiceAudio = audio;
+          audio.play().catch(() => {});
+          return;
+        } catch {}
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const spoken = String(text)
+            .replace(/\b00\b/g, "Love")
+            .replace(/\s*-\s*/g, " ")
+            .replace(/!/g, "");
+          const utter = new SpeechSynthesisUtterance(spoken);
+          utter.rate = 1.06;
+          utter.pitch = 1.04;
+          utter.volume = Math.min(1, this.sfxVolume * 0.9);
+          window.speechSynthesis.speak(utter);
+        } catch {}
+      }
+    };
+    if (delayMs > 0) {
+      const timer = setTimeout(trigger, delayMs);
+      this._voiceTimers.push(timer);
+    } else {
+      trigger();
+    }
+  }
+
+  /* =====================================================================
+     PRO GAME UI & SHOP SYNTHESIZER SOUND EFFECTS (WEB AUDIO API)
+     ===================================================================== */
+
+  playUiHover() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1420, now);
+    osc.frequency.exponentialRampToValueAtTime(1880, now + 0.018);
+    gain.gain.setValueAtTime(0.0005, now);
+    gain.gain.linearRampToValueAtTime(0.016, now + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.02);
+    osc.connect(gain).connect(this.sfxGain);
+    osc.start(now);
+    osc.stop(now + 0.022);
+  }
+
+  playUiClick(variant = "default") {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    let fStart = 640;
+    let fEnd = 920;
+    let dur = 0.048;
+    let wave = "triangle";
+
+    if (variant === "tab") {
+      fStart = 520;
+      fEnd = 780;
+      dur = 0.055;
+      wave = "sine";
+    } else if (variant === "unit") {
+      fStart = 440;
+      fEnd = 880;
+      dur = 0.065;
+      wave = "triangle";
+    } else if (variant === "camera") {
+      fStart = 760;
+      fEnd = 1140;
+      dur = 0.045;
+      wave = "sine";
+    }
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = wave;
+    osc.frequency.setValueAtTime(fStart, now);
+    osc.frequency.exponentialRampToValueAtTime(fEnd, now + dur);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.055, now + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc.connect(gain).connect(this.sfxGain);
+    osc.start(now);
+    osc.stop(now + dur + 0.008);
+  }
+
+  playShopOpen() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    // Broadcast studio chime + subtle air whoosh
+    [440, 554.37, 659.25, 880].forEach((freq, idx) => {
+      const t0 = now + idx * 0.045;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.045, t0 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t0 + 0.26);
+      osc.connect(gain).connect(this.sfxGain);
+      if (this.reverbSend) gain.connect(this.reverbSend);
+      osc.start(t0);
+      osc.stop(t0 + 0.28);
+    });
+  }
+
+  playShopClose() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    [659.25, 880].forEach((freq, idx) => {
+      const t0 = now + idx * 0.05;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.05, t0 + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t0 + 0.18);
+      osc.connect(gain).connect(this.sfxGain);
+      osc.start(t0);
+      osc.stop(t0 + 0.2);
+    });
+  }
+
+  playCoinClaim() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    // Shimmering gold coin cascade (B5 -> E6 -> G#6 -> B6)
+    [987.77, 1318.51, 1661.22, 1975.53].forEach((freq, idx) => {
+      const t0 = now + idx * 0.052;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc1.type = "sine";
+      osc2.type = "triangle";
+      osc2.detune.setValueAtTime(14, t0);
+      osc1.frequency.setValueAtTime(freq, t0);
+      osc2.frequency.setValueAtTime(freq * 2, t0);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.065, t0 + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t0 + 0.32);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.sfxGain);
+      if (this.reverbSend) gain.connect(this.reverbSend);
+      osc1.start(t0);
+      osc2.start(t0);
+      osc1.stop(t0 + 0.34);
+      osc2.stop(t0 + 0.34);
+    });
+  }
+
+  playStatUpgrade(level = 1) {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const lvFactor = 1 + Math.min(10, Math.max(1, level)) * 0.045;
+    const baseNotes = [392.0, 493.88, 587.33, 783.99];
+    baseNotes.forEach((freq, idx) => {
+      const t0 = now + idx * 0.042;
+      const osc = ctx.createOscillator();
+      const sub = ctx.createOscillator();
+      osc.type = "sawtooth";
+      sub.type = "sine";
+      osc.frequency.setValueAtTime(freq * lvFactor, t0);
+      sub.frequency.setValueAtTime(freq * 0.5 * lvFactor, t0);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2600, t0);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.055, t0 + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t0 + 0.22);
+
+      osc.connect(filter).connect(gain);
+      sub.connect(gain);
+      gain.connect(this.sfxGain);
+      if (this.reverbSend) gain.connect(this.reverbSend);
+      osc.start(t0);
+      sub.start(t0);
+      osc.stop(t0 + 0.24);
+      sub.stop(t0 + 0.24);
+    });
+  }
+
+  playItemUnlock() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    // Grand Slam Pro Unlock Fanfare (C5 -> E5 -> G5 -> B5 -> C6)
+    [523.25, 659.25, 783.99, 987.77, 1046.5].forEach((freq, idx) => {
+      const t0 = now + idx * 0.058;
+      const o1 = ctx.createOscillator();
+      const o2 = ctx.createOscillator();
+      o1.type = "triangle";
+      o2.type = "sine";
+      o2.detune.setValueAtTime(12, t0);
+      o1.frequency.setValueAtTime(freq, t0);
+      o2.frequency.setValueAtTime(freq * 1.5, t0);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(idx === 4 ? 0.08 : 0.058, t0 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t0 + (idx === 4 ? 0.48 : 0.28));
+      o1.connect(gain);
+      o2.connect(gain);
+      gain.connect(this.sfxGain);
+      if (this.reverbSend) gain.connect(this.reverbSend);
+      o1.start(t0);
+      o2.start(t0);
+      o1.stop(t0 + 0.5);
+      o2.stop(t0 + 0.5);
+    });
+  }
+
+  playItemEquip() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    // Crisp lock-in mechanical double-click + harmonic confirmation
+    [360, 720].forEach((freq, idx) => {
+      const t0 = now + idx * 0.038;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, t0);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.25, t0 + 0.055);
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.06, t0 + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.07);
+      osc.connect(gain).connect(this.sfxGain);
+      osc.start(t0);
+      osc.stop(t0 + 0.075);
+    });
+  }
+
+  playErrorBuzz() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    [155, 122].forEach((freq, idx) => {
+      const t0 = now + idx * 0.085;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(freq, t0);
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(480, t0);
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.06, t0 + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.075);
+      osc.connect(filter).connect(gain).connect(this.sfxGain);
+      osc.start(t0);
+      osc.stop(t0 + 0.08);
+    });
+  }
+}
+
+export default AudioEngine;

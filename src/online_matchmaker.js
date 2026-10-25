@@ -18,6 +18,7 @@ import {
   serverTimestamp,
   getDocs
 } from "firebase/firestore";
+import { characterShopManager } from "./character_shop.js";
 
 // Tự động xóa phòng trống hoặc không hoạt động sau 5 phút (300,000 ms)
 export const ROOM_IDLE_TTL_MS = 5 * 60 * 1000;
@@ -27,7 +28,7 @@ const MIN_MOVEMENT_INTERVAL_MS = 95; // ~10.5 Hz cho di chuyển của Guest
 
 export class OnlineMatchmaker {
   constructor(callbacks = {}) {
-    this.callbacks = callbacks; // onRoomUpdate, onGuestAction, onHostSnapshot, onPlayerJoined, onError, onRoomsPurged
+    this.callbacks = callbacks; // onRoomUpdate, onGuestAction, onHostSnapshot, onPlayerJoined, onLoadoutSync, onError, onRoomsPurged
     this.currentRoomId = null;
     this.isHost = false;
     this.user = null;
@@ -37,6 +38,9 @@ export class OnlineMatchmaker {
     this.guestActionSeq = 0;
     this.lastGuestActionSeqReceived = 0;
     this.lastHostSnapshotSeqReceived = 0;
+    this.hostLoadout = null;
+    this.guestLoadout = null;
+    this._lastLoadoutSig = "";
 
     // Bandwidth & Rate-limiting state
     this._lastSnapshotSentTime = 0;
@@ -249,6 +253,33 @@ export class OnlineMatchmaker {
   }
 
   /**
+   * Đồng bộ cấu hình Nhân Vật Chính + Bot Đồng Đội của người chơi lên phòng hiện tại
+   */
+  async syncMyLoadout(loadout = null) {
+    if (!this.currentRoomId) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    const myLoadout = loadout || characterShopManager.getCompactOnlineLoadout();
+    const roomRef = doc(db, "rooms", this.currentRoomId);
+    try {
+      if (this.isHost) {
+        this.hostLoadout = myLoadout;
+        await updateDoc(roomRef, {
+          hostLoadout: myLoadout,
+          lastActiveMs: Date.now()
+        });
+      } else {
+        this.guestLoadout = myLoadout;
+        await updateDoc(roomRef, {
+          guestLoadout: myLoadout,
+          lastActiveMs: Date.now()
+        });
+      }
+    } catch {
+      // Non-fatal sync
+    }
+  }
+
+  /**
    * Tạo phòng đấu 1v1 mới (hoặc tự động vào phòng nếu người dùng nhập mã phòng đang chờ có sẵn)
    */
   async createRoom({ customCode = "", hostName = "", gamesToWin = 1 } = {}) {
@@ -286,12 +317,18 @@ export class OnlineMatchmaker {
       }
 
       const now = Date.now();
+      const myLoadout = characterShopManager.getCompactOnlineLoadout();
+      this.hostLoadout = myLoadout;
+      this.guestLoadout = null;
+
       const initialData = {
         roomId,
         hostId: user.uid,
         hostName: finalHostName,
+        hostLoadout: myLoadout,
         guestId: null,
         guestName: null,
+        guestLoadout: null,
         status: "waiting", // waiting | playing | finished
         gamesToWin: Number(gamesToWin || 1),
         activeUserCount: 1,
@@ -320,7 +357,14 @@ export class OnlineMatchmaker {
       this.matchStartedTriggered = false;
       this._subscribeToRoom(roomId);
       this._startRoomTimers(roomId);
-      return { roomId, isHost: true, hostName: finalHostName, gamesToWin: Number(gamesToWin || 1) };
+      return {
+        roomId,
+        isHost: true,
+        hostName: finalHostName,
+        hostLoadout: myLoadout,
+        guestLoadout: null,
+        gamesToWin: Number(gamesToWin || 1)
+      };
     } catch (err) {
       handleFirestoreError(err, `tạo phòng đấu [${roomId}]`, { roomId });
       throw err;
@@ -365,9 +409,14 @@ export class OnlineMatchmaker {
       }
 
       const now = Date.now();
+      const myLoadout = characterShopManager.getCompactOnlineLoadout();
+      this.hostLoadout = data.hostLoadout || null;
+      this.guestLoadout = myLoadout;
+
       await updateDoc(roomRef, {
         guestId: user.uid,
         guestName: finalGuestName,
+        guestLoadout: myLoadout,
         activeUserCount: 2,
         lastActiveMs: now,
         guestLastSeenMs: now,
@@ -379,7 +428,15 @@ export class OnlineMatchmaker {
       this.matchStartedTriggered = false;
       this._subscribeToRoom(roomId);
       this._startRoomTimers(roomId);
-      return { roomId, isHost: false, hostName: data.hostName, guestName: finalGuestName, gamesToWin: data.gamesToWin };
+      return {
+        roomId,
+        isHost: false,
+        hostName: data.hostName,
+        guestName: finalGuestName,
+        hostLoadout: data.hostLoadout || null,
+        guestLoadout: myLoadout,
+        gamesToWin: data.gamesToWin
+      };
     } catch (err) {
       handleFirestoreError(err, `tham gia phòng [${roomId}]`, { roomId });
       throw err;
@@ -395,10 +452,13 @@ export class OnlineMatchmaker {
     }
     const now = Date.now();
     this._roomCreatedOrJoinedAtMs = now;
+    const myLoadout = characterShopManager.getCompactOnlineLoadout();
+    this.hostLoadout = myLoadout;
     const roomRef = doc(db, "rooms", this.currentRoomId);
     try {
       await updateDoc(roomRef, {
         status: "playing",
+        hostLoadout: myLoadout,
         lastActiveMs: now,
         hostLastSeenMs: now,
         matchStartedAt: serverTimestamp(),
@@ -441,6 +501,23 @@ export class OnlineMatchmaker {
           return;
         }
 
+        if (data.hostLoadout) this.hostLoadout = data.hostLoadout;
+        if (data.guestLoadout) this.guestLoadout = data.guestLoadout;
+
+        const loadoutSig = JSON.stringify({
+          h: this.hostLoadout,
+          g: this.guestLoadout
+        });
+        if (loadoutSig !== this._lastLoadoutSig) {
+          this._lastLoadoutSig = loadoutSig;
+          if (this.callbacks.onLoadoutSync) {
+            this.callbacks.onLoadoutSync({
+              hostLoadout: this.hostLoadout,
+              guestLoadout: this.guestLoadout
+            });
+          }
+        }
+
         if (this.callbacks.onWaitingRoomUpdate) {
           this.callbacks.onWaitingRoomUpdate(data);
         }
@@ -451,7 +528,8 @@ export class OnlineMatchmaker {
           if (this.callbacks.onPlayerJoined) {
             this.callbacks.onPlayerJoined({
               role: "p2",
-              guestName: data.guestName || "Player 2"
+              guestName: data.guestName || "Player 2",
+              guestLoadout: data.guestLoadout || null
             });
           }
         }
@@ -466,7 +544,9 @@ export class OnlineMatchmaker {
               gamesToWin: data.gamesToWin || 1,
               isHost: this.isHost,
               hostName: data.hostName || "Player 1",
-              guestName: data.guestName || "Player 2"
+              guestName: data.guestName || "Player 2",
+              hostLoadout: data.hostLoadout || this.hostLoadout,
+              guestLoadout: data.guestLoadout || this.guestLoadout
             });
           }
         }

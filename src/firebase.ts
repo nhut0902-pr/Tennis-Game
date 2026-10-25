@@ -156,16 +156,39 @@ export type AppUser = GuestUser;
 
 const GUEST_UID_STORAGE_KEY = "argon_tennis_guest_uid";
 const GUEST_NAME_STORAGE_KEY = "argon_tennis_nickname";
+const GOOGLE_USER_STORAGE_KEY = "argon_tennis_google_user_v1";
 
 function getOrCreateLocalGuest(displayName?: string): GuestUser {
+  // Check if user previously signed in with Google and saved their profile locally
+  if (!displayName) {
+    try {
+      const savedGoogleRaw = localStorage.getItem(GOOGLE_USER_STORAGE_KEY);
+      if (savedGoogleRaw) {
+        const parsedGoogle = JSON.parse(savedGoogleRaw);
+        if (parsedGoogle && typeof parsedGoogle.uid === "string" && parsedGoogle.uid.length >= 4) {
+          return {
+            uid: parsedGoogle.uid,
+            displayName: parsedGoogle.displayName || localStorage.getItem(GUEST_NAME_STORAGE_KEY) || "TayVot",
+            isAnonymous: false,
+            isLocalGuest: false
+          };
+        }
+      }
+    } catch {}
+  }
+
   let uid = "";
   try {
-    uid = sessionStorage.getItem(GUEST_UID_STORAGE_KEY) || "";
+    uid =
+      localStorage.getItem(GUEST_UID_STORAGE_KEY) ||
+      sessionStorage.getItem(GUEST_UID_STORAGE_KEY) ||
+      "";
     if (!uid) {
       const rand = Math.random().toString(36).substring(2, 10) + Date.now().toString(36).slice(-4);
       uid = `guest_${rand}`;
-      sessionStorage.setItem(GUEST_UID_STORAGE_KEY, uid);
     }
+    localStorage.setItem(GUEST_UID_STORAGE_KEY, uid);
+    sessionStorage.setItem(GUEST_UID_STORAGE_KEY, uid);
   } catch {
     uid = `guest_${Math.floor(100000 + Math.random() * 900000)}`;
   }
@@ -225,6 +248,14 @@ function notifyAuthListeners() {
 export function updateUserProfileName(displayName: string): AppUser {
   const cleaned = (displayName || "").trim();
   const updated = getOrCreateLocalGuest(cleaned);
+  if (auth.currentUser && !auth.currentUser.isAnonymous) {
+    updated.uid = auth.currentUser.uid;
+    updated.isAnonymous = false;
+    updated.isLocalGuest = false;
+    try {
+      localStorage.setItem(GOOGLE_USER_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }
   auth.currentUser = updated;
   notifyAuthListeners();
   return updated;
@@ -261,11 +292,12 @@ export async function signInWithGoogle(): Promise<AppUser> {
         isAnonymous: false,
         isLocalGuest: false
       };
-      if (mapped.displayName) {
-        try {
+      try {
+        if (mapped.displayName) {
           localStorage.setItem(GUEST_NAME_STORAGE_KEY, mapped.displayName);
-        } catch {}
-      }
+        }
+        localStorage.setItem(GOOGLE_USER_STORAGE_KEY, JSON.stringify(mapped));
+      } catch {}
       // Sign out the popup instance immediately so it never caches tokens requiring securetoken API
       await signOut(googleAuth).catch(() => {});
       auth.currentUser = mapped;
