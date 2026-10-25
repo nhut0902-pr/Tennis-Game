@@ -16,13 +16,13 @@ import {
   registerRosterMiiProfiles
 } from "./mii_avatars.js";
 import { SVG_ICONS } from "./svg_icons.js";
-import { db, auth, setFirebaseNetworkEnabled } from "./firebase.ts";
-import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 const SHOP_STORAGE_KEY = "argon_tennis_character_shop_v2";
 const SHOP_STORAGE_KEY_V3 = "argon_tennis_character_shop_v3";
 const SHOP_STORAGE_KEY_V1 = "argon_tennis_character_shop_v1";
-const CLOUD_MASTER_VAULT_DOC_ID = "argon_cloud_vault_v1";
+const COOKIE_SAVE_KEY = "argon_save_v1";
+const CACHE_VAULT_NAME = "argon-offline-save-vault-v1";
+const CACHE_VAULT_URL = "/__argon_local_save_snapshot__.json";
 const IDB_DB_NAME = "ArgonTennisVaultDB";
 const IDB_STORE_NAME = "shop_vault";
 const IDB_RECORD_KEY = "primary_shop_state_v3";
@@ -1864,9 +1864,46 @@ class CharacterShopManager {
     this._applyingRemoteState = false;
     this._unsubCloudVault = null;
     this._unsubUserVault = null;
+    this.clientUid = this._getOrCreateClientUid();
     this.state = this._loadState();
     this._syncSelectedCharacterToMiiProfile();
     this._initAsyncAndCloudPersistence();
+  }
+
+  _getOrCreateClientUid() {
+    const UID_KEY = "argon_client_uid_v1";
+    const UID_COOKIE = "argon_uid_v1";
+    let uid = "";
+    try {
+      uid = localStorage.getItem(UID_KEY) || "";
+    } catch {}
+    if (!uid && typeof document !== "undefined" && document.cookie) {
+      try {
+        for (const p of document.cookie.split(";")) {
+          const [k, ...v] = p.trim().split("=");
+          if (k === UID_COOKIE) {
+            uid = decodeURIComponent(v.join("=")).trim();
+            break;
+          }
+        }
+      } catch {}
+    }
+    if (!uid || uid.length < 6) {
+      uid = `u_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    }
+    try {
+      localStorage.setItem(UID_KEY, uid);
+    } catch {}
+    try {
+      if (typeof document !== "undefined") {
+        document.cookie = `${UID_COOKIE}=${encodeURIComponent(uid)}; path=/; max-age=31536000; SameSite=Lax`;
+        const host = window.location.hostname || "";
+        if (host.endsWith(".run.app")) {
+          document.cookie = `${UID_COOKIE}=${encodeURIComponent(uid)}; domain=.run.app; path=/; max-age=31536000; SameSite=None; Secure`;
+        }
+      }
+    } catch {}
+    return uid;
   }
 
   _resolveCharId(rawId) {
@@ -2221,6 +2258,238 @@ class CharacterShopManager {
     };
   }
 
+  _encodeCompactToken(stateObj = this.state) {
+    try {
+      const s = stateObj || this.state;
+      const cu = {};
+      if (s.characterUpgrades) {
+        CHARACTER_ROSTER.forEach((c, idx) => {
+          const u = s.characterUpgrades[c.id];
+          if (u && ((u.speed || 1) > 1 || (u.power || 1) > 1 || (u.spin || 1) > 1 || (u.reflex || 1) > 1)) {
+            cu[idx] = [u.speed || 1, u.power || 1, u.spin || 1, u.reflex || 1];
+          }
+        });
+      }
+      const compact = {
+        c: s.coins,
+        ts: s.updatedAtMs || Date.now(),
+        rv: s.revision || 1,
+        m: s.selectedMapId || "melbourne_blue",
+        sc: s.selectedCharacterId,
+        pc: s.partnerCharacterId,
+        so: s.selectedOutfitId,
+        sr: s.selectedRacketId,
+        sv: s.selectedStrikeVfxId,
+        po: s.partnerOutfitId,
+        pr: s.partnerRacketId,
+        pv: s.partnerStrikeVfxId,
+        ea: s.equippedAccessories,
+        pa: s.partnerEquippedAccessories,
+        uc: (s.unlockedCharacters || []).map((id) => CHARACTER_ROSTER.findIndex((x) => x.id === id)).filter((i) => i >= 0),
+        uo: (s.unlockedOutfits || []).map((id) => OUTFIT_CATALOG.findIndex((x) => x.id === id)).filter((i) => i >= 0),
+        ur: (s.unlockedRackets || []).map((id) => RACKET_CATALOG.findIndex((x) => x.id === id)).filter((i) => i >= 0),
+        uv: (s.unlockedStrikeVfx || []).map((id) => STRIKE_VFX_CATALOG.findIndex((x) => x.id === id)).filter((i) => i >= 0),
+        ua: (s.unlockedAccessories || []).map((id) => ACCESSORY_CATALOG.findIndex((x) => x.id === id)).filter((i) => i >= 0),
+        cu,
+        sk: PLAYER_SPECIAL_SKILLS.map((k) => s.playerSpecialSkills?.[k.key] || 1),
+        ai: PARTNER_AI_UPGRADE_CONFIG.map((k) => s.partnerAiUpgrades?.[k.key] || 1)
+      };
+      return btoa(encodeURIComponent(JSON.stringify(compact)));
+    } catch {
+      return "";
+    }
+  }
+
+  _decodeCompactToken(tokenStr) {
+    if (!tokenStr || typeof tokenStr !== "string") return null;
+    try {
+      const cleaned = tokenStr.trim().replace(/^ARGON1:/i, "");
+      const jsonStr = decodeURIComponent(atob(cleaned));
+      const d = JSON.parse(jsonStr);
+      if (!d || typeof d !== "object") return null;
+
+      const def = this._getDefaultState();
+      const charUpgrades = { ...def.characterUpgrades };
+      if (d.cu && typeof d.cu === "object") {
+        for (const [idxStr, arr] of Object.entries(d.cu)) {
+          const ch = CHARACTER_ROSTER[Number(idxStr)];
+          if (ch && Array.isArray(arr)) {
+            charUpgrades[ch.id] = {
+              speed: Number(arr[0] || 1),
+              power: Number(arr[1] || 1),
+              spin: Number(arr[2] || 1),
+              reflex: Number(arr[3] || 1)
+            };
+          }
+        }
+      }
+      const playerSpecialSkills = { ...def.playerSpecialSkills };
+      if (Array.isArray(d.sk)) {
+        PLAYER_SPECIAL_SKILLS.forEach((k, i) => {
+          if (d.sk[i] != null) playerSpecialSkills[k.key] = Number(d.sk[i]) || 1;
+        });
+      }
+      const partnerAiUpgrades = { ...def.partnerAiUpgrades };
+      if (Array.isArray(d.ai)) {
+        PARTNER_AI_UPGRADE_CONFIG.forEach((k, i) => {
+          if (d.ai[i] != null) partnerAiUpgrades[k.key] = Number(d.ai[i]) || 1;
+        });
+      }
+
+      return this._normalizeStateObject({
+        coins: d.c,
+        updatedAtMs: d.ts || 1000,
+        revision: d.rv || 1,
+        selectedMapId: d.m || "melbourne_blue",
+        selectedCharacterId: d.sc,
+        partnerCharacterId: d.pc,
+        selectedOutfitId: d.so,
+        selectedRacketId: d.sr,
+        selectedStrikeVfxId: d.sv,
+        partnerOutfitId: d.po,
+        partnerRacketId: d.pr,
+        partnerStrikeVfxId: d.pv,
+        equippedAccessories: d.ea || def.equippedAccessories,
+        partnerEquippedAccessories: d.pa || def.partnerEquippedAccessories,
+        unlockedCharacters: Array.isArray(d.uc)
+          ? d.uc.map((i) => CHARACTER_ROSTER[i]?.id).filter(Boolean)
+          : def.unlockedCharacters,
+        unlockedOutfits: Array.isArray(d.uo)
+          ? d.uo.map((i) => OUTFIT_CATALOG[i]?.id).filter(Boolean)
+          : def.unlockedOutfits,
+        unlockedRackets: Array.isArray(d.ur)
+          ? d.ur.map((i) => RACKET_CATALOG[i]?.id).filter(Boolean)
+          : def.unlockedRackets,
+        unlockedStrikeVfx: Array.isArray(d.uv)
+          ? d.uv.map((i) => STRIKE_VFX_CATALOG[i]?.id).filter(Boolean)
+          : def.unlockedStrikeVfx,
+        unlockedAccessories: Array.isArray(d.ua)
+          ? d.ua.map((i) => ACCESSORY_CATALOG[i]?.id).filter(Boolean)
+          : [],
+        characterUpgrades,
+        playerSpecialSkills,
+        partnerAiUpgrades
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  exportSaveCode() {
+    const token = this._encodeCompactToken(this.state);
+    return token ? `ARGON1:${token}` : "";
+  }
+
+  getRestoreShareUrl() {
+    if (typeof window === "undefined") return "";
+    const code = this.exportSaveCode();
+    if (!code) return window.location.href;
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    return `${baseUrl}?save=${encodeURIComponent(code)}`;
+  }
+
+  downloadSaveFile() {
+    if (typeof document === "undefined") return;
+    const code = this.exportSaveCode();
+    const payload = {
+      format: "ARGON_TENNIS_SAVE_V3",
+      exportedAt: new Date().toISOString(),
+      coins: this.state.coins,
+      unlockedCharactersCount: this.state.unlockedCharacters?.length || 1,
+      saveCode: code,
+      state: this.state
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `argon-tennis-save-${this.state.coins}xu.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  importSaveCode(rawInput) {
+    if (!rawInput || typeof rawInput !== "string") {
+      return { ok: false, message: "Dữ liệu khôi phục không hợp lệ." };
+    }
+    const trimmed = rawInput.trim();
+    let decoded = null;
+
+    // 1. Check if user pasted a full URL containing ?save=... or #save=...
+    if (trimmed.includes("save=")) {
+      try {
+        const match = trimmed.match(/[?#&]save=([^&#\s]+)/i);
+        if (match && match[1]) {
+          decoded = this._decodeCompactToken(decodeURIComponent(match[1]));
+        }
+      } catch {}
+    }
+
+    // 2. Check if user uploaded/pasted a JSON save file
+    if (!decoded && trimmed.startsWith("{")) {
+      try {
+        const parsedJson = JSON.parse(trimmed);
+        if (parsedJson.state && typeof parsedJson.state === "object") {
+          decoded = this._normalizeStateObject(parsedJson.state);
+        } else if (parsedJson.saveCode) {
+          decoded = this._decodeCompactToken(parsedJson.saveCode);
+        } else if (parsedJson.coins != null || parsedJson.unlockedCharacters) {
+          decoded = this._normalizeStateObject(parsedJson);
+        }
+      } catch {}
+    }
+
+    // 3. Otherwise decode as ARGON1:... compact token
+    if (!decoded) {
+      decoded = this._decodeCompactToken(trimmed);
+    }
+
+    if (!decoded) {
+      return { ok: false, message: "Không thể giải mã! Hãy chọn đúng file .json hoặc dán đúng mã ARGON1:..." };
+    }
+    decoded.updatedAtMs = Date.now();
+    decoded.revision = (Number(this.state.revision) || 0) + 10;
+    this.state = this._mergeShopStates(this.state, decoded);
+    this._saveState({ markUserChange: true });
+    this._syncSelectedCharacterToMiiProfile();
+    return {
+      ok: true,
+      message: `✅ Khôi phục thành công: ${this.state.coins.toLocaleString("vi-VN")} Xu & ${this.state.unlockedCharacters.length}/30 Nhân Vật!`
+    };
+  }
+
+  _readCookieMirror() {
+    if (typeof document === "undefined" || !document.cookie) return null;
+    try {
+      const parts = document.cookie.split(";");
+      for (const p of parts) {
+        const [k, ...vParts] = p.trim().split("=");
+        if (k === COOKIE_SAVE_KEY) {
+          const val = decodeURIComponent(vParts.join("="));
+          return this._decodeCompactToken(val);
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  _writeCookieMirror(stateObj = this.state) {
+    if (typeof document === "undefined") return;
+    try {
+      const token = this._encodeCompactToken(stateObj);
+      if (!token) return;
+      const encoded = encodeURIComponent(token);
+      document.cookie = `${COOKIE_SAVE_KEY}=${encoded}; path=/; max-age=31536000; SameSite=Lax`;
+      // Also attempt cross-subdomain cookie if hosted under a shared parent domain
+      const host = window.location.hostname || "";
+      if (host.endsWith(".run.app")) {
+        document.cookie = `${COOKIE_SAVE_KEY}=${encoded}; domain=.run.app; path=/; max-age=31536000; SameSite=None; Secure`;
+      }
+    } catch {}
+  }
+
   _loadState() {
     let combined = this._getDefaultState();
     const rawCandidates = [];
@@ -2254,7 +2523,38 @@ class CharacterShopManager {
       } catch {}
     }
 
-    // Write unified local state back immediately so v2 and v3 stay in sync
+    // Merge cookie mirror if present
+    const cookieState = this._readCookieMirror();
+    if (cookieState) {
+      combined = this._mergeShopStates(combined, cookieState);
+    }
+
+    // Check if URL has ?save=ARGON1:... or #save=ARGON1:... parameter for instant zero-DB cross-deploy import
+    try {
+      if (typeof window !== "undefined") {
+        if (window.location.search) {
+          const params = new URLSearchParams(window.location.search);
+          const urlSave = params.get("save");
+          if (urlSave) {
+            const decodedUrl = this._decodeCompactToken(urlSave);
+            if (decodedUrl) {
+              combined = this._mergeShopStates(combined, decodedUrl);
+            }
+          }
+        }
+        if (window.location.hash && window.location.hash.includes("save=")) {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+          const hashSave = hashParams.get("save");
+          if (hashSave) {
+            const decodedHash = this._decodeCompactToken(hashSave);
+            if (decodedHash) {
+              combined = this._mergeShopStates(combined, decodedHash);
+            }
+          }
+        }
+      }
+    } catch {}
+
     this._writeLocalMirrors(combined);
     return combined;
   }
@@ -2269,7 +2569,33 @@ class CharacterShopManager {
         window.name = `ARGON_SHOP_BACKUP:${serialized}`;
       }
     } catch {}
+    this._writeCookieMirror(stateObj);
     this._writeIndexedDBMirror(stateObj);
+    this._writeCacheStorageMirror(stateObj);
+  }
+
+  async _readCacheStorageMirror() {
+    if (typeof caches === "undefined") return null;
+    try {
+      const cache = await caches.open(CACHE_VAULT_NAME);
+      const resp = await cache.match(CACHE_VAULT_URL);
+      if (!resp) return null;
+      return await resp.json();
+    } catch {
+      return null;
+    }
+  }
+
+  async _writeCacheStorageMirror(stateObj) {
+    if (typeof caches === "undefined") return;
+    try {
+      const cache = await caches.open(CACHE_VAULT_NAME);
+      const body = JSON.stringify(stateObj);
+      await cache.put(
+        CACHE_VAULT_URL,
+        new Response(body, { headers: { "Content-Type": "application/json" } })
+      );
+    } catch {}
   }
 
   _openIndexedDB() {
@@ -2323,45 +2649,36 @@ class CharacterShopManager {
   _initAsyncAndCloudPersistence() {
     if (typeof window === "undefined") return;
 
-    // 1. Restore from IndexedDB mirror if available
+    // 1. Restore from IndexedDB mirror if available (100% Free Offline)
     this._readIndexedDBMirror().then((idbState) => {
       if (idbState && typeof idbState === "object") {
         this._applyIncomingExternalState(idbState, { source: "idb" });
       }
     });
 
-    // 2. Restore & live-sync with Cloud Firestore so deploying the web app (ais-dev <-> ais-pre) never loses progress
-    this._syncWithCloudFirestore();
+    // 2. Restore from Browser CacheStorage Vault (survives PWA/ServiceWorker updates, 0 DB quota)
+    this._readCacheStorageMirror().then((cacheState) => {
+      if (cacheState && typeof cacheState === "object") {
+        this._applyIncomingExternalState(cacheState, { source: "cache" });
+      }
+    });
 
-    // 3. Re-sync when user logs in with Google or updates profile name
-    if (auth && typeof auth.onAuthStateChanged === "function") {
-      auth.onAuthStateChanged((user) => {
-        if (user && user.uid) {
-          this._syncUserCloudProfile(user.uid, user.displayName);
-        }
-      });
-    }
+    // 3. Restore from Local Container File Vault (/api/local-vault — 0 Firebase DB usage!)
+    this._syncWithLocalDiskVault();
 
-    // 4. Flush any pending save immediately on pagehide / visibilitychange / online
+    // 4. Flush local mirrors immediately on pagehide / visibilitychange
     const flushNow = () => {
       this._writeLocalMirrors(this.state);
-      if (this._cloudSaveTimer) {
-        clearTimeout(this._cloudSaveTimer);
-        this._cloudSaveTimer = null;
-        this._pushStateToCloudNow();
-      }
+      this._pushStateToLocalDiskVault();
     };
     window.addEventListener("pagehide", flushNow);
     window.addEventListener("beforeunload", flushNow);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") flushNow();
     });
-    window.addEventListener("online", () => {
-      this._syncWithCloudFirestore();
-    });
   }
 
-  _applyIncomingExternalState(externalState, { source = "cloud" } = {}) {
+  _applyIncomingExternalState(externalState, { source = "local" } = {}) {
     if (!externalState || typeof externalState !== "object") return false;
     const beforeSig = JSON.stringify(this.state);
     const merged = this._mergeShopStates(this.state, externalState);
@@ -2373,7 +2690,6 @@ class CharacterShopManager {
     this._writeLocalMirrors(this.state);
     this._syncSelectedCharacterToMiiProfile();
 
-    // Also sync selected court map if changed
     if (this.state.selectedMapId) {
       try {
         localStorage.setItem("argon_tennis_selected_map_v1", this.state.selectedMapId);
@@ -2382,130 +2698,38 @@ class CharacterShopManager {
 
     this._notify();
     this._applyingRemoteState = false;
-    this._updateCloudSyncStatusLabel(
-      source === "cloud"
-        ? "☁️ Đã khôi phục & đồng bộ Đội Hình + Xu từ Cloud Firestore"
-        : "Đã đồng bộ dữ liệu đội hình"
-    );
     return true;
   }
 
-  _updateCloudSyncStatusLabel(text) {
-    if (typeof document === "undefined") return;
-    const footerNote = document.getElementById("shop-footer-note");
-    if (footerNote && text) {
-      footerNote.textContent = text;
-    }
-  }
-
-  async _syncWithCloudFirestore() {
-    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+  async _syncWithLocalDiskVault() {
+    if (!this.clientUid) return;
     try {
-      await setFirebaseNetworkEnabled(true);
-      const vaultRef = doc(db, "players", CLOUD_MASTER_VAULT_DOC_ID);
-      const snap = await getDoc(vaultRef);
-
-      if (snap.exists()) {
-        const cloudData = snap.data();
-        if (cloudData) {
-          this._applyIncomingExternalState(cloudData, { source: "cloud" });
+      const resp = await fetch(`/api/local-vault?uid=${encodeURIComponent(this.clientUid)}`, {
+        method: "GET"
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.state && typeof data.state === "object") {
+          this._applyIncomingExternalState(data.state, { source: "disk" });
         }
       }
-
-      // If our local state has progress that is newer or higher than the cloud vault, push it to the cloud
-      const localProgress = this._computeProgressScore(this.state);
-      const cloudProgress = snap.exists() ? this._computeProgressScore(this._normalizeStateObject(snap.data())) : 0;
-      const cloudRev = snap.exists() ? Number(snap.data()?.revision || snap.data()?.shopState?.revision || 0) : 0;
-
-      if (
-        (this.state.updatedAtMs > 0 || localProgress > 0) &&
-        (!snap.exists() || localProgress > cloudProgress || this.state.revision > cloudRev)
-      ) {
-        await this._pushStateToCloudNow();
-      }
-
-      // Subscribe to real-time updates on the master cloud vault
-      if (!this._unsubCloudVault) {
-        this._unsubCloudVault = onSnapshot(
-          vaultRef,
-          (liveSnap) => {
-            if (liveSnap.exists()) {
-              this._applyIncomingExternalState(liveSnap.data(), { source: "cloud" });
-            }
-          },
-          () => {}
-        );
-      }
-    } catch {
-      // Offline or transient network issue; local mirrors remain active
-    }
-  }
-
-  async _syncUserCloudProfile(uid, displayName = "TayVot") {
-    if (!uid || (typeof navigator !== "undefined" && !navigator.onLine)) return;
-    try {
-      await setFirebaseNetworkEnabled(true);
-      const userRef = doc(db, "players", uid);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data && data.shopState) {
-          this._applyIncomingExternalState(data.shopState, { source: "cloud" });
-        }
-      }
-      if (this._computeProgressScore(this.state) > 0 || this.state.updatedAtMs > 0) {
-        this._scheduleCloudPush();
+      if (this._computeProgressScore(this.state) > 0 || (this.state.updatedAtMs || 0) > 0) {
+        this._pushStateToLocalDiskVault();
       }
     } catch {}
   }
 
-  _scheduleCloudPush() {
-    if (this._applyingRemoteState) return;
-    if (this._cloudSaveTimer) clearTimeout(this._cloudSaveTimer);
-    this._cloudSaveTimer = setTimeout(() => {
-      this._cloudSaveTimer = null;
-      this._pushStateToCloudNow();
-    }, 350);
-  }
-
-  async _pushStateToCloudNow() {
-    if (typeof navigator !== "undefined" && !navigator.onLine) return;
-    // Never overwrite cloud with an untouched fresh default state
+  async _pushStateToLocalDiskVault() {
+    if (!this.clientUid) return;
     if ((this.state.updatedAtMs || 0) === 0 && this._computeProgressScore(this.state) === 0) {
       return;
     }
     try {
-      await setFirebaseNetworkEnabled(true);
-      const payload = {
-        userId: auth.currentUser?.uid || CLOUD_MASTER_VAULT_DOC_ID,
-        displayName: auth.currentUser?.displayName || "TayVot",
-        skillRating: this.getEffectivePlayerModifiers()?.overallRating || 1000,
-        wins: 0,
-        losses: 0,
-        shopState: this.state,
-        selectedMapId: this.state.selectedMapId || "melbourne_blue",
-        updatedAtMs: this.state.updatedAtMs || Date.now(),
-        revision: this.state.revision || 1,
-        updatedAt: new Date().toISOString()
-      };
-
-      const writes = [
-        setDoc(doc(db, "players", CLOUD_MASTER_VAULT_DOC_ID), payload, { merge: true })
-      ];
-      const uid = auth.currentUser?.uid;
-      if (uid && uid.length >= 4 && uid.length <= 128 && uid !== CLOUD_MASTER_VAULT_DOC_ID) {
-        writes.push(
-          setDoc(
-            doc(db, "players", uid),
-            { ...payload, userId: uid },
-            { merge: true }
-          )
-        );
-      }
-      await Promise.all(writes);
-      this._updateCloudSyncStatusLabel(
-        "☁️ Đã lưu tự động lên Cloud Firestore — An toàn vĩnh viễn khi Deploy Web"
-      );
+      await fetch(`/api/local-vault?uid=${encodeURIComponent(this.clientUid)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: this.clientUid, state: this.state })
+      });
     } catch {}
   }
 
@@ -2517,7 +2741,7 @@ class CharacterShopManager {
     this._writeLocalMirrors(this.state);
     this._notify();
     if (markUserChange && !this._applyingRemoteState) {
-      this._scheduleCloudPush();
+      this._pushStateToLocalDiskVault();
     }
   }
 
@@ -3208,9 +3432,44 @@ class CharacterShopManager {
    * Serializes the player's Main Character + Bot Partner squad into a compact object (~180 bytes)
    * for Firebase online 1v1 synchronization.
    */
-  getCompactOnlineLoadout() {
+  getCompactOnlineLoadout({ avoidCloningHostLoadout = null } = {}) {
     const pCharId = this.state.selectedCharacterId;
     const bCharId = this.state.partnerCharacterId;
+
+    // If P2 joins from the exact same browser tab/storage as Host P1 (e.g., testing on 1 machine),
+    // prevent P2 from blindly cloning Host P1's character and upgraded stats.
+    if (
+      avoidCloningHostLoadout &&
+      avoidCloningHostLoadout.pChar === pCharId &&
+      JSON.stringify(avoidCloningHostLoadout.pUpg || {}) ===
+        JSON.stringify(this.getCharacterUpgradeLevels(pCharId) || {})
+    ) {
+      const fallbackMain = pCharId === "alex" ? "elena" : "alex";
+      const fallbackBot = bCharId === "kenji" ? "sofia" : "kenji";
+      return {
+        pChar: fallbackMain,
+        pOut: "outfit_default",
+        pRac: "racket_classic",
+        pVfx: "vfx_default",
+        pAcc: [],
+        pUpg: { speed: 1, power: 1, spin: 1, reflex: 1 },
+        pSk: {
+          hyperServe: 1,
+          flashStep: 1,
+          meteorSmash: 1,
+          eagleEye: 1,
+          curveMaster: 1,
+          thunderShock: 1
+        },
+        bChar: fallbackBot,
+        bOut: "outfit_default",
+        bRac: "racket_classic",
+        bVfx: "vfx_default",
+        bAcc: [],
+        bAi: { aiIq: 2, speed: 2, reflex: 2, power: 2, overdrive: 1, magnetNet: 1 }
+      };
+    }
+
     return {
       pChar: pCharId,
       pOut: this.state.selectedOutfitId,
@@ -3229,10 +3488,24 @@ class CharacterShopManager {
   }
 
   getPlayerModifiersFromLoadout(loadout = null) {
-    if (!loadout) return this.getEffectivePlayerModifiers();
-    const char = this.getCharacterById(loadout.pChar);
+    const safeLoadout = loadout || {
+      pChar: "alex",
+      pOut: "outfit_default",
+      pRac: "racket_classic",
+      pVfx: "vfx_default",
+      pAcc: [],
+      pUpg: { speed: 1, power: 1, spin: 1, reflex: 1 },
+      pSk: {},
+      bChar: "kenji",
+      bOut: "outfit_default",
+      bRac: "racket_classic",
+      bVfx: "vfx_default",
+      bAcc: [],
+      bAi: {}
+    };
+    const char = this.getCharacterById(safeLoadout.pChar);
     const mech = char.mechanic || {};
-    const upg = { speed: 1, power: 1, spin: 1, reflex: 1, ...(loadout.pUpg || {}) };
+    const upg = { speed: 1, power: 1, spin: 1, reflex: 1, ...(safeLoadout.pUpg || {}) };
     const skills = {
       hyperServe: 1,
       flashStep: 1,
@@ -3240,11 +3513,11 @@ class CharacterShopManager {
       eagleEye: 1,
       curveMaster: 1,
       thunderShock: 1,
-      ...(loadout.pSk || {})
+      ...(safeLoadout.pSk || {})
     };
-    const racket = RACKET_CATALOG.find((r) => r.id === loadout.pRac) || RACKET_CATALOG[0];
-    const vfx = STRIKE_VFX_CATALOG.find((v) => v.id === loadout.pVfx) || STRIKE_VFX_CATALOG[0];
-    const accIds = Array.isArray(loadout.pAcc) ? loadout.pAcc : char.appearance?.defaultAccessories || [];
+    const racket = RACKET_CATALOG.find((r) => r.id === safeLoadout.pRac) || RACKET_CATALOG[0];
+    const vfx = STRIKE_VFX_CATALOG.find((v) => v.id === safeLoadout.pVfx) || STRIKE_VFX_CATALOG[0];
+    const accIds = Array.isArray(safeLoadout.pAcc) ? safeLoadout.pAcc : char.appearance?.defaultAccessories || [];
     const accBonus = this._computeAccessoryBonuses(accIds);
 
     const speedPoints =
@@ -3305,7 +3578,7 @@ class CharacterShopManager {
 
     const totalUpg = (upg.speed || 1) + (upg.power || 1) + (upg.spin || 1) + (upg.reflex || 1);
     const starTier = totalUpg >= 28 ? 5 : totalUpg >= 20 ? 4 : totalUpg >= 12 ? 3 : totalUpg >= 7 ? 2 : 1;
-    const partnerMods = this.getPartnerModifiersFromLoadout(loadout);
+    const partnerMods = this.getPartnerModifiersFromLoadout(safeLoadout);
 
     return {
       mechanicId: mech.id || "standard",
@@ -3334,8 +3607,15 @@ class CharacterShopManager {
   }
 
   getPartnerModifiersFromLoadout(loadout = null) {
-    if (!loadout) return this.getEffectivePartnerModifiers();
-    const char = this.getCharacterById(loadout.bChar || "maya");
+    const safeLoadout = loadout || {
+      bChar: "kenji",
+      bOut: "outfit_default",
+      bRac: "racket_classic",
+      bVfx: "vfx_default",
+      bAcc: [],
+      bAi: {}
+    };
+    const char = this.getCharacterById(safeLoadout.bChar || "kenji");
     const mech = char.mechanic || {};
     const aiUpg = {
       aiIq: 2,
@@ -3344,11 +3624,11 @@ class CharacterShopManager {
       power: 2,
       overdrive: 1,
       magnetNet: 1,
-      ...(loadout.bAi || {})
+      ...(safeLoadout.bAi || {})
     };
-    const racket = RACKET_CATALOG.find((r) => r.id === loadout.bRac) || RACKET_CATALOG[0];
-    const vfx = STRIKE_VFX_CATALOG.find((v) => v.id === loadout.bVfx) || STRIKE_VFX_CATALOG[0];
-    const accIds = Array.isArray(loadout.bAcc) ? loadout.bAcc : char.appearance?.defaultAccessories || [];
+    const racket = RACKET_CATALOG.find((r) => r.id === safeLoadout.bRac) || RACKET_CATALOG[0];
+    const vfx = STRIKE_VFX_CATALOG.find((v) => v.id === safeLoadout.bVfx) || STRIKE_VFX_CATALOG[0];
+    const accIds = Array.isArray(safeLoadout.bAcc) ? safeLoadout.bAcc : char.appearance?.defaultAccessories || [];
     const accBonus = this._computeAccessoryBonuses(accIds);
 
     const iqLv = aiUpg.aiIq || 1;
@@ -4522,6 +4802,52 @@ export class CharacterShopUI {
     this._updateUnitSwitcherBadges();
   }
 
+  openSaveVaultModal() {
+    const modal = document.getElementById("save-vault-modal");
+    if (!modal) return;
+    this._refreshSaveVaultModalFields();
+    this._setVaultFeedback("");
+    modal.classList.remove("hidden");
+    this._playSfx("open");
+  }
+
+  closeSaveVaultModal() {
+    const modal = document.getElementById("save-vault-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    this._playSfx("close");
+  }
+
+  _setVaultFeedback(msg, isError = false) {
+    const el = document.getElementById("vault-feedback-msg");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.style.color = isError ? "#fb7185" : "#34d399";
+  }
+
+  _refreshSaveVaultModalFields() {
+    const unlockedCount = this.shop.state.unlockedCharacters?.length || 1;
+    const totalCount = CHARACTER_ROSTER.length;
+    document.querySelectorAll("[data-vault-unlocked-count]").forEach((el) => {
+      el.textContent = `${unlockedCount}/${totalCount}`;
+    });
+
+    const pChar = this.shop.getSelectedCharacter("player");
+    const bChar = this.shop.getSelectedCharacter("partner");
+    document.querySelectorAll("[data-vault-squad-names]").forEach((el) => {
+      el.textContent = `${pChar.name} & Bot ${bChar.name}`;
+    });
+
+    const inpShareUrl = document.getElementById("vault-share-url-input");
+    if (inpShareUrl) {
+      inpShareUrl.value = this.shop.getRestoreShareUrl();
+    }
+    const inpMyCode = document.getElementById("vault-my-code-input");
+    if (inpMyCode) {
+      inpMyCode.value = this.shop.exportSaveCode();
+    }
+  }
+
   switchTab(tabName) {
     this.activeTab = tabName || "upgrades";
     document.querySelectorAll("[data-shop-tab]").forEach((b) => {
@@ -4589,6 +4915,7 @@ export class CharacterShopUI {
     document.querySelectorAll("[data-shop-coins]").forEach((el) => {
       el.textContent = coins.toLocaleString("vi-VN");
     });
+    this._refreshSaveVaultModalFields();
   }
 
   open() {

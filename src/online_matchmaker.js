@@ -352,6 +352,9 @@ export class OnlineMatchmaker {
       };
 
       await setDoc(roomRef, initialData);
+      try {
+        localStorage.setItem("argon_hosting_room_id", roomId);
+      } catch {}
       this.currentRoomId = roomId;
       this.isHost = true;
       this.matchStartedTriggered = false;
@@ -409,7 +412,12 @@ export class OnlineMatchmaker {
       }
 
       const now = Date.now();
-      const myLoadout = characterShopManager.getCompactOnlineLoadout();
+      const isSameBrowserAsHost =
+        data.hostId === user.uid ||
+        (typeof localStorage !== "undefined" && localStorage.getItem("argon_hosting_room_id") === roomId);
+      const myLoadout = characterShopManager.getCompactOnlineLoadout({
+        avoidCloningHostLoadout: isSameBrowserAsHost ? data.hostLoadout : null
+      });
       this.hostLoadout = data.hostLoadout || null;
       this.guestLoadout = myLoadout;
 

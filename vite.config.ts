@@ -1,9 +1,11 @@
+import fs from "fs";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 const ROOM_IDLE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const LOCAL_VAULT_FILE = path.resolve(".argon-local-vault.json");
 
 function createRacketSlot(role: string) {
   return {
@@ -198,6 +200,44 @@ function argonTennisRelayPlugin() {
       const roomParam = parsed.searchParams.get("room") || "default";
       const roleRaw = (parsed.searchParams.get("role") || "p1").toLowerCase();
       const role = roleRaw === "p2" || roleRaw === "2" || roleRaw === "opponent" ? "p2" : "p1";
+
+      if (pathname === "/api/local-vault") {
+        const uid = (parsed.searchParams.get("uid") || "").trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
+        const readVaultMap = (): Record<string, any> => {
+          try {
+            if (fs.existsSync(LOCAL_VAULT_FILE)) {
+              const raw = JSON.parse(fs.readFileSync(LOCAL_VAULT_FILE, "utf-8"));
+              if (raw && typeof raw === "object" && raw.users && typeof raw.users === "object") {
+                return raw.users;
+              }
+            }
+          } catch {}
+          return {};
+        };
+
+        if (req.method === "GET") {
+          if (!uid) {
+            sendJson(res, 200, { ok: true, state: null });
+            return;
+          }
+          const usersMap = readVaultMap();
+          sendJson(res, 200, { ok: true, state: usersMap[uid] || null });
+          return;
+        }
+        if (req.method === "POST") {
+          const body = await readJsonBody(req);
+          const targetUid = uid || (body?.uid || "").trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
+          if (targetUid && body && body.state && typeof body.state === "object") {
+            try {
+              const usersMap = readVaultMap();
+              usersMap[targetUid] = body.state;
+              fs.writeFileSync(LOCAL_VAULT_FILE, JSON.stringify({ users: usersMap }), "utf-8");
+            } catch {}
+          }
+          sendJson(res, 200, { ok: true });
+          return;
+        }
+      }
 
       if (req.method === "GET" && pathname === "/api/racket/state") {
         const room = getOrCreateRoom(roomParam);
