@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { renderAllHudMiiAvatars as renderMiiAvatars, renderMiiAvatar as renderSingleMii } from "./mii_avatars.js";
+import { triggerPhysicalHardwareVibration } from "./motion_controls.js";
 
 export class HudUI {
   constructor(callbacks = {}) {
@@ -499,39 +500,204 @@ export class HudUI {
     window.__argonTennis?.characterShopUI?.stopVictoryModal3D?.();
   }
 
-  showVictoryModal({ playerWon, playerGames, opponentGames, coinsEarned = 0, isOnline = false }) {
+  showVersusIntro({
+    p1Name = "Player 1",
+    p2Name = "Player 2",
+    p1Loadout = null,
+    p2Loadout = null,
+    isOnline = false,
+    gamesToWin = 1,
+    difficulty = "casual",
+    onComplete = null
+  } = {}) {
+    const overlay = document.getElementById("match-versus-overlay");
+    if (!overlay) {
+      if (typeof onComplete === "function") onComplete();
+      return;
+    }
+
+    if (this._vsIntroTimers) {
+      this._vsIntroTimers.forEach(clearTimeout);
+      this._vsIntroTimers = [];
+    } else {
+      this._vsIntroTimers = [];
+    }
+
+    overlay.classList.remove("hidden", "versus-fade-out");
+    overlay.setAttribute("aria-hidden", "false");
+
+    // Draw Mii Portraits for VS cards
+    const cvs1 = document.getElementById("vs-mii-canvas-p1");
+    if (cvs1) renderSingleMii(cvs1, "player1");
+    const cvs2 = document.getElementById("vs-mii-canvas-p2");
+    if (cvs2) renderSingleMii(cvs2, isOnline ? "opponent1" : "opponent1");
+
+    // Player 1 Meta
+    const p1NameEl = document.getElementById("vs-p1-name");
+    const p1TitleEl = document.getElementById("vs-p1-title");
+    const p1BannerEl = document.getElementById("vs-p1-banner");
+    if (p1NameEl) p1NameEl.textContent = p1Name || "BẠN";
+    if (p1TitleEl) p1TitleEl.textContent = isOnline ? "Đấu Thủ Host (P1)" : "Vận Động Viên Chủ Nhà";
+    if (p1BannerEl) p1BannerEl.textContent = isOnline ? "HOST P1" : "BẠN";
+
+    // Player 2 Meta
+    const p2NameEl = document.getElementById("vs-p2-name");
+    const p2TitleEl = document.getElementById("vs-p2-title");
+    const p2BannerEl = document.getElementById("vs-p2-banner");
+    if (p2NameEl) p2NameEl.textContent = p2Name || (isOnline ? "CHALLENGER" : "BOT AI");
+    if (p2TitleEl) p2TitleEl.textContent = isOnline ? "Đấu Thủ Khách (P2)" : `Cấp Độ: ${String(difficulty || "casual").toUpperCase()}`;
+    if (p2BannerEl) p2BannerEl.textContent = isOnline ? "CHALLENGER P2" : "BOT AI";
+
+    // Match condition text
+    const condEl = document.getElementById("vs-condition-text");
+    if (condEl) {
+      const mapName = window.__argonTennis?.courtMapManager?.getSelectedMap?.()?.name || "GRAND SLAM HARD COURT";
+      condEl.textContent = `SET: ${gamesToWin || 1} GAME · ${mapName.toUpperCase()}`;
+    }
+
+    const countText = document.getElementById("vs-countdown-text");
+    const countdownSteps = [
+      { text: "READY", delay: 0, vib: "countdown_tick", sfx: null },
+      { text: "3", delay: 550, vib: "countdown_tick", sfx: "toss" },
+      { text: "2", delay: 1050, vib: "countdown_tick", sfx: "toss" },
+      { text: "1", delay: 1550, vib: "countdown_tick", sfx: "toss" },
+      { text: "SERVE!", delay: 2000, vib: "serve_go", sfx: "start" }
+    ];
+
+    let finished = false;
+    const finishIntro = () => {
+      if (finished) return;
+      finished = true;
+      if (this._vsIntroTimers) {
+        this._vsIntroTimers.forEach(clearTimeout);
+        this._vsIntroTimers = [];
+      }
+      if (this._vsSkipCleanup) {
+        this._vsSkipCleanup();
+        this._vsSkipCleanup = null;
+      }
+      overlay.classList.add("versus-fade-out");
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+        overlay.classList.remove("versus-fade-out");
+        overlay.setAttribute("aria-hidden", "true");
+        if (typeof onComplete === "function") onComplete();
+      }, 340);
+    };
+
+    countdownSteps.forEach((step) => {
+      const tid = setTimeout(() => {
+        if (finished) return;
+        if (countText) {
+          countText.textContent = step.text;
+          countText.style.animation = "none";
+          void countText.offsetWidth;
+          countText.style.animation = "vsCountPulse 0.35s ease-out";
+        }
+        if (step.vib) {
+          triggerPhysicalHardwareVibration(step.vib, { intensity: 1 });
+        }
+        if (step.sfx && window.__argonTennis?.audioEngine) {
+          if (step.sfx === "start") {
+            window.__argonTennis.audioEngine.playVoiceCallout?.("start");
+          } else {
+            window.__argonTennis.audioEngine.playServeToss?.();
+          }
+        }
+      }, step.delay);
+      this._vsIntroTimers.push(tid);
+    });
+
+    // Auto finish after countdown completes
+    const endTid = setTimeout(finishIntro, 2450);
+    this._vsIntroTimers.push(endTid);
+
+    // Skip on tap/click or keydown
+    const onSkip = (e) => {
+      if (e && e.target && e.target.tagName === "INPUT") return;
+      finishIntro();
+    };
+    overlay.addEventListener("click", onSkip, { once: true });
+    const onKeySkip = (e) => {
+      if (e.code === "Space" || e.code === "Enter" || e.code === "Escape") {
+        onSkip();
+      }
+    };
+    window.addEventListener("keydown", onKeySkip, { once: true });
+    this._vsSkipCleanup = () => {
+      overlay.removeEventListener("click", onSkip);
+      window.removeEventListener("keydown", onKeySkip);
+    };
+  }
+
+  hideVersusIntro() {
+    if (this._vsIntroTimers) {
+      this._vsIntroTimers.forEach(clearTimeout);
+      this._vsIntroTimers = [];
+    }
+    if (this._vsSkipCleanup) {
+      this._vsSkipCleanup();
+      this._vsSkipCleanup = null;
+    }
+    const overlay = document.getElementById("match-versus-overlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  showVictoryModal({
+    playerWon,
+    playerGames,
+    opponentGames,
+    coinsEarned = 0,
+    isOnline = false,
+    winnerName = null,
+    winnerRole = null
+  }) {
     if (!this.elVictoryModal) return;
     const banner = document.getElementById("victory-result-banner");
     const scoreText = document.getElementById("victory-match-score");
     const skillValue = document.getElementById("skill-rating-value");
     const coinText = document.getElementById("victory-coin-reward-text");
+    const winnerTagEl = document.getElementById("victory-winner-tag");
     const winnerNameEl = document.getElementById("victory-winner-3d-name");
     const skillPlayerNameEl = document.getElementById("victory-skill-player-name");
 
     if (banner) {
-      banner.textContent = playerWon ? "CHIẾN THẮNG!" : "HOÀN THÀNH TRẬN ĐẤU!";
-      banner.style.color = playerWon ? "#ffea28" : "#9ad4ff";
+      banner.textContent = playerWon ? "CHIẾN THẮNG!" : isOnline ? "THẤT BẠI!" : "HOÀN THÀNH TRẬN ĐẤU!";
+      banner.style.color = playerWon ? "#ffea28" : isOnline ? "#f43f5e" : "#9ad4ff";
+    }
+    if (winnerTagEl) {
+      winnerTagEl.textContent = playerWon ? "BẠN LÀ NHÀ VÔ ĐỊCH SÂN ĐẤU" : isOnline ? "ĐỐI THỦ GIÀNH CHIẾN THẮNG" : "KẾT QUẢ CHUNG CUỘC";
     }
     if (scoreText) {
-      scoreText.textContent = `Tỷ Số Set: ${playerGames} - ${opponentGames}`;
+      scoreText.textContent = isOnline
+        ? `Tỷ Số Set: Bạn ${playerGames} - Đối thủ ${opponentGames}`
+        : `Tỷ Số Set: ${playerGames} - ${opponentGames}`;
     }
     if (coinText) {
-      const rewardAmt = coinsEarned > 0 ? coinsEarned : playerWon ? (isOnline ? 500 : 350) : 120;
+      const rewardAmt = coinsEarned > 0 ? coinsEarned : playerWon ? (isOnline ? 1400 : 950) : (isOnline ? 380 : 280);
       coinText.textContent = `+${rewardAmt.toLocaleString("vi-VN")} XU THƯỞNG${isOnline ? " ONLINE" : ""}`;
     }
 
     const shop = window.__argonTennis?.characterShop;
-    if (shop) {
-      const pChar = shop.getSelectedCharacter("player");
-      const bChar = shop.getSelectedCharacter("partner");
-      if (winnerNameEl) {
-        winnerNameEl.textContent = playerWon
-          ? `${pChar.name} & Bot ${bChar.name} · VÔ ĐỊCH!`
-          : `${pChar.name} & Bot ${bChar.name}`;
+    const pChar = shop?.getSelectedCharacter("player") || { name: "Ammaar" };
+    const bChar = shop?.getSelectedCharacter("partner") || { name: "Maya" };
+
+    if (winnerNameEl) {
+      if (playerWon) {
+        winnerNameEl.textContent = `${pChar.name} & Bot ${bChar.name} · VÔ ĐỊCH!`;
+      } else {
+        if (winnerName) {
+          winnerNameEl.textContent = `${winnerName} · VÔ ĐỊCH!`;
+        } else {
+          winnerNameEl.textContent = isOnline ? "Đối Thủ · VÔ ĐỊCH!" : `Đối Thủ & Bot Maya`;
+        }
       }
-      if (skillPlayerNameEl) {
-        skillPlayerNameEl.textContent = pChar.name;
-      }
+    }
+    if (skillPlayerNameEl) {
+      skillPlayerNameEl.textContent = pChar.name;
     }
 
     const finalRating = playerWon ? 1165 : 1030;
@@ -544,12 +710,16 @@ export class HudUI {
     this._drawSkillGraph(playerWon);
     this.elVictoryModal.classList.remove("hidden");
 
+    // Real hardware vibration for victory/defeat
+    triggerPhysicalHardwareVibration(playerWon ? "match_won" : "point_lost", { intensity: playerWon ? 1.5 : 0.8 });
+
     setTimeout(() => {
       window.__argonTennis?.characterShopUI?.startVictoryModal3D?.({
         playerWon,
         playerGames,
         opponentGames,
-        coinsEarned
+        coinsEarned,
+        isOnline
       });
     }, 30);
   }

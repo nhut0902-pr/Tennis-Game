@@ -5594,6 +5594,383 @@ kbd {
   justify-content: center;
 }
 
+/* ==========================================================================
+   PRE-MATCH VERSUS ANIMATION OVERLAY (BROADCAST ESPORTS / WII SPORTS STYLE)
+   ========================================================================== */
+.match-versus-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.4s ease-out;
+}
+
+.match-versus-overlay.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.match-versus-overlay.versus-fade-out {
+  opacity: 0;
+  transform: scale(1.05);
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1), transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.versus-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.88) 0%, rgba(2, 6, 23, 0.96) 85%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.versus-light-slash {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.28) 0%, rgba(56, 189, 248, 0.15) 45%, rgba(245, 158, 11, 0.15) 55%, rgba(239, 68, 68, 0.28) 100%);
+  transform: rotate(-15deg);
+  animation: vsSlashPulse 3.5s ease-in-out infinite alternate;
+}
+
+.versus-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity: 0.6;
+}
+
+@keyframes vsSlashPulse {
+  0% { transform: rotate(-15deg) scale(1); opacity: 0.85; }
+  100% { transform: rotate(-15deg) scale(1.08); opacity: 1; }
+}
+
+.versus-stage {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1100px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Player Cards */
+.versus-player-card {
+  flex: 1;
+  max-width: 330px;
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 20px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+.versus-player-card.left-card {
+  border: 2px solid rgba(56, 189, 248, 0.55);
+  box-shadow: 0 20px 50px rgba(14, 165, 233, 0.25), inset 0 0 25px rgba(14, 165, 233, 0.15);
+  animation: vsCardSlideLeft 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.versus-player-card.right-card {
+  border: 2px solid rgba(244, 63, 94, 0.55);
+  box-shadow: 0 20px 50px rgba(244, 63, 94, 0.25), inset 0 0 25px rgba(244, 63, 94, 0.15);
+  animation: vsCardSlideRight 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes vsCardSlideLeft {
+  0% { opacity: 0; transform: translateX(-120px) rotate(-3deg) scale(0.9); }
+  100% { opacity: 1; transform: translateX(0) rotate(0) scale(1); }
+}
+
+@keyframes vsCardSlideRight {
+  0% { opacity: 0; transform: translateX(120px) rotate(3deg) scale(0.9); }
+  100% { opacity: 1; transform: translateX(0) rotate(0) scale(1); }
+}
+
+.vs-card-banner {
+  font-family: var(--wii-font);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+
+.left-card .vs-card-banner {
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+}
+
+.right-card .vs-card-banner {
+  background: linear-gradient(90deg, #e11d48, #fb7185);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.6);
+}
+
+.vs-avatar-circle {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.vs-avatar-circle.p1-circle {
+  border: 3.5px solid #38bdf8;
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.55);
+}
+
+.vs-avatar-circle.p2-circle {
+  border: 3.5px solid #f43f5e;
+  box-shadow: 0 0 22px rgba(244, 63, 94, 0.55);
+}
+
+.vs-avatar-circle canvas {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: block;
+}
+
+.vs-player-name {
+  font-family: "Barlow Condensed", var(--wii-font);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #f8fafc;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.vs-player-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.vs-stat-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.vs-chip {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vs-chip.chip-speed { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+.vs-chip.chip-power { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+.vs-chip.chip-spin { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+.vs-chip.chip-reflex { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+/* Center VS Column */
+.versus-center-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+
+.versus-emblem-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.versus-halo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed rgba(250, 204, 21, 0.45);
+  animation: vsRotateRing 8s linear infinite;
+}
+
+@keyframes vsRotateRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.versus-vs-badge {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 64px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 3px;
+  background: linear-gradient(180deg, #ffffff 0%, #fde047 40%, #eab308 70%, #ca8a04 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.75)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.8));
+  animation: vsBadgeSlam 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  will-change: transform;
+}
+
+@keyframes vsBadgeSlam {
+  0% { transform: scale(3.5); opacity: 0; filter: blur(6px); }
+  70% { transform: scale(0.92); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.versus-match-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 16px;
+}
+
+.vs-info-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.vs-info-condition {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.versus-countdown-badge {
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #facc15;
+  border-radius: 999px;
+  padding: 8px 32px;
+  box-shadow: 0 0 25px rgba(250, 204, 21, 0.4), inset 0 0 12px rgba(250, 204, 21, 0.2);
+  margin-bottom: 10px;
+  min-width: 140px;
+}
+
+.countdown-num {
+  font-family: "Barlow Condensed", var(--wii-font);
+  font-size: 32px;
+  font-weight: 900;
+  color: #fef08a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: inline-block;
+  animation: vsCountPulse 0.45s ease-out;
+}
+
+@keyframes vsCountPulse {
+  0% { transform: scale(1.4); opacity: 0.3; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.vs-skip-hint {
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Mobile & Small Screens Layout for Versus Screen */
+@media (max-width: 768px) {
+  .versus-stage {
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 12px;
+  }
+  .versus-player-card {
+    max-width: 90vw;
+    width: 90vw;
+    padding: 12px 14px;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    text-align: left;
+    border-radius: 14px;
+  }
+  .versus-player-card .vs-avatar-circle {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .versus-player-card .vs-avatar-circle canvas {
+    width: 58px;
+    height: 58px;
+  }
+  .versus-player-card .vs-player-name {
+    font-size: 20px;
+  }
+  .versus-player-card .vs-player-title {
+    font-size: 10.5px;
+    margin-bottom: 4px;
+  }
+  .versus-player-card .vs-stat-chips {
+    justify-content: flex-start;
+  }
+  .versus-player-card .vs-card-banner {
+    display: none;
+  }
+  .versus-center-column {
+    order: -1;
+    margin-bottom: 6px;
+  }
+  .versus-emblem-wrap {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 4px;
+  }
+  .versus-vs-badge {
+    font-size: 42px;
+  }
+  .versus-match-info {
+    margin-bottom: 8px;
+  }
+  .versus-countdown-badge {
+    padding: 4px 22px;
+    min-width: 110px;
+  }
+  .countdown-num {
+    font-size: 22px;
+  }
+}
+
 
 
 

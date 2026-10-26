@@ -121,6 +121,60 @@
       <span class="replay-label">Replay</span>
     </div>
 
+    <!-- Pre-Match Versus Animation Overlay -->
+    <div id="match-versus-overlay" class="match-versus-overlay hidden" aria-hidden="true">
+      <div class="versus-backdrop">
+        <div class="versus-light-slash"></div>
+        <div class="versus-grid-pattern"></div>
+      </div>
+      <div class="versus-stage">
+        <!-- Team Left (Player 1 / You / Host) -->
+        <div class="versus-player-card left-card" id="vs-card-p1">
+          <div class="vs-card-banner" id="vs-p1-banner">PLAYER 1</div>
+          <div class="vs-avatar-circle p1-circle">
+            <canvas id="vs-mii-canvas-p1" width="160" height="160"></canvas>
+          </div>
+          <div class="vs-player-name" id="vs-p1-name">AMMAAR</div>
+          <div class="vs-player-title" id="vs-p1-title">Huyền Thoại Sân Đấu</div>
+          <div class="vs-stat-chips" id="vs-p1-chips">
+            <span class="vs-chip chip-speed">TỐC ĐỘ S</span>
+            <span class="vs-chip chip-power">LỰC A+</span>
+          </div>
+        </div>
+
+        <!-- Center VS Emblem & Countdown -->
+        <div class="versus-center-column">
+          <div class="versus-emblem-wrap">
+            <div class="versus-halo-ring"></div>
+            <div class="versus-vs-badge">VS</div>
+            <div class="versus-spark-burst"></div>
+          </div>
+          <div class="versus-match-info" id="vs-match-info">
+            <span class="vs-info-tag">PRO TOUR MATCH</span>
+            <strong class="vs-info-condition" id="vs-condition-text">SET: 1 GAME · SÂN CỎ GRAND SLAM</strong>
+          </div>
+          <div class="versus-countdown-badge" id="vs-countdown-badge">
+            <span class="countdown-num" id="vs-countdown-text">READY</span>
+          </div>
+          <div class="vs-skip-hint">Chạm màn hình hoặc bấm phím để Bỏ qua</div>
+        </div>
+
+        <!-- Team Right (Player 2 / Challenger / Bot) -->
+        <div class="versus-player-card right-card" id="vs-card-p2">
+          <div class="vs-card-banner" id="vs-p2-banner">CHALLENGER</div>
+          <div class="vs-avatar-circle p2-circle">
+            <canvas id="vs-mii-canvas-p2" width="160" height="160"></canvas>
+          </div>
+          <div class="vs-player-name" id="vs-p2-name">KAITO</div>
+          <div class="vs-player-title" id="vs-p2-title">Chuyên Gia Cắt Bóng</div>
+          <div class="vs-stat-chips" id="vs-p2-chips">
+            <span class="vs-chip chip-spin">XOÁY S</span>
+            <span class="vs-chip chip-reflex">PHẢN XẠ A</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Mobile On-Screen Touch Gamepad (Gamepad ảo cho Điện thoại & Tablet) -->
     <div id="touch-gamepad-layer" class="touch-gamepad-layer" aria-label="Touch Controls">
       <!-- Left: Virtual Analog Joystick -->

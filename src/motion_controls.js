@@ -1147,13 +1147,12 @@ export class MotionController {
 
   triggerHapticFeedback({ kind = "hit", grade = "PERFECT", shotType = "TOPSPIN", speedKmh = 165, intensity = 1, role = null } = {}) {
     const targetRole = role || this.role || "p1";
-    if (this.settings.hapticsEnabled && typeof navigator !== "undefined" && navigator.vibrate) {
-      try {
-        if (kind === "whiff" || kind === "fault") navigator.vibrate([18, 35, 18]);
-        else if (intensity >= 1.25 || /PERFECT|POWER|SMASH/i.test(grade)) navigator.vibrate([45, 28, 65]);
-        else navigator.vibrate([28]);
-      } catch {}
+    const isForLocalPlayer = !role || role === this.role;
+
+    if (this.settings.hapticsEnabled !== false && isForLocalPlayer) {
+      triggerPhysicalHardwareVibration(kind, { intensity, grade });
     }
+
     if (
       (this.phoneState.connected || this.p2PhoneState.connected) &&
       (typeof navigator === "undefined" || navigator.onLine)
@@ -1597,3 +1596,71 @@ export class MotionController {
 }
 
 export default MotionController;
+
+export function triggerPhysicalHardwareVibration(kind = "hit", { intensity = 1, grade = "", durationMs = 60, pattern = null, role = null } = {}) {
+  if (typeof window === "undefined") return;
+
+  // Filter role if specified (so P1 hits only buzz P1 device, P2 hits buzz P2 device)
+  if (role) {
+    const localRole = (typeof window !== "undefined" && window.__CURRENT_PLAYER_ROLE) ||
+      (new URLSearchParams(window.location.search).get("role") === "p2" ? "p2" : "p1");
+    if (role !== localRole) return;
+  }
+
+  // 1. Resolve vibration pattern for navigator.vibrate
+  let vibPattern = pattern;
+  if (!vibPattern) {
+    if (kind === "match_won") {
+      vibPattern = [80, 45, 80, 45, 140, 60, 240];
+    } else if (kind === "point_won") {
+      vibPattern = [45, 30, 45, 30, 95];
+    } else if (kind === "point_lost") {
+      vibPattern = [135];
+    } else if (kind === "countdown_tick") {
+      vibPattern = [45];
+    } else if (kind === "serve_go") {
+      vibPattern = [65, 30, 90];
+    } else if (kind === "whiff" || kind === "fault" || kind === "out" || kind === "net") {
+      vibPattern = [65, 35, 65];
+    } else if (intensity >= 1.25 || /PERFECT|POWER|SMASH|SWEET/i.test(grade || "")) {
+      vibPattern = [45, 25, 85];
+    } else if (kind === "swing" || kind === "toss") {
+      vibPattern = [22];
+    } else {
+      vibPattern = [32];
+    }
+  }
+
+  // 2. Physical device vibration (Android Chrome / Mobile Safari PWA / Tablet / Phone)
+  if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+    try {
+      navigator.vibrate(vibPattern);
+    } catch {}
+  }
+
+  // 3. Physical Gamepad / Controller Rumble (Xbox, DualShock, Pro Controller)
+  if (typeof navigator !== "undefined" && typeof navigator.getGamepads === "function") {
+    try {
+      const pads = navigator.getGamepads();
+      if (pads) {
+        const strong = Math.min(1.0, Math.max(0.2, (kind === "match_won" ? 1.0 : intensity >= 1.25 ? 0.85 : 0.45) * intensity));
+        const weak = Math.min(1.0, Math.max(0.15, (kind === "match_won" ? 0.9 : intensity >= 1.25 ? 0.75 : 0.35) * intensity));
+        const dur = typeof vibPattern === "number" ? vibPattern : Array.isArray(vibPattern) ? vibPattern.reduce((a, b) => a + b, 0) : durationMs;
+        for (let i = 0; i < pads.length; i++) {
+          const gp = pads[i];
+          if (!gp) continue;
+          if (gp.vibrationActuator && typeof gp.vibrationActuator.playEffect === "function") {
+            gp.vibrationActuator.playEffect("dual-rumble", {
+              startDelay: 0,
+              duration: Math.min(1000, Math.max(40, dur)),
+              weakMagnitude: weak,
+              strongMagnitude: strong
+            }).catch(() => {});
+          } else if (gp.hapticActuators && gp.hapticActuators[0] && typeof gp.hapticActuators[0].pulse === "function") {
+            gp.hapticActuators[0].pulse(strong, Math.min(1000, dur)).catch(() => {});
+          }
+        }
+      }
+    } catch {}
+  }
+}
