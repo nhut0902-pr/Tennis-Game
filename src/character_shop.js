@@ -1380,11 +1380,11 @@ export const VIP_SUBSCRIPTION_PACKAGES = [
     id: "vip_1day",
     name: "VIP 1 Ngày",
     durationMs: 24 * 60 * 60 * 1000,
-    priceCoins: 2000,
+    priceCoins: 100000,
     bonusVipCoins: 5000,
     coinMultiplier: 2.0,
-    badge: "2.000 XU",
-    tag: "GÓI TRẢI NGHIỆM",
+    badge: "100.000 XU",
+    tag: "GÓI NGÀY",
     desc: "Kích hoạt VIP 24h. Nhân x2 Xu thưởng trận, tặng ngay +5.000 Xu VIP!"
   },
   {
@@ -1395,19 +1395,19 @@ export const VIP_SUBSCRIPTION_PACKAGES = [
     bonusVipCoins: 150000,
     coinMultiplier: 3.0,
     badge: "2.000.000 XU",
-    tag: "GÓI PHỔ BIẾN",
+    tag: "GÓI TUẦN",
     desc: "Kích hoạt VIP 7 ngày. Nhân x3 Xu thưởng mọi trận, tặng ngay +150.000 Xu VIP!"
   },
   {
     id: "vip_1month",
-    name: "VIP 1 Tháng (Đại Gia)",
+    name: "VIP 1 Tháng",
     durationMs: 30 * 24 * 60 * 60 * 1000,
     priceCoins: 2000000000,
     bonusVipCoins: 2000000,
     coinMultiplier: 5.0,
     badge: "2.000.000.000 XU",
-    tag: "ĐẠI GIA BẤT TỬ",
-    desc: "Đặc quyền Thần Thánh 30 ngày. Nhân x5 Xu thưởng, tặng ngay +2.000.000 Xu VIP, mở full cơ chế!"
+    tag: "GÓI THÁNG",
+    desc: "Đặc quyền 30 ngày. Nhân x5 Xu thưởng, tặng ngay +2.000.000 Xu VIP, mở full cơ chế!"
   }
 ];
 
@@ -1415,162 +1415,164 @@ export const CHARACTER_ACTIVE_MECHANICS = {
   zeus_vip: [
     {
       id: "zeus_speed",
-      name: "⚡ Lôi Tốc Thần Thánh",
+      name: "Lôi Tốc Thần Thánh",
       shortLabel: "LÔI TỐC",
-      icon: "⚡",
+      icon: "SPD",
       hotkey: "1",
       color: "#facc15",
       type: "speed",
-      speedMult: 1.8,
+      speedMult: 1.95,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "+80% Tốc độ di chuyển và để lại tàn ảnh tia chớp vạn dặm trong 20s!"
+      desc: "+95% Tốc độ di chuyển và tự động lướt đón bóng tia chớp trong 20s!"
     },
     {
       id: "zeus_smash",
-      name: "⚡ Sấm Sét Huỷ Diệt",
+      name: "Sấm Sét Huỷ Diệt",
       shortLabel: "LÔI SMASH",
-      icon: "💥",
+      icon: "PWR",
       hotkey: "2",
       color: "#eab308",
       type: "smash",
-      powerMult: 1.85,
+      powerMult: 2.25,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Mọi cú Smash hoá tia sét 280+ km/h xé toạc sân đấu trong 20s!"
+      desc: "Mọi cú đánh hoá tia sét 320+ km/h xé toạc sân đấu trong 20s!"
     },
     {
       id: "zeus_shield",
-      name: "🛡️ Lôi Khiên Bất Hoại",
+      name: "Lôi Khiên Bất Hoại",
       shortLabel: "LÔI KHIÊN",
-      icon: "🛡️",
+      icon: "SHD",
       hotkey: "3",
       color: "#38bdf8",
       type: "magnet",
-      reachBoost: 3.5,
+      reachBoost: 4.5,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Lôi trường hút bóng 3.5m tự động hướng bóng vào điểm ngọt trong 20s!"
+      desc: "Lôi trường hút bóng 4.5m tự động đưa bóng vào điểm ngọt trong 20s!"
     }
   ],
   kitsune_vip: [
     {
       id: "kitsune_dash",
-      name: "🦊 Hồ Ly Lướt Gió",
+      name: "Hồ Ly Lướt Gió",
       shortLabel: "HỒ DƯỢT",
-      icon: "🦊",
+      icon: "SPD",
       hotkey: "1",
       color: "#ec4899",
       type: "speed",
-      speedMult: 1.8,
+      speedMult: 1.95,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Lướt gió cửu vĩ siêu thanh, tăng 80% tốc biến cứu bóng hiểm trong 20s!"
+      desc: "Lướt gió cửu vĩ siêu thanh, tăng 95% tốc biến cứu bóng hiểm trong 20s!"
     },
     {
       id: "kitsune_spin",
-      name: "🔥 Ma Hỏa Xoáy Ảo",
+      name: "Ma Hỏa Xoáy Ảo",
       shortLabel: "MA HỎA",
-      icon: "🔥",
+      icon: "SPN",
       hotkey: "2",
       color: "#f43f5e",
       type: "spin",
-      curveMult: 2.2,
+      curveMult: 2.5,
+      powerMult: 1.9,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Bóng xoáy ma hỏa uốn lượn 3D cực dị khiến bot và đối thủ mất phương hướng!"
+      desc: "Bóng xoáy ma hỏa uốn lượn 3D cực dị khiến bot mất phương hướng trong 20s!"
     },
     {
       id: "kitsune_slow",
-      name: "✨ Cửu Vĩ Mê Hoặc",
+      name: "Cửu Vĩ Mê Hoặc",
       shortLabel: "MÊ HOẶC",
-      icon: "✨",
+      icon: "TME",
       hotkey: "3",
       color: "#f472b6",
       type: "time",
-      slowEnemy: 0.5,
+      slowEnemy: 0.42,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Hào quang mị hoặc làm chậm 50% tốc độ chạy của đối thủ và bot trong 20s!"
+      desc: "Hào quang mị hoặc làm chậm 58% tốc độ chạy của đối thủ và bot trong 20s!"
     }
   ],
   ares_vip: [
     {
       id: "ares_rage",
-      name: "⚔️ Chiến Thần Cuồng Nộ",
+      name: "Chiến Thần Cuồng Nộ",
       shortLabel: "CUỒNG NỘ",
-      icon: "⚔️",
+      icon: "PWR",
       hotkey: "1",
       color: "#ef4444",
       type: "smash",
-      powerMult: 2.0,
+      powerMult: 2.4,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "+100% Uy lực mọi cú đánh, bóng bốc lửa đỏ rực đẩy văng đối thủ!"
+      desc: "+140% Uy lực mọi cú đánh, bóng bốc lửa đỏ rực đẩy văng đối thủ!"
     },
     {
       id: "ares_stomp",
-      name: "💥 Địa Chấn Nẩy Thấp",
+      name: "Địa Chấn Nẩy Thấp",
       shortLabel: "ĐỊA CHẤN",
-      icon: "💥",
+      icon: "SPN",
       hotkey: "2",
       color: "#b91c1c",
       type: "spin",
       lowBounce: 0.35,
+      powerMult: 2.0,
       durationMs: 20000,
       cooldownMs: 60000,
       desc: "Bóng chạm đất phát sóng chấn động nảy cực thấp sát mặt cỏ không thể cứu!"
     },
     {
       id: "ares_will",
-      name: "🛡️ Giáp Chiến Bất Phá",
+      name: "Giáp Chiến Bất Phá",
       shortLabel: "CHIẾN GIÁP",
-      icon: "🛡️",
+      icon: "SHD",
       hotkey: "3",
       color: "#f97316",
       type: "magnet",
-      reachBoost: 3.2,
+      reachBoost: 4.2,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Kháng hoàn toàn đòn đánh bộc phá và tăng tầm với bóng thêm 3.2m!"
+      desc: "Kháng hoàn toàn đòn đánh bộc phá và tăng tầm hút bóng thêm 4.2m!"
     }
   ],
   chronos_vip: [
     {
       id: "chronos_freeze",
-      name: "⏳ Ngưng Đọng Thời Không",
+      name: "Ngưng Đọng Thời Không",
       shortLabel: "NGƯNG ĐỌNG",
-      icon: "⏳",
+      icon: "TME",
       hotkey: "1",
       color: "#a855f7",
       type: "time",
-      slowEnemy: 0.45,
+      slowEnemy: 0.38,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Làm chậm 55% toàn bộ thế giới xung quanh, bạn di chuyển tự do trong 20s!"
+      desc: "Làm chậm 62% toàn bộ đối thủ trên sân, bạn di chuyển tự do trong 20s!"
     },
     {
       id: "chronos_warp",
-      name: "🌀 Cú Đánh Xuyên Không",
+      name: "Cú Đánh Xuyên Không",
       shortLabel: "XUYÊN KHÔNG",
-      icon: "🌀",
+      icon: "PWR",
       hotkey: "2",
       color: "#c084fc",
       type: "smash",
-      powerMult: 1.8,
+      powerMult: 2.3,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Bóng dịch chuyển tức thời qua lưới hạ gục điểm đối phương tức thì!"
+      desc: "Bóng dịch chuyển tia chớp qua lưới hạ gục điểm đối phương tức thì!"
     },
     {
       id: "chronos_shield",
-      name: "⌛ Vòng Lặp Vô Tận",
+      name: "Vòng Lặp Vô Tận",
       shortLabel: "VÔ TẬN",
-      icon: "⌛",
+      icon: "SHD",
       hotkey: "3",
       color: "#818cf8",
       type: "magnet",
-      reachBoost: 3.8,
+      reachBoost: 4.8,
       durationMs: 20000,
       cooldownMs: 60000,
       desc: "Kéo giãn thời gian tiếp bóng và tự động hút bóng về mặt vợt trong 20s!"
@@ -1579,84 +1581,85 @@ export const CHARACTER_ACTIVE_MECHANICS = {
   shenlong_vip: [
     {
       id: "shenlong_rush",
-      name: "🐉 Thần Long Xuất Hải",
+      name: "Thần Long Xuất Hải",
       shortLabel: "LONG THẦN",
-      icon: "🐉",
+      icon: "SPD",
       hotkey: "1",
       color: "#10b981",
       type: "speed",
-      speedMult: 1.85,
+      speedMult: 2.0,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Hóa thân rồng thần lướt như bay trên sân đấu, tốc độ tăng 85% trong 20s!"
+      desc: "Hóa thân rồng thần lướt như bay trên sân đấu, tốc độ tăng 100% trong 20s!"
     },
     {
       id: "shenlong_flame",
-      name: "🔥 Long Hỏa Thiêu Đốt",
+      name: "Long Hỏa Thiêu Đốt",
       shortLabel: "LONG HỎA",
-      icon: "🔥",
+      icon: "PWR",
       hotkey: "2",
       color: "#34d399",
       type: "smash",
-      powerMult: 1.95,
+      powerMult: 2.35,
       durationMs: 20000,
       cooldownMs: 60000,
       desc: "Cú đập rồng lửa cuộn lốc xanh ngọc, bóng găm góc chữ A cực kỳ hiểm hóc!"
     },
     {
       id: "shenlong_domain",
-      name: "🌊 Long Vực Khí Hải",
+      name: "Long Vực Khí Hải",
       shortLabel: "LONG VỰC",
-      icon: "🌊",
+      icon: "DMN",
       hotkey: "3",
       color: "#059669",
       type: "domain",
-      curveMult: 2.0,
-      reachBoost: 2.8,
+      curveMult: 2.4,
+      reachBoost: 4.2,
+      powerMult: 1.9,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Tạo lãnh địa rồng bảo hộ, không bao giờ đánh bóng rúc lưới hoặc ra ngoài!"
+      desc: "Tạo lãnh địa rồng bảo hộ, tự động hút bóng và không bao giờ đánh hỏng!"
     }
   ],
   omnibot_max20: [
     {
       id: "omni_overclock",
-      name: "🤖 Ép Xung Max 20",
+      name: "Ép Xung Max 20",
       shortLabel: "ÉP XUNG",
-      icon: "🤖",
+      icon: "SPD",
       hotkey: "1",
       color: "#f59e0b",
       type: "speed",
-      speedMult: 1.9,
+      speedMult: 2.15,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Bản sao cơ chế Bot X2 Max 20: Tốc độ ánh sáng, lướt sân không độ trễ trong 20s!"
+      desc: "Bản sao cơ chế Bot X2 Max 20: Tốc độ ánh sáng, tự động lướt bắt bóng trong 20s!"
     },
     {
       id: "omni_plasma",
-      name: "⚡ Tia Plasma Thần Cấp",
-      shortLabel: "PLASMA BEAM",
-      icon: "⚡",
+      name: "Tia Plasma Thần Cấp",
+      shortLabel: "PLASMA",
+      icon: "PWR",
       hotkey: "2",
       color: "#ef4444",
       type: "smash",
-      powerMult: 2.1,
+      powerMult: 2.6,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Quỹ đạo tia plasma siêu thanh không thể cản phá với vận tốc 300+ km/h!"
+      desc: "Quỹ đạo tia plasma siêu thanh không thể cản phá với vận tốc 340+ km/h!"
     },
     {
       id: "omni_matrix",
-      name: "🛡️ Khiên Lượng Tử Tuyệt Đối",
+      name: "Khiên Lượng Tử Tuyệt Đối",
       shortLabel: "LƯỢNG TỬ",
-      icon: "🛡️",
+      icon: "SHD",
       hotkey: "3",
       color: "#06b6d4",
       type: "magnet",
-      reachBoost: 4.2,
+      reachBoost: 5.2,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "Bán kính hút bóng 4.2m bao phủ gần như toàn bộ phần sân đấu trong 20s!"
+      desc: "Bán kính hút bóng 5.2m bao phủ toàn bộ phần sân đấu trong 20s!"
     }
   ]
 };
@@ -1670,16 +1673,17 @@ export function getCharacterActiveMechanics(charId) {
     return [
       {
         id: "generic_sprint",
-        name: "⚡ Bứt Tốc Thể Lực",
+        name: "Bứt Tốc Thể Lực",
         shortLabel: "BỨT TỐC",
-        icon: "⚡",
+        icon: "SPD",
         hotkey: "1",
         color: "#38bdf8",
         type: "speed",
-        speedMult: 1.45,
+        speedMult: 1.65,
+        powerMult: 1.5,
         durationMs: 20000,
         cooldownMs: 60000,
-        desc: "+45% Tốc độ di chuyển trên sân trong 20s!"
+        desc: "+65% Tốc độ di chuyển và +50% lực đánh trên sân trong 20s!"
       }
     ];
   }
@@ -1688,29 +1692,30 @@ export function getCharacterActiveMechanics(charId) {
     return [
       {
         id: `${charId}_rush`,
-        name: `⚡ Siêu Tốc: ${char.name}`,
+        name: `Siêu Tốc: ${char.name}`,
         shortLabel: "SIÊU TỐC",
-        icon: "⚡",
+        icon: "SPD",
         hotkey: "1",
         color: char.accentCss || "#38bdf8",
         type: "speed",
-        speedMult: 1.6,
+        speedMult: 1.75,
+        reachBoost: 2.2,
         durationMs: 20000,
         cooldownMs: 60000,
-        desc: `Kích hoạt xung năng lượng tăng 60% tốc độ trong 20s!`
+        desc: `Kích hoạt xung năng lượng tăng 75% tốc độ và tầm đón bóng trong 20s!`
       },
       {
         id: `${charId}_blast`,
-        name: `💥 Bộc Phá: ${char.passiveName || char.name}`,
+        name: `Bộc Phá: ${char.passiveName || char.name}`,
         shortLabel: "BỘC PHÁ",
-        icon: "💥",
+        icon: "PWR",
         hotkey: "2",
         color: "#f59e0b",
         type: "smash",
-        powerMult: 1.7,
+        powerMult: 1.95,
         durationMs: 20000,
         cooldownMs: 60000,
-        desc: `Tăng 70% uy lực Smash và bóng bốc hiệu ứng rực rỡ trong 20s!`
+        desc: `Tăng 95% uy lực Smash và tốc độ bóng sấm sét trong 20s!`
       }
     ];
   }
@@ -1718,16 +1723,17 @@ export function getCharacterActiveMechanics(charId) {
   return [
     {
       id: `${charId}_sprint`,
-      name: `⚡ Bứt Tốc Thể Lực: ${char.name}`,
+      name: `Bứt Tốc: ${char.name}`,
       shortLabel: "BỨT TỐC",
-      icon: "⚡",
+      icon: "SPD",
       hotkey: "1",
       color: char.accentCss || "#38bdf8",
       type: "speed",
-      speedMult: 1.45,
+      speedMult: 1.65,
+      powerMult: 1.55,
       durationMs: 20000,
       cooldownMs: 60000,
-      desc: "+45% Tốc độ di chuyển trên sân đấu trong 20s!"
+      desc: "+65% Tốc độ di chuyển và +55% lực đánh trên sân đấu trong 20s!"
     }
   ];
 }
@@ -3832,15 +3838,21 @@ class CharacterShopManager {
     const effPwr = Math.max(0, powerPoints - 4);
     const effSpn = Math.max(0, spinPoints - 4);
 
-    const autoInterceptChance = Math.min(
-      0.99,
-      0.46 + iqLv * 0.055 + (mech.botInterceptBonus || 0) + accBonus.botInterceptBonus + (ovdLv - 1) * 0.02
-    );
+    const autoInterceptChance =
+      iqLv <= 1 && !char.isRobot && !char.isVip
+        ? 0
+        : Math.min(
+            0.85,
+            (iqLv - 1) * 0.065 +
+              (mech.botInterceptBonus || 0) +
+              accBonus.botInterceptBonus +
+              (ovdLv - 1) * 0.02
+          );
     const interceptReachX =
-      1.52 + rflxLv * 0.19 + (magLv - 1) * 0.13 + (mech.reachBonus || 0) * 0.75;
+      1.15 + (rflxLv - 1) * 0.14 + (magLv - 1) * 0.1 + (mech.reachBonus || 0) * 0.45;
     const interceptReachZ =
-      1.2 + rflxLv * 0.11 + (magLv - 1) * 0.09 + (mech.reachBonus || 0) * 0.45;
-    const canInterceptPowerShot = rflxLv >= 3 || iqLv >= 4 || Boolean(char.isRobot);
+      0.95 + (rflxLv - 1) * 0.09 + (magLv - 1) * 0.07 + (mech.reachBonus || 0) * 0.35;
+    const canInterceptPowerShot = rflxLv >= 4 || iqLv >= 5 || Boolean(char.isRobot);
     const maxSpeed =
       (4.35 + Math.min(18, effSpd) * 0.18 + Math.max(0, effSpd - 18) * 0.065) *
       (1 + (mech.speedBurstMult || 0) * 0.48);
@@ -6892,39 +6904,46 @@ export class CharacterShopUI {
     this.victoryMainActor = mainActor;
     this.victoryPartnerActor = partnerActor;
 
-    // Trigger initial celebratory expressions and pose
-    this.previewAnimator.triggerPointReaction(mainActor, "win");
-    this.previewAnimator.triggerPointReaction(partnerActor, "win");
-    this.previewFacialFX?.setExpression(mainActor, "happy_grin", 12.0);
-    this.previewFacialFX?.setExpression(partnerActor, "happy_grin", 12.0);
-    this.previewFacialFX?.triggerEmoteBurst(mainActor, "win");
+    // Trigger initial expressions and pose based on whether player won or lost
+    this.victoryPlayerWon = playerWon;
+    this.previewAnimator.triggerPointReaction(mainActor, playerWon ? "win" : "loss");
+    this.previewAnimator.triggerPointReaction(partnerActor, playerWon ? "win" : "loss");
+    this.previewFacialFX?.setExpression(mainActor, playerWon ? "happy_grin" : "shocked_loss", 12.0);
+    this.previewFacialFX?.setExpression(partnerActor, playerWon ? "happy_grin" : "shocked_loss", 12.0);
+    if (playerWon) {
+      this.previewFacialFX?.triggerEmoteBurst(mainActor, "win");
+    } else {
+      this.previewFacialFX?.triggerEmoteBurst(mainActor, "loss");
+    }
 
-    // 3D Confetti & Star Particles
+    // 3D Confetti & Star Particles (only when player won)
     this.victoryConfetti = [];
-    const confettiColors = [0xfacc15, 0x38bdf8, 0xf43f5e, 0x10b981, 0xa855f7, 0xffffff];
-    const confGeo = new THREE.PlaneGeometry(0.065, 0.036);
-    for (let i = 0; i < 42; i++) {
-      const mat = new THREE.MeshBasicMaterial({
-        color: confettiColors[i % confettiColors.length],
-        side: THREE.DoubleSide
-      });
-      const mesh = new THREE.Mesh(confGeo, mat);
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 0.25 + Math.random() * 1.35;
-      mesh.position.set(
-        Math.cos(angle) * radius,
-        0.5 + Math.random() * 2.2,
-        Math.sin(angle) * radius * 0.7
-      );
-      mesh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-      this.victoryScene.add(mesh);
-      this.victoryConfetti.push({
-        mesh,
-        vy: 0.65 + Math.random() * 0.85,
-        vx: (Math.random() - 0.5) * 0.4,
-        rotSpeed: 2.5 + Math.random() * 4.5,
-        phase: Math.random() * Math.PI * 2
-      });
+    if (playerWon) {
+      const confettiColors = [0xfacc15, 0x38bdf8, 0xf43f5e, 0x10b981, 0xa855f7, 0xffffff];
+      const confGeo = new THREE.PlaneGeometry(0.065, 0.036);
+      for (let i = 0; i < 42; i++) {
+        const mat = new THREE.MeshBasicMaterial({
+          color: confettiColors[i % confettiColors.length],
+          side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(confGeo, mat);
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.25 + Math.random() * 1.35;
+        mesh.position.set(
+          Math.cos(angle) * radius,
+          0.5 + Math.random() * 2.2,
+          Math.sin(angle) * radius * 0.7
+        );
+        mesh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+        this.victoryScene.add(mesh);
+        this.victoryConfetti.push({
+          mesh,
+          vy: 0.65 + Math.random() * 0.85,
+          vx: (Math.random() - 0.5) * 0.4,
+          rotSpeed: 2.5 + Math.random() * 4.5,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
     }
 
     const stepVictory = () => {
@@ -6950,18 +6969,37 @@ export class CharacterShopUI {
         }
       }
 
-      // Animate Champion & Partner Victory Poses
+      // Animate Champion & Partner Poses (Happy Celebration on Win vs Sad Slump on Loss)
       const actors = [this.victoryMainActor, this.victoryPartnerActor];
       actors.forEach((act, idx) => {
         if (!act) return;
         const phaseOffset = idx * 0.85;
         const pTime = t * 4.2 + phaseOffset;
 
-        if (this.victoryPoseMode === "jump") {
+        if (!this.victoryPlayerWon) {
+          // Defeated / Sad Slump Pose when player lost
+          act.root.position.y = 0;
+          act.root.rotation.y = Math.sin(t * 1.1 + phaseOffset) * 0.12;
+          if (act.parts.torso) {
+            act.parts.torso.rotation.x = 0.28 + Math.sin(t * 2.0 + phaseOffset) * 0.04;
+            act.parts.torso.rotation.z = Math.sin(t * 1.8 + phaseOffset) * 0.05;
+          }
+          if (act.parts.head) {
+            act.parts.head.rotation.x = 0.36 + Math.sin(t * 2.2) * 0.05;
+            act.parts.head.rotation.y = Math.sin(t * 1.5 + phaseOffset) * 0.18;
+          }
+          if (act.parts.handL) {
+            act.parts.handL.position.y = (act.parts.handL.userData.basePos?.y || 0.78) - 0.12;
+          }
+          if (act.racketPivot) {
+            act.racketPivot.position.y = 0.68;
+            act.racketPivot.rotation.x = 0.75;
+            act.racketPivot.rotation.z = 0.45;
+          }
+        } else if (this.victoryPoseMode === "jump") {
           // Energetic Championship Jump + Double Fist Pump
           const jumpWave = Math.max(0, Math.sin(pTime));
           const prevWave = Math.max(0, Math.sin(pTime - dt * 4.2));
-          // Trigger camera landing shake when landing from a high jump
           if (prevWave > 0.05 && jumpWave <= 0.05 && idx === 0) {
             this.victoryCameraShake = Math.max(this.victoryCameraShake, 0.32);
           }
@@ -7035,8 +7073,9 @@ export class CharacterShopUI {
 
         this.previewFacialFX?.update(act, dt, {
           phase: "MATCH_OVER",
-          ball: { pos: new THREE.Vector3(0, 1.2, 2.0), inPlay: false },
-          score: { playerPoints: 4, opponentPoints: 0 },
+          lastPointWinner: this.victoryPlayerWon ? "player" : "opponent",
+          ball: { pos: new THREE.Vector3(0, 1.2, 2.0), inPlay: false, lastHitter: this.victoryPlayerWon ? "player" : "opponent" },
+          score: { playerPoints: this.victoryPlayerWon ? 4 : 0, opponentPoints: this.victoryPlayerWon ? 0 : 4 },
           rallyCount: 0,
           camera: this.victoryCamera
         });
@@ -7089,7 +7128,10 @@ export class CharacterShopUI {
     this.victoryPoseMode = pose;
     this.victoryCameraShake = 0.52;
     if (this.victoryMainActor) {
-      this.previewFacialFX?.triggerEmoteBurst(this.victoryMainActor, "win");
+      this.previewFacialFX?.triggerEmoteBurst(
+        this.victoryMainActor,
+        this.victoryPlayerWon !== false ? "win" : "loss"
+      );
     }
     if (this.engine?.audioEngine?.playSwingWhoosh) {
       this.engine.audioEngine.playSwingWhoosh(1.3);
@@ -7111,8 +7153,7 @@ export class CharacterShopUI {
     if (this.activeTab === "upgrades") {
       this._renderUpgradesAndSkillsTab(container);
     } else if (this.activeTab === "vip") {
-      this.charCategoryFilter = "vip";
-      this._renderCharactersTab(container);
+      this._renderVipTab(container);
     } else if (this.activeTab === "characters") {
       this._renderCharactersTab(container);
     } else if (this.activeTab === "outfits") {
@@ -7344,6 +7385,176 @@ export class CharacterShopUI {
     });
   }
 
+  _renderVipTab(container) {
+    const editUnit = this._EffectiveEditUnit();
+    const selectedId =
+      editUnit === "partner" ? this.shop.state.partnerCharacterId : this.shop.state.selectedCharacterId;
+    const coins = this.shop.state.coins;
+    const vipInfo = this.shop.getVipInfo();
+    const isVipSub = vipInfo.isSubActive;
+    const vipMultiplier = vipInfo.coinMultiplier;
+    const remainingTime = vipInfo.remainingTime;
+    const vipRoster = CHARACTER_ROSTER.filter((c) => !!c.isVip);
+
+    const vipPackagesHtml = VIP_SUBSCRIPTION_PACKAGES.map((pkg) => {
+      const canBuy = coins >= pkg.priceCoins;
+      return `
+        <div class="vip-pkg-card ${canBuy ? "can-buy" : "locked"}">
+          <div class="vip-pkg-top">
+            <span class="vip-pkg-tag">${pkg.tag}</span>
+            <span class="vip-pkg-price">${pkg.badge}</span>
+          </div>
+          <div class="vip-pkg-body">
+            <div class="vip-pkg-name">${pkg.name}</div>
+            <div class="vip-pkg-desc">${pkg.desc}</div>
+          </div>
+          <button type="button" class="vip-pkg-buy-btn ${canBuy ? "ready" : "disabled"}" data-buy-vip-pkg="${pkg.id}">
+            ${canBuy ? `MUA GÓI · ${pkg.badge}` : `CẦN ${pkg.badge}`}
+          </button>
+        </div>
+      `;
+    }).join("");
+
+    const vipRosterHtml = vipRoster
+      .map((c, idx) => {
+        const unlocked = this.shop.state.unlockedCharacters.includes(c.id);
+        const isSelected = c.id === selectedId;
+        const mods = this.shop.getEffectivePlayerModifiers(c.id);
+        const vipCoins = this.shop.state.vipCoins || 0;
+        const canAfford = vipCoins >= (c.vipPrice || 200000);
+        const charCoinPct = Math.round((c.mechanic?.coinBonusPct || 0.1) * 100);
+
+        const spdVal = Math.round(42 + mods.speedPoints * 6.5);
+        const pwrVal = Math.round(42 + mods.powerPoints * 6.5);
+        const spnVal = Math.round(42 + mods.spinPoints * 6.5);
+        const rflxVal = Math.round(42 + mods.reflexPoints * 6.5);
+
+        const spdPct = Math.min(100, Math.max(14, Math.round((spdVal / 365) * 100)));
+        const pwrPct = Math.min(100, Math.max(14, Math.round((pwrVal / 365) * 100)));
+        const spnPct = Math.min(100, Math.max(14, Math.round((spnVal / 365) * 100)));
+        const rflxPct = Math.min(100, Math.max(14, Math.round((rflxVal / 365) * 100)));
+
+        const btnLabel = isSelected
+          ? editUnit === "partner"
+            ? "ĐANG LÀ BOT ĐỒNG ĐỘI"
+            : "ĐANG RA SÂN CHÍNH"
+          : unlocked
+          ? editUnit === "partner"
+            ? "CHỌN LÀM BOT ĐỒNG ĐỘI"
+            : "CHỌN VẬN ĐỘNG VIÊN"
+          : `MỞ KHÓA · ${(c.vipPrice || 200000).toLocaleString("vi-VN")} XU VIP`;
+
+        const miiPortraitSvg = getMiiAvatarSVG(c.id, { uid: `vip-card-${c.id}` });
+        const mechs = getCharacterActiveMechanics(c.id);
+        const mechsHtml = `
+          <div class="char-mech-tags">
+            ${mechs
+              .map(
+                (m) => `
+              <span class="char-mech-pill" style="--m-col:${m.color}" title="${m.desc}">
+                [${m.hotkey}] ${m.shortLabel} (20S)
+              </span>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+
+        return `
+          <article class="shop-item-card char-card vip-card-theme ${isSelected ? "active" : ""} ${!unlocked ? "locked-card" : ""}" style="--stagger-idx:${idx}; --card-accent:${c.accentCss}">
+            <div class="shop-card-visual-box char-visual-box">
+              <div class="char-portrait-wrap">${miiPortraitSvg}</div>
+              <div class="char-ovr-Lockup">
+                <span class="ovr-num" style="color:#facc15">${mods.overallRating}</span>
+                <span class="ovr-lbl">OVR</span>
+              </div>
+            </div>
+
+            <div class="shop-item-meta-line">SIÊU CẦU THỦ VIP · ${c.roleTag} · +${charCoinPct}% XU</div>
+            <div class="shop-item-name">${c.name}</div>
+            <div class="shop-item-role" style="color:${c.accentCss}; font-weight:800;">${c.passiveName || c.title}</div>
+            <div class="shop-item-desc">${c.passiveDesc}</div>
+            ${mechsHtml}
+
+            <div class="shop-mini-bars">
+              <div class="mini-bar-row"><span>TỐC</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${spdPct}%"></div></div><strong class="mini-bar-num">${spdVal}</strong></div>
+              <div class="mini-bar-row"><span>LỰC</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pwrPct}%"></div></div><strong class="mini-bar-num">${pwrVal}</strong></div>
+              <div class="mini-bar-row"><span>XOÁY</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${spnPct}%"></div></div><strong class="mini-bar-num">${spnVal}</strong></div>
+              <div class="mini-bar-row"><span>P.XẠ</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${rflxPct}%"></div></div><strong class="mini-bar-num">${rflxVal}</strong></div>
+            </div>
+
+            <div class="shop-item-actions">
+              <button type="button" class="shop-action-btn ${isSelected ? "equipped" : unlocked ? "select" : canAfford ? "buy" : "buy locked"} vip-buy-btn"
+                data-char-action="${c.id}">
+                ${btnLabel}
+              </button>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+    container.innerHTML = `
+      <div class="shop-section-block">
+        <div class="shop-section-header">
+          <div class="section-heading-group">
+            <span class="section-index-tag">01 // VIP MEMBERSHIP PACKAGES</span>
+            <h3 class="shop-section-title">GÓI ĐẶC QUYỀN HỘI VIÊN VIP (MUA BẰNG XU)</h3>
+          </div>
+          <span class="shop-section-sub">${isVipSub ? `ĐANG KÍCH HOẠT: ${remainingTime} (NHÂN X${vipMultiplier} XU)` : "CHƯA KÍCH HOẠT"}</span>
+        </div>
+
+        <div class="vip-packages-grid">
+          ${vipPackagesHtml}
+        </div>
+      </div>
+
+      <div class="shop-section-block">
+        <div class="shop-section-header">
+          <div class="section-heading-group">
+            <span class="section-index-tag">02 // VIP APEX ROSTER (3 CƠ CHẾ CHỦ ĐỘNG 20S / 60S HỒI)</span>
+            <h3 class="shop-section-title">SIÊU CẦU THỦ VIP TỐI THƯỢNG</h3>
+          </div>
+          <span class="shop-section-sub">VÍ VIP: ${(this.shop.state.vipCoins || 0).toLocaleString("vi-VN")} XU VIP</span>
+        </div>
+
+        <div class="shop-cards-grid">
+          ${vipRosterHtml}
+        </div>
+      </div>
+    `;
+
+    container.querySelectorAll("[data-buy-vip-pkg]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const pkgId = btn.getAttribute("data-buy-vip-pkg");
+        const res = this.shop.buyVipSubscription(pkgId);
+        this._showToast(res.message);
+        if (res.ok) {
+          this._playSfx("unlock");
+          this._renderCoinDisplays();
+          this._renderVipTab(container);
+        } else {
+          this._playSfx("error");
+        }
+      });
+    });
+
+    container.querySelectorAll("[data-char-action]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const cid = btn.getAttribute("data-char-action");
+        const res = this.shop.unlockOrSelectCharacter(cid, editUnit);
+        this._showToast(res.message);
+        if (res.ok) {
+          this._playSfx(res.action === "unlocked" ? "unlock" : "equip");
+          this.triggerPreviewPose(res.action === "unlocked" ? "win" : "smash");
+          this._renderVipTab(container);
+        } else {
+          this._playSfx("error");
+        }
+      });
+    });
+  }
+
   _renderCharactersTab(container) {
     const editUnit = this._EffectiveEditUnit();
     const selectedId =
@@ -7380,87 +7591,28 @@ export class CharacterShopUI {
 
     const filterTabs = [
       { id: "all", label: `TẤT CẢ (${CHARACTER_ROSTER.length})` },
-      { id: "vip", label: `👑 VIP SIÊU CẤP (${countVip})` },
       { id: "pro", label: `PRO & CLB (${countPro})` },
       { id: "master", label: `CAO THỦ NGUYÊN TỐ (${countMaster})` },
       { id: "robot", label: `ROBOT & MECHA (${countRobot})` },
-      { id: "mythic", label: `PREMIUM MYTHIC (${countMythic})` },
+      { id: "mythic", label: `MYTHIC (${countMythic})` },
+      { id: "vip", label: `CẦU THỦ VIP (${countVip})` },
       { id: "unlocked", label: `ĐÃ SỞ HỮU (${countUnlocked})` }
     ];
 
     const filterBarHtml = filterTabs
       .map(
         (ft) => `
-        <button type="button" class="char-filter-chip ${activeFilter === ft.id ? "active" : ""}" data-char-filter="${ft.id}"
-          style="padding:7px 13px; border-radius:6px; font-size:11px; font-weight:800; letter-spacing:0.06em; border:1px solid ${
-            activeFilter === ft.id ? "#38bdf8" : "rgba(148,163,184,0.22)"
-          }; background:${
-            activeFilter === ft.id ? "linear-gradient(135deg, rgba(14,165,233,0.32), rgba(37,99,235,0.28))" : "rgba(15,23,42,0.72)"
-          }; color:${activeFilter === ft.id ? "#f8fafc" : "#94a3b8"}; cursor:pointer; transition:all 0.16s ease;">
+        <button type="button" class="char-filter-chip ${activeFilter === ft.id ? "active" : ""}" data-char-filter="${ft.id}">
           ${ft.label}
         </button>
       `
       )
       .join("");
 
-    const vipInfo = this.shop.getVipInfo();
-    const isVipSub = vipInfo.isSubActive;
-    const vipMultiplier = vipInfo.coinMultiplier;
-    const remainingTime = vipInfo.remainingTime;
-
-    const vipPackagesHtml = VIP_SUBSCRIPTION_PACKAGES.map((pkg) => {
-      const canBuy = coins >= pkg.priceCoins;
-      return `
-        <div class="vip-pkg-card ${canBuy ? "can-buy" : "locked"}" style="flex:1; min-width:210px; background:linear-gradient(145deg, rgba(30,27,75,0.7), rgba(15,23,42,0.85)); border:1px solid rgba(250,204,21,0.3); border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
-          <div class="vip-pkg-top" style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="background:rgba(250,204,21,0.2); color:#facc15; font-size:10px; font-weight:800; padding:2px 8px; border-radius:4px; border:1px solid rgba(250,204,21,0.4);">${pkg.tag}</span>
-            <span style="color:#fde047; font-size:12px; font-weight:900;">${pkg.badge}</span>
-          </div>
-          <div>
-            <div style="font-size:14px; font-weight:900; color:#ffffff; margin-bottom:2px;">👑 ${pkg.name}</div>
-            <div style="font-size:11px; color:#cbd5e1; line-height:1.4;">${pkg.desc}</div>
-          </div>
-          <button type="button" class="vip-pkg-buy-btn" data-buy-vip-pkg="${pkg.id}"
-            style="width:100%; padding:8px 10px; border-radius:6px; font-size:11px; font-weight:900; letter-spacing:0.04em; border:none; cursor:${canBuy ? "pointer" : "not-allowed"}; background:${canBuy ? "linear-gradient(135deg, #f59e0b, #d97706)" : "rgba(100,116,139,0.3)"}; color:${canBuy ? "#0f172a" : "#64748b"}; transition:all 0.16s ease;">
-            ${canBuy ? `KÍCH HOẠT · ${pkg.badge}` : `THIẾU XU · ${pkg.badge}`}
-          </button>
-        </div>
-      `;
-    }).join("");
-
-    const vipBannerHtml = `
-      <div class="vip-membership-banner" style="background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(124,58,237,0.22), rgba(15,23,42,0.92)); border:1px solid rgba(250,204,21,0.45); border-radius:12px; padding:16px; margin-bottom:16px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; border-bottom:1px solid rgba(250,204,21,0.25); padding-bottom:10px;">
-          <div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:20px;">👑</span>
-              <h3 style="font-size:16px; font-weight:900; color:#facc15; margin:0; letter-spacing:0.04em;">ĐẶC QUYỀN HỘI VIÊN VIP ARGON TENNIS</h3>
-              <span style="background:${isVipSub ? "#10b981" : "#475569"}; color:#ffffff; font-size:10px; font-weight:900; padding:3px 8px; border-radius:12px;">
-                ${isVipSub ? `ĐANG KÍCH HOẠT (${remainingTime})` : "CHƯA KÍCH HOẠT"}
-              </span>
-            </div>
-            <div style="font-size:11px; color:#e2e8f0; margin-top:4px;">
-              ⚡ Đặc quyền VIP: Nhân <strong>x${vipMultiplier} Xu thưởng</strong> mọi trận đấu · Mở quyền chiêu mộ 6 Siêu Cầu Thủ VIP OVR 200+ · Kích hoạt 3 Cơ chế Tối Thượng trong trận!
-            </div>
-          </div>
-          <div style="display:flex; gap:10px;">
-            <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(250,204,21,0.4); border-radius:8px; padding:6px 12px; text-align:right;">
-              <div style="font-size:9px; color:#94a3b8; font-weight:800;">XU VIP CỦA BẠN</div>
-              <div style="font-size:14px; font-weight:900; color:#facc15;">👑 ${(this.shop.state.vipCoins || 0).toLocaleString("vi-VN")} VIP</div>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-          ${vipPackagesHtml}
-        </div>
-      </div>
-    `;
-
     const rosterHtml = filteredRoster
       .map((c, idx) => {
         const unlocked = this.shop.state.unlockedCharacters.includes(c.id);
         const isSelected = c.id === selectedId;
-        const starTier = this.shop.getCharacterStarTier(c.id);
         const mods = this.shop.getEffectivePlayerModifiers(c.id);
         const isVip = !!c.isVip;
         const vipCoins = this.shop.state.vipCoins || 0;
@@ -7468,7 +7620,7 @@ export class CharacterShopUI {
         const r = (c.rarity || "").toUpperCase();
 
         const rarityLabel = isVip
-          ? "👑 SIÊU CẦU THỦ VIP"
+          ? "SIÊU CẦU THỦ VIP"
           : c.isPremium
           ? "MYTHIC PREMIUM"
           : c.isRobot
@@ -7477,7 +7629,6 @@ export class CharacterShopUI {
           ? "CAO THỦ NGUYÊN TỐ"
           : "PRO TOUR";
 
-        const coinBonusPct = Math.round(((c.mechanic?.coinBonusPct || 0) + (mods.coinBonusMult - 1 - (c.mechanic?.coinBonusPct || 0))) * 100);
         const charCoinPct = Math.round((c.mechanic?.coinBonusPct || 0.1) * 100);
 
         const spdVal = Math.round(42 + mods.speedPoints * 6.5);
@@ -7499,21 +7650,22 @@ export class CharacterShopUI {
             ? "CHỌN LÀM BOT ĐỒNG ĐỘI"
             : "CHỌN VẬN ĐỘNG VIÊN"
           : isVip
-          ? `MỞ KHÓA VIP · 👑 ${(c.vipPrice || 200000).toLocaleString("vi-VN")} VIP`
+          ? `MỞ KHÓA · ${(c.vipPrice || 200000).toLocaleString("vi-VN")} XU VIP`
           : `CHIÊU MỘ · ${SVG_ICONS.coin("coin-svg-icon icon-xs")} ${c.price.toLocaleString("vi-VN")}`;
 
         const miiPortraitSvg = getMiiAvatarSVG(c.id, { uid: `shop-card-${c.id}` });
         const mechs = getCharacterActiveMechanics(c.id);
         const mechsHtml = `
-          <div class="shop-char-mechanics-strip" style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(148,163,184,0.2);">
-            <div style="font-size:9px; font-weight:800; color:#94a3b8; margin-bottom:4px; letter-spacing:0.04em;">CƠ CHẾ TRẬN ĐẤU (20S ACTIVE / 60S HỒI):</div>
-            <div style="display:flex; flex-wrap:wrap; gap:4px;">
-              ${mechs.map(m => `
-                <span style="font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; border:1px solid ${m.color}66; color:${m.color}; background:${m.color}18;" title="${m.desc}">
-                  ${m.icon} ${m.shortLabel}
-                </span>
-              `).join("")}
-            </div>
+          <div class="char-mech-tags">
+            ${mechs
+              .map(
+                (m) => `
+              <span class="char-mech-pill" style="--m-col:${m.color}" title="${m.desc}">
+                [${m.hotkey}] ${m.shortLabel}
+              </span>
+            `
+              )
+              .join("")}
           </div>
         `;
 
@@ -7529,7 +7681,7 @@ export class CharacterShopUI {
 
             <div class="shop-item-meta-line">${rarityLabel} · ${c.roleTag} · +${charCoinPct}% XU</div>
             <div class="shop-item-name">${c.name}</div>
-            <div class="shop-item-role" style="color:${c.accentCss}; font-weight:800;">⚡ ${c.passiveName || c.title}</div>
+            <div class="shop-item-role" style="color:${c.accentCss}; font-weight:800;">${c.passiveName || c.title}</div>
             <div class="shop-item-desc">${c.passiveDesc}</div>
             ${mechsHtml}
 
@@ -7553,17 +7705,15 @@ export class CharacterShopUI {
 
     container.innerHTML = `
       <div class="shop-section-block">
-        ${vipBannerHtml}
-
         <div class="shop-section-header">
           <div class="section-heading-group">
-            <span class="section-index-tag">ROSTER // 30 PRO, ELEMENTAL, ROBOT &amp; MYTHIC LEGENDS</span>
-            <h3 class="shop-section-title">ĐỘI HÌNH VẬN ĐỘNG VIÊN &amp; ROBOT: ${editUnit === "partner" ? "BOT ĐỒNG ĐỘI" : "BẠN"}</h3>
+            <span class="section-index-tag">ROSTER // 30 PRO, ELEMENTAL, ROBOT &amp; VIP LEGENDS</span>
+            <h3 class="shop-section-title">ĐỘI HÌNH VẬN ĐỘNG VIÊN: ${editUnit === "partner" ? "BOT ĐỒNG ĐỘI" : "BẠN"}</h3>
           </div>
           <span class="shop-section-sub">ĐÃ MỞ KHÓA ${countUnlocked}/${CHARACTER_ROSTER.length}</span>
         </div>
 
-        <div class="char-filter-bar" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+        <div class="char-filter-bar">
           ${filterBarHtml}
         </div>
 
@@ -7572,21 +7722,6 @@ export class CharacterShopUI {
         </div>
       </div>
     `;
-
-    container.querySelectorAll("[data-buy-vip-pkg]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const pkgId = btn.getAttribute("data-buy-vip-pkg");
-        const res = this.shop.buyVipSubscription(pkgId);
-        this._showToast(res.message);
-        if (res.ok) {
-          this._playSfx("unlock");
-          this._renderCoinDisplays();
-          this._renderCharactersTab(container);
-        } else {
-          this._playSfx("error");
-        }
-      });
-    });
 
     container.querySelectorAll("[data-char-filter]").forEach((btn) => {
       btn.addEventListener("click", () => {

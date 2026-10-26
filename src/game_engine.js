@@ -2211,6 +2211,7 @@ export class ArgonTennisEngine {
     }
     if (this.phase === "RALLY") {
       this.autoPlayMode = !1;
+      if (this.player.swingCooldown > 0) return;
       const t =
           e.side === "backhand" ||
           (Number(e.dirX || 0) > 0.12 && e.side !== "forehand")
@@ -2224,56 +2225,23 @@ export class ArgonTennisEngine {
         i = String(
           e.shotType || this.selectedShotType || "topspin",
         ).toLowerCase();
-      if (this.ball.lastHitter === "opponent") {
-        const s = this.ball.pos.z - this.player.pos.z,
-          n = this.ball.pos.z - this.playerPartner.pos.z,
-          h =
-            this.ball.pos.z > 0.3 &&
-            this.ball.pos.z <= 7.5 &&
-            Math.abs(this.ball.pos.x - this.playerPartner.pos.x) < 3.4,
-          r = h ? n : s;
-        if (r < -0.95 && r >= -7.8) {
-          const l = h ? this.playerPartner : this.player;
-          (this.racketKinematics &&
-            this.racketKinematics.triggerSwing(l, {
-              shotType: i,
-              side: t,
-              speed: Number(e.speed || 1.2),
-              timing: "early",
-              dirX: Number(e.dirX || 0),
-            }),
-            this.audioEngine &&
-              this.audioEngine.playSwingWhoosh(Number(e.speed || 1.15)),
-            (this.pendingUserSwing = {
-              evt: { ...e, side: t, sweetSpotAssisted: !0 },
-              expiresAt: this.elapsedTime + 0.48,
-              waitForSweetSpot: !0,
-            }));
-          return;
-        }
-      }
-      if (
-        !this._attemptPlayerRallyStrike({ ...e, side: t }, !1) &&
-        (this.racketKinematics &&
+      // Do NOT queue pendingUserSwing! Every swing press is evaluated immediately.
+      // If the ball is not within reach right now, it whiffs and locks cooldown so spamming fails.
+      this.pendingUserSwing = null;
+      if (!this._attemptPlayerRallyStrike({ ...e, side: t }, !1)) {
+        this.player.swingCooldown = 0.48;
+        this.playerPartner.swingCooldown = 0.48;
+        this._partnerInterceptApproved = !1;
+        this.racketKinematics &&
           this.racketKinematics.triggerSwing(this.player, {
             shotType: i,
             side: t,
             speed: Number(e.speed || 1.2),
-            timing: "sweet",
+            timing: "late",
             dirX: Number(e.dirX || 0),
-          }),
-        this.audioEngine &&
-          this.audioEngine.playSwingWhoosh(Number(e.speed || 1.15)),
-        this.ball.lastHitter === "opponent")
-      ) {
-        const s = this.ball.pos.z - this.player.pos.z,
-          n = this.ball.pos.z - this.playerPartner.pos.z;
-        ((s >= -8 && s <= 0.9) || (n >= -5.5 && n <= 0.9)) &&
-          (this.pendingUserSwing = {
-            evt: { ...e, side: t, sweetSpotAssisted: !0 },
-            expiresAt: this.elapsedTime + 0.48,
-            waitForSweetSpot: !0,
           });
+        this.audioEngine &&
+          this.audioEngine.playSwingWhoosh(Number(e.speed || 1.15));
       }
     }
   }
@@ -2550,8 +2518,16 @@ export class ArgonTennisEngine {
               this.hostLoadout,
             )
           : characterShopManager.getEffectivePartnerModifiers(),
-      reachBonus = (pMods.reachAdd || 0) + (this.player?.activeVipReachBoost || 0),
-      swBonus = (pMods.sweetSpotAdd || 0) + (this.player?.activeVipReachBoost ? 0.5 : 0),
+      vipReach = Math.min(0.45, Number(this.player?.activeVipReachBoost || 0) * 0.15),
+      hasVipActive =
+        vipReach > 0 ||
+        (this.player?.activeVipSmashBuff || 1) > 1.05 ||
+        (this.player?.activeVipSpeedBuff || 1) > 1.05 ||
+        !!this.player?.activeVipDomain,
+      charReach = Math.min(0.35, (pMods.reachAdd || 0) * 0.22),
+      reachBonus = charReach + vipReach,
+      swBonus =
+        Math.min(0.25, pMods.sweetSpotAdd || 0) + (vipReach > 0 ? 0.2 : 0),
       pMult = (pMods.powerMult || 1) * (this.player?.activeVipSmashBuff || 1),
       spMult = pMods.spinMult || 1,
       i = this.ball.pos.z - this.player.pos.z,
@@ -2560,26 +2536,90 @@ export class ArgonTennisEngine {
       n = this.ball.pos.z - this.playerPartner.pos.z,
       h = Math.abs(this.ball.pos.x - this.playerPartner.pos.x),
       r = Math.hypot(h, n),
+      partReach = Math.min(0.25, (partMods.reachAdd || 0) * 0.2),
       l =
         !t &&
-        this.ball.pos.z > 0.3 &&
-        this.ball.pos.z <= 7.6 &&
-        r <= 3.95 + (partMods.reachAdd || 0) &&
+        (partMods.aiIqLevel || 1) >= 3 &&
+        this.ball.pos.z > 0.8 &&
+        this.ball.pos.z <= 5.8 &&
+        h <= 1.15 + partReach &&
+        Math.abs(n) <= 1.05 + partReach &&
         r < s,
       p = l ? this.playerPartner : this.player,
       g = l ? n : i,
       c = l ? h : a,
       y = l ? r : s;
     if (!t && p.swingCooldown > 0) return !1;
+    const maxReachX = l ? 1.15 + partReach : 1.55 + reachBonus,
+      maxReachZ = l ? 1.05 + partReach : 1.45 + reachBonus * 0.5,
+      maxDist = l ? 1.35 + partReach : 1.78 + reachBonus;
+    if (
+      !t &&
+      (this.ball.pos.z <= 0.6 ||
+        c > maxReachX ||
+        g < -maxReachZ ||
+        g > 1.05 ||
+        y > maxDist)
+    ) {
+      this.player.swingCooldown = 0.48;
+      this.playerPartner.swingCooldown = 0.48;
+      this._partnerInterceptApproved = !1;
+      const A =
+          this.ball.pos.z <= 0.6
+            ? "ĐÁNH QUÁ SỚM! \u2022 KHÓA VỢT"
+            : g > 1.05
+              ? "QUÁ TRỄ! \u2022 HỤT BÓNG"
+              : c > maxReachX
+                ? "ĐỨNG QUÁ XA! \u2022 HỤT BÓNG"
+                : "ĐÁNH QUÁ SỚM! \u2022 HỤT BÓNG",
+        G = this._projectToScreen(
+          this.player.pos.clone().add(new o.Vector3(0, 2.35, 0)),
+        );
+      (this.hud.showTimingPopup({
+        grade: A,
+        detail:
+          c > maxReachX
+            ? "DÙNG CẦN GẠT DI CHUYỂN TỚI BÓNG!"
+            : "KHÔNG SPAM ĐÁNH SỚM!",
+        screenPos: G,
+        durationMs: 750,
+      }),
+        this.hud.updateTimingGauge({
+          cursorNormalized: g > 1.05 ? 0.92 : 0.12,
+          modeTitle: "HỤT BÓNG!",
+          speedText: c > maxReachX ? "ĐỨNG XA" : g > 1.05 ? "TRỄ" : "SỚM",
+        }),
+        this.motionController &&
+          this.motionController.triggerHapticFeedback &&
+          this.motionController.triggerHapticFeedback({
+            role: "p1",
+            kind: "whiff",
+            grade: A,
+            shotType: this.selectedShotType || "TOPSPIN",
+            speedKmh: 0,
+            intensity: 0.65,
+          }),
+        triggerPhysicalHardwareVibration("fault", {
+          role: "p1",
+          intensity: 0.65,
+        }));
+      return !1;
+    }
+    p.swingCooldown = 0.32;
     const d =
         e.side === "overhead" ||
+        hasVipActive ||
         ((this.selectedShotType === "FLAT" || e.shotType === "smash") &&
-          this.ball.pos.y > 1.5) ||
-        this.ball.pos.y > 1.78,
+          this.ball.pos.y > 1.45) ||
+        this.ball.pos.y > 1.75,
       activeMult = l
         ? partMods.volleyPowerMult || 1
         : pMult * (d ? pMods.smashPowerMult || 1 : 1),
-      f = o.MathUtils.clamp(Number(e.speed || 1.18) * activeMult, 0.8, 2.15);
+      f = o.MathUtils.clamp(
+        Number(e.speed || 1.18) * activeMult,
+        0.8,
+        hasVipActive ? 3.5 : 2.15,
+      );
     if (e.shotType) {
       const A = String(e.shotType).toUpperCase();
       this.selectedShotType = A === "SMASH" || A === "POWER" ? "FLAT" : A;
@@ -2615,65 +2655,32 @@ export class ArgonTennisEngine {
         dirX: Number(e.dirX || 0),
       });
     }
-    if (
-      (this.audioEngine && this.audioEngine.playSwingWhoosh(f),
-      y > (l ? 4.05 + (partMods.reachAdd || 0) : 4.85 + reachBonus) && !t)
-    ) {
-      if (g > 1.45) {
-        p.swingCooldown = 0.16;
-        const A = "TOO LATE! \u2022 WHIFF",
-          G = this._projectToScreen(
-            p.pos.clone().add(new o.Vector3(0, 2.35, 0)),
-          );
-        (this.hud.showTimingPopup({
-          grade: A,
-          detail: "BALL PASSED",
-          screenPos: G,
-          durationMs: 750,
-        }),
-          this.hud.updateTimingGauge({
-            cursorNormalized: 0.92,
-            modeTitle: "SWING WHIFF!",
-            speedText: "LATE",
-          }),
-          this.motionController &&
-            this.motionController.triggerHapticFeedback &&
-            this.motionController.triggerHapticFeedback({
-              role: "p1",
-              kind: "whiff",
-              grade: A,
-              shotType: this.selectedShotType || "TOPSPIN",
-              speedKmh: 0,
-              intensity: 0.65,
-            }),
-          triggerPhysicalHardwareVibration("fault", {
-            role: "p1",
-            intensity: 0.65,
-          }));
-      }
-      return !1;
-    }
+    this.audioEngine && this.audioEngine.playSwingWhoosh(f);
     let u = "PERFECT",
       w = 0.5;
-    const x = c > 2.85 + reachBonus * 0.5;
+    const x = c > 1.85 + reachBonus * 0.35;
     e.timing
       ? (u = String(e.timing).toUpperCase())
-      : e.sweetSpotAssisted && g >= -1.85 - swBonus && g <= 0.78 + swBonus
+      : hasVipActive ||
+          (e.sweetSpotAssisted && g >= -1.45 - swBonus && g <= 0.72 + swBonus)
         ? ((u = "PERFECT"), (w = 0.5))
-        : g < -2.65 - swBonus
+        : g < -1.75 - swBonus
           ? ((u = "VERY EARLY"), (w = 0.14))
-          : g < -1.45 - swBonus || (e.dirX && e.dirX < -0.52)
+          : g < -1.05 - swBonus || (e.dirX && e.dirX < -0.52)
             ? ((u = "EARLY"), (w = 0.28))
-            : g > 1.35 + swBonus
+            : g > 1.05 + swBonus
               ? ((u = "VERY LATE"), (w = 0.88))
-              : g > 0.68 + swBonus || (e.dirX && e.dirX > 0.52)
+              : g > 0.58 + swBonus || (e.dirX && e.dirX > 0.52)
                 ? ((u = "LATE"), (w = 0.72))
                 : x &&
-                  this.matchConfig.difficulty === "pro" &&
+                  this.matchConfig.difficulty !== "de" &&
+                  this.matchConfig.difficulty !== "thap" &&
                   ((u = g < 0 ? "EARLY" : "LATE"), (w = g < 0 ? 0.3 : 0.7));
-    const _ = u === "VERY EARLY" || u === "VERY LATE",
-      T = this.selectedShotType || "TOPSPIN",
-      M = !_ && (u === "PERFECT" || T === "FLAT" || d) && f >= 0.98,
+    const _ = !hasVipActive && (u === "VERY EARLY" || u === "VERY LATE"),
+      T = hasVipActive ? "FLAT" : this.selectedShotType || "TOPSPIN",
+      M =
+        hasVipActive ||
+        (!_ && (u === "PERFECT" || T === "FLAT" || d) && f >= 0.98),
       R = p.pos.x >= 0 ? 1 : -1,
       v = o.MathUtils.clamp(Number(e.dirX || 0), -1, 1);
     let E = 0;
@@ -2692,7 +2699,7 @@ export class ArgonTennisEngine {
     (_ &&
       !t &&
       !this.autoPlayMode &&
-      this.matchConfig.difficulty === "pro" &&
+      this.matchConfig.difficulty !== "de" &&
       f > 1.45 &&
       Math.random() < 0.28 &&
       (k = !0),
@@ -2706,37 +2713,51 @@ export class ArgonTennisEngine {
             ))
           : (E = o.MathUtils.clamp(
               E,
-              -S.SINGLES_X + 0.35,
-              S.SINGLES_X - 0.35,
+              -S.SINGLES_X + 0.25,
+              S.SINGLES_X - 0.25,
             )));
     let N = -(8.2 + Math.random() * 2.6),
       I = 0.84,
       C = 16,
       V = 0;
-    (_ && !k && !O
-      ? ((I = 1.04), (N = -(6.2 + Math.random() * 2.2)), (C = 6))
-      : l
-        ? ((I = M ? 0.56 : 0.68), (N = -(5.6 + Math.random() * 3.4)), (C = 12))
-        : T === "LOB"
-          ? ((I = 1.32), (N = -(9 + Math.random() * 2)), (C = 4))
-          : T === "SLICE"
-            ? ((I = 0.98),
-              (N = -(6.8 + Math.random() * 2.6)),
-              (C = -6.5 * spMult),
-              (V = -R * 11 * spMult))
-            : T === "FLAT" || M
-              ? ((I = Math.max(0.52, 0.72 / Math.min(1.26, f * 0.94))),
-                (N = -(9 + Math.random() * 2.2)),
-                (C = 21 * spMult))
-              : (I = Math.max(0.62, 0.84 / Math.min(1.22, f * 0.92))),
-      (C *= spMult));
+    if (hasVipActive) {
+      const vipPowerBoost = Math.max(1.35, this.player?.activeVipSmashBuff || 1.55);
+      I = Math.max(0.32, 0.52 / Math.min(1.65, vipPowerBoost * 0.82));
+      N = -(10.2 + Math.random() * 1.3);
+      C = 38 * spMult;
+      V = (this.opponent.pos.x >= 0 ? -1 : 1) * 14;
+    } else if (_ && !k && !O) {
+      I = 1.04;
+      N = -(6.2 + Math.random() * 2.2);
+      C = 6;
+    } else if (l) {
+      I = M ? 0.54 : 0.66;
+      N = -(5.6 + Math.random() * 3.4);
+      C = 12;
+    } else if (T === "LOB") {
+      I = 1.32;
+      N = -(9 + Math.random() * 2);
+      C = 4;
+    } else if (T === "SLICE") {
+      I = 0.96;
+      N = -(6.8 + Math.random() * 2.6);
+      C = -6.5 * spMult;
+      V = -R * 11 * spMult;
+    } else if (T === "FLAT" || M) {
+      I = Math.max(0.46, 0.72 / Math.min(1.52, f * 0.94));
+      N = -(9.2 + Math.random() * 2.2);
+      C = 22 * spMult;
+    } else {
+      I = Math.max(0.58, 0.84 / Math.min(1.38, f * 0.92));
+      C *= spMult;
+    }
     const K = Math.max(
       0.84,
       1 - Math.min(8, this.ball.rallyStrokeCount) * 0.015,
     );
     I *= K;
     const B = this.ball.pos.clone();
-    ((B.y = Math.max(0.78, Math.min(1.92, B.y))),
+    ((B.y = Math.max(0.78, Math.min(2.15, B.y))),
       this.ball.pos.copy(B),
       this._launchBallToTarget(B, new o.Vector3(E, 0, N), I, {
         topspin: C,
@@ -2828,11 +2849,13 @@ export class ArgonTennisEngine {
         modeTitle: `${u} (${X})`,
         speedText: `${F} KM/H`,
       }),
-      this.player.targetPos.set(
-        o.MathUtils.clamp(-E * 0.22, -1.6, 1.6),
-        0,
-        S.BASELINE_Z - 0.15,
-      ),
+      this.autoPlayMode && !this.userHasInteracted
+        ? this.player.targetPos.set(
+            o.MathUtils.clamp(-E * 0.22, -1.6, 1.6),
+            0,
+            S.BASELINE_Z - 0.15,
+          )
+        : this.player.targetPos.copy(this.player.pos),
       this.playerPartner.targetPos.set(
         o.MathUtils.clamp(
           E * 0.35 + (this.score.deuceSide ? -1.4 : 1.4),
@@ -3207,77 +3230,133 @@ export class ArgonTennisEngine {
       isCao = diff === "cao" || diff === "pro",
       isThap = diff === "thap",
       isDe = diff === "de",
-      isCasual = !isX2 && !isCucCao && !isSieuCao && !isCao,
+      isHigh = isX2 || isCucCao || isSieuCao || isCao,
+      isCasual = !isHigh,
       a = Math.abs(this.ball.pos.x - e.pos.x),
       s = !!this.ball.isPowerShot,
-      h = !isX2 && (a > (isCasual ? 1.08 : 1.55) || (s && a > (isCasual ? 0.75 : 1.25))),
+      h =
+        !isX2 &&
+        !isCucCao &&
+        (a > (isCasual ? 1.08 : 1.75) || (s && a > (isCasual ? 0.75 : 1.45))),
       r = this.ball.pos.x > e.pos.x + 0.05;
 
+    // On X2 / Cực Cao, snap bot closer to ball at contact so it never looks like hitting air
+    if ((isX2 || isCucCao) && a > 1.2) {
+      e.pos.x = o.MathUtils.lerp(e.pos.x, this.ball.pos.x, isX2 ? 0.85 : 0.65);
+    }
+
     e.swingType = r ? "backhand" : "forehand";
-    e.swingDuration = isX2 ? 0.16 : 0.36;
-    e.swingTimer = isX2 ? 0.16 : 0.36;
+    e.swingDuration = isX2 ? 0.16 : isCucCao ? 0.24 : 0.36;
+    e.swingTimer = e.swingDuration;
     e.arcVisibleTimer = this.autoPlayMode ? 0.85 : 0.36;
     if (e.swingArcMesh) e.swingArcMesh.visible = false;
 
     const l = this.player.pos.x >= 0 ? -1 : 1;
-    let p = isX2 ? 2.85 : isCucCao ? 2.4 : isSieuCao ? 1.9 : isCao ? 1.5 : isThap ? 0.9 : isDe ? 0.7 : 1.1;
+    let p = isX2
+      ? 3.75
+      : isCucCao
+        ? 3.25
+        : isSieuCao
+          ? 2.65
+          : isCao
+            ? 2.15
+            : isThap
+              ? 0.9
+              : isDe
+                ? 0.7
+                : 1.35;
     let g = isX2
-      ? l * (S.SINGLES_X - 0.22)
-      : o.MathUtils.clamp(l * p, -S.SINGLES_X + 0.55, S.SINGLES_X - 0.55);
+      ? l * (S.SINGLES_X - 0.18 - Math.random() * 0.35)
+      : isCucCao
+        ? l * (S.SINGLES_X - 0.32 - Math.random() * 0.45)
+        : o.MathUtils.clamp(l * p, -S.SINGLES_X + 0.45, S.SINGLES_X - 0.45);
 
     let c = isX2
-      ? 10.6 + Math.random() * 0.7
+      ? t
+        ? 5.2 + Math.random() * 2.5
+        : 10.6 + Math.random() * 0.85
       : isCucCao
-      ? 9.6 + Math.random() * 1.5
-      : isSieuCao
-      ? 8.6 + Math.random() * 1.8
-      : isCao
-      ? 7.6 + Math.random() * 2.4
-      : isThap
-      ? 6.0 + Math.random() * 2.0
-      : isDe
-      ? 5.4 + Math.random() * 1.8
-      : 6.8 + Math.random() * 2.2;
+        ? 9.8 + Math.random() * 1.4
+        : isSieuCao
+          ? 8.8 + Math.random() * 1.8
+          : isCao
+            ? 7.8 + Math.random() * 2.2
+            : isThap
+              ? 6.0 + Math.random() * 2.0
+              : isDe
+                ? 5.4 + Math.random() * 1.8
+                : 6.8 + Math.random() * 2.2;
 
     let y = "TOPSPIN";
-    let f = isX2 ? 0.44 : isCucCao ? 0.62 : isSieuCao ? 0.74 : isCao ? 0.86 : isThap ? 1.18 : isDe ? 1.34 : 1.05;
+    let f = isX2
+      ? 0.34
+      : isCucCao
+        ? 0.48
+        : isSieuCao
+          ? 0.62
+          : isCao
+            ? 0.76
+            : isThap
+              ? 1.18
+              : isDe
+                ? 1.34
+                : 1.02;
     let m = false;
 
     if (this.autoPlayMode && !this.userHasInteracted) {
       y = "TOPSPIN";
       f = 0.84;
     } else if (isX2) {
-      // Bot X2 (MAX GOD Level 20) Return:
-      if (this.ball.pos.y > 1.6 || t) {
+      if (this.ball.pos.y > 1.35 || t) {
         y = "SMASH";
-        f = 0.38;
-        c = 9.8 + Math.random() * 1.2;
+        f = 0.31;
       } else {
-        y = "TOPSPIN";
+        y = this.ball.rallyStrokeCount % 3 === 0 ? "SLICE" : "FLAT";
+        f = 0.35;
+      }
+    } else if (isCucCao) {
+      if (this.ball.pos.y > 1.5 || t) {
+        y = "SMASH";
         f = 0.44;
+      } else {
+        y = "FLAT";
+        f = 0.5;
       }
     } else if (h && this.ball.rallyStrokeCount >= 2) {
-      const b = isCasual ? (a > 1.45 || s ? 0.42 : 0.28) : a > 1.92 ? 0.24 : 0.14;
+      const b = isCasual ? (a > 1.45 || s ? 0.42 : 0.28) : a > 1.92 ? 0.12 : 0.06;
       Math.random() < b
         ? Math.random() < 0.48
           ? ((m = true), (c = 1.2), (f = 0.76))
           : ((g = (Math.random() < 0.5 ? 1 : -1) * (S.SINGLES_X + 0.48 + Math.random() * 0.45)), (c = 9.5 + Math.random() * 2.8), (f = 0.88))
         : ((y = a > 1.35 || s ? "LOB" : "SLICE"), (g = o.MathUtils.clamp((Math.random() - 0.5) * 2.4, -S.SINGLES_X + 1.1, S.SINGLES_X - 1.1)), (c = 5.6 + Math.random() * 2.2), (f = y === "LOB" ? 1.36 : 1.18));
     } else if (t) {
-      y = "SLICE";
+      y = isHigh ? "FLAT" : "SLICE";
       c = 5.8 + Math.random() * 2.6;
-      f = isCasual ? 0.96 : 0.76;
+      f = isCasual ? 0.96 : 0.64;
     } else {
-      const b = ["TOPSPIN", "TOPSPIN", "SLICE", "TOPSPIN", "LOB"];
+      const b = isHigh
+        ? ["FLAT", "TOPSPIN", "SLICE", "FLAT", "TOPSPIN"]
+        : ["TOPSPIN", "TOPSPIN", "SLICE", "TOPSPIN", "LOB"];
       y = b[this.ball.rallyStrokeCount % b.length];
-      f = y === "LOB" ? (isCasual ? 1.36 : 1.24) : y === "SLICE" ? (isCasual ? 1.18 : 0.96) : isCasual ? 1.1 : 0.86;
+      f =
+        y === "LOB"
+          ? isCasual
+            ? 1.36
+            : 1.18
+          : y === "SLICE"
+            ? isCasual
+              ? 1.18
+              : 0.82
+            : isCasual
+              ? 1.08
+              : f;
     }
     const d = this.ball.pos.clone();
-    d.y = Math.max(0.82, Math.min(1.68, d.y));
+    d.y = Math.max(0.82, Math.min(2.15, d.y));
     this.ball.pos.copy(d);
     this._launchBallToTarget(d, new o.Vector3(g, 0, c), f, {
-      topspin: isX2 ? 45 : y === "SLICE" ? -5 : y === "LOB" ? 5 : 13,
-      sidespin: isX2 ? (Math.random() < 0.5 ? -12 : 12) : 0,
+      topspin: isX2 ? 52 : isCucCao ? 34 : y === "SLICE" ? -5 : y === "LOB" ? 5 : 16,
+      sidespin: isX2 ? l * 18 : isCucCao ? l * 10 : 0,
       allowNetFault: m,
     });
     this.ball.inPlay = true;
@@ -3285,16 +3364,16 @@ export class ArgonTennisEngine {
     this.ball.bounceCountOnCurrentSide = 0;
     this.ball.rallyStrokeCount += 1;
     this.ball.shotType = y;
-    this.ball.isPowerShot = isX2;
-    this.ballTrail.setStyle(y, isX2);
+    this.ball.isPowerShot = isX2 || isCucCao || y === "SMASH";
+    this.ballTrail.setStyle(y, this.ball.isPowerShot);
     if (this.racketKinematics) {
       this.racketKinematics.triggerSwing(e, {
         shotType: y.toLowerCase(),
         side: r ? "backhand" : "forehand",
-        speed: 1.15,
+        speed: isX2 ? 1.55 : 1.2,
         timing: "sweet",
       });
-      this.racketKinematics.triggerImpactRecoil(e, 0.95);
+      this.racketKinematics.triggerImpactRecoil(e, isX2 ? 1.35 : 0.95);
     }
     if (this.swingVfx) {
       this.swingVfx.onRacketContact({
@@ -3302,9 +3381,9 @@ export class ArgonTennisEngine {
         ball: this.ball,
         contactPos: d,
         shotType: y,
-        isPower: isX2,
+        isPower: this.ball.isPowerShot,
         isServe: false,
-        timingQuality: "GOOD",
+        timingQuality: isX2 || isCucCao ? "PERFECT" : "GOOD",
         speed: this.ball.vel.length(),
       });
     }
@@ -3317,8 +3396,8 @@ export class ArgonTennisEngine {
       if (h) this.facialFX.spawnSweatDrops(e, 4);
     }
     if (this.audioEngine) {
-      this.audioEngine.playSwingWhoosh(1);
-      this.audioEngine.playRacketHit(y.toLowerCase(), "good");
+      this.audioEngine.playSwingWhoosh(isX2 ? 1.35 : 1);
+      this.audioEngine.playRacketHit(y.toLowerCase(), isX2 ? "perfect" : "good");
     }
     this.opponent.targetPos.set(
       o.MathUtils.clamp(-g * 0.25, -1.6, 1.6),
@@ -3333,7 +3412,7 @@ export class ArgonTennisEngine {
     i,
     { topspin: a = 14, sidespin: s = 0, allowNetFault: n = !1 } = {},
   ) {
-    const h = Math.max(0.45, i),
+    const h = Math.max(0.28, i),
       r = t.x - e.x,
       l = t.z - e.z,
       p = 0.08 - e.y,
@@ -3368,43 +3447,55 @@ export class ArgonTennisEngine {
       ),
       a = t.x < -0.12 ? 0.38 : -0.38,
       s = o.MathUtils.clamp(t.x + a, -S.DOUBLES_X + 0.4, S.DOUBLES_X - 0.4);
-    (e.targetPos.set(s, 0, i),
-      e === this.player && this.playerPartner
-        ? t.z > 0 && t.z < 6.6 && Math.abs(t.x - this.playerPartner.pos.x) < 2.9
-          ? this.playerPartner.targetPos.set(
-              o.MathUtils.clamp(t.x, -S.SINGLES_X + 0.4, S.SINGLES_X - 0.4),
-              0,
-              o.MathUtils.clamp(t.z + 0.85, 2.8, 6.2),
-            )
-          : this.playerPartner.targetPos.set(
-              o.MathUtils.clamp(
-                t.x * 0.42 + (this.score.deuceSide ? -1.35 : 1.35),
-                -2.9,
-                2.9,
-              ),
-              0,
-              5.1,
-            )
-        : e === this.opponent &&
-          this.opponentPartner &&
-          (this.isMultiplayer &&
-          t.z < 0 &&
-          t.z > -6.6 &&
-          Math.abs(t.x - this.opponentPartner.pos.x) < 2.9
-            ? this.opponentPartner.targetPos.set(
-                o.MathUtils.clamp(t.x, -S.SINGLES_X + 0.4, S.SINGLES_X - 0.4),
-                0,
-                o.MathUtils.clamp(t.z - 0.85, -6.2, -2.8),
-              )
-            : this.opponentPartner.targetPos.set(
-                o.MathUtils.clamp(
-                  t.x * 0.45 + (this.score.deuceSide ? 1.35 : -1.35),
-                  -2.9,
-                  2.9,
-                ),
-                0,
-                -5.1,
-              )));
+    if (e === this.player) {
+      // ONLY auto-move the player in background demo / autoPlayMode when manualMovement is explicitly disabled!
+      if (
+        (this.autoPlayMode && !this.userHasInteracted) ||
+        this.motionController?.settings?.manualMovement === !1
+      ) {
+        e.targetPos.set(s, 0, i);
+      } else {
+        e.targetPos.copy(e.pos);
+      }
+      if (this.playerPartner) {
+        const partMods = characterShopManager.getEffectivePartnerModifiers();
+        if ((partMods.aiIqLevel || 1) >= 4 && t.z > 0 && t.z < 6.2) {
+          this.playerPartner.targetPos.set(
+            o.MathUtils.clamp(t.x * 0.55, -S.SINGLES_X + 0.5, S.SINGLES_X - 0.5),
+            0,
+            5.1,
+          );
+        } else {
+          this.playerPartner.targetPos.set(
+            this.score.deuceSide ? -1.85 : 1.85,
+            0,
+            5.1,
+          );
+        }
+      }
+      return;
+    }
+    e.targetPos.set(s, 0, i);
+    if (e === this.opponent && this.opponentPartner) {
+      this.isMultiplayer &&
+      t.z < 0 &&
+      t.z > -6.6 &&
+      Math.abs(t.x - this.opponentPartner.pos.x) < 2.9
+        ? this.opponentPartner.targetPos.set(
+            o.MathUtils.clamp(t.x, -S.SINGLES_X + 0.4, S.SINGLES_X - 0.4),
+            0,
+            o.MathUtils.clamp(t.z - 0.85, -6.2, -2.8),
+          )
+        : this.opponentPartner.targetPos.set(
+            o.MathUtils.clamp(
+              t.x * 0.45 + (this.score.deuceSide ? 1.35 : -1.35),
+              -2.9,
+              2.9,
+            ),
+            0,
+            -5.1,
+          );
+    }
   }
   _initVipMechanicsUI() {
     const dock = document.getElementById("vip-mechanics-dock");
@@ -3430,9 +3521,9 @@ export class ArgonTennisEngine {
               <button type="button" class="vip-mech-btn ready" id="btn-vip-mech-${idx}" data-mech-idx="${idx}" title="${m.name}: ${m.desc}" style="--mech-color:${m.color};">
                 <div class="mech-btn-glow"></div>
                 <div class="mech-btn-content">
-                  <span class="mech-icon">${m.icon}</span>
+                  <span class="mech-key-badge">PHÍM ${hotkeyLabel}</span>
                   <span class="mech-short-label">${m.shortLabel}</span>
-                  <span class="mech-key-badge">${hotkeyLabel}</span>
+                  <span class="mech-status-text" id="mech-status-${idx}">SẴN SÀNG</span>
                   <span class="mech-timer-badge hidden" id="mech-timer-${idx}">20s</span>
                 </div>
                 <div class="mech-cd-progress" id="mech-prog-${idx}"></div>
@@ -3470,19 +3561,46 @@ export class ArgonTennisEngine {
     s.activeUntil = now + (m.durationMs || 20000);
     s.cooldownUntil = s.activeUntil + (m.cooldownMs || 60000);
 
-    this.hud?.showCenterBanner(m.name.toUpperCase(), {
+    // Sync buffs immediately so any immediate strike uses the full power
+    this._updateVipMechanics(0.016);
+
+    this.hud?.showCenterBanner(`KÍCH HOẠT: ${m.name.toUpperCase()}`, {
       style: "style-gold",
       subText: `HIỆU LỰC 20 GIÂY \u2022 ${m.desc}`,
-      durationMs: 1800,
+      durationMs: 1850,
     });
-    this.triggerCameraShake(0.55);
-    triggerPhysicalHardwareVibration("point_won");
-    this.audioEngine?.playSwingWhoosh?.(1.4);
+    this.triggerCameraShake(0.75);
+    triggerPhysicalHardwareVibration("match_won");
+    this.audioEngine?.playSwingWhoosh?.(1.65);
+    this.audioEngine?.playVoiceCallout?.("smash");
+
     if (this.player) {
-      this._spawnStarBurst(
-        this.player.pos.clone().add(new o.Vector3(0, 1.2, 0)),
-        18,
-      );
+      const burstPos = this.player.pos.clone().add(new o.Vector3(0, 1.15, 0));
+      this._spawnStarBurst(burstPos, 28);
+      this._spawnBounceRing(this.player.pos.x, this.player.pos.z);
+
+      // Immediate 3D Character Animation + VFX Burst on Activation!
+      this.player.swingType = "smash";
+      this.player.swingDuration = 0.48;
+      this.player.swingTimer = 0.48;
+      if (this.player.rig) {
+        this.player.rig.verticalHopOffset = 0.52;
+      }
+      if (this.racketKinematics) {
+        this.racketKinematics.triggerSwing(this.player, {
+          shotType: "smash",
+          side: "overhead",
+          speed: 1.85,
+          timing: "sweet",
+        });
+      }
+      if (this.swingVfx) {
+        this.swingVfx.spawnImpactBurst?.(burstPos, new o.Color(m.color), 1.8);
+        this.swingVfx.seedActorSwingArc?.(this.player, "SMASH", true);
+      }
+      if (this.facialFX) {
+        this.facialFX.setExpression(this.player, "effort_shout", 2.5);
+      }
     }
   }
 
@@ -3501,32 +3619,38 @@ export class ArgonTennisEngine {
       if (!s) return;
       const btn = document.getElementById(`btn-vip-mech-${idx}`);
       const timerBadge = document.getElementById(`mech-timer-${idx}`);
+      const statusText = document.getElementById(`mech-status-${idx}`);
       const prog = document.getElementById(`mech-prog-${idx}`);
 
       if (now < s.activeUntil) {
         const remainSec = Math.max(1, Math.ceil((s.activeUntil - now) / 1000));
         activeColor = m.color;
         if (m.type === "speed")
-          anySpeedBuff = Math.max(anySpeedBuff, m.speedMult || 1.8);
+          anySpeedBuff = Math.max(anySpeedBuff, m.speedMult || 2.1);
         if (m.type === "smash")
-          anySmashBuff = Math.max(anySmashBuff, m.powerMult || 1.85);
+          anySmashBuff = Math.max(anySmashBuff, m.powerMult || 2.2);
         if (m.type === "magnet")
-          anyReachBoost = Math.max(anyReachBoost, m.reachBoost || 3.2);
+          anyReachBoost = Math.max(anyReachBoost, m.reachBoost || 3.5);
         if (m.type === "time")
-          anyTimeSlow = Math.min(anyTimeSlow, m.slowEnemy || 0.5);
+          anyTimeSlow = Math.min(anyTimeSlow, m.slowEnemy || 0.42);
         if (m.type === "domain") {
           anyDomain = true;
-          anyReachBoost = Math.max(anyReachBoost, m.reachBoost || 2.8);
+          anyReachBoost = Math.max(anyReachBoost, m.reachBoost || 3.2);
+          anySmashBuff = Math.max(anySmashBuff, m.powerMult || 1.9);
+          anySpeedBuff = Math.max(anySpeedBuff, m.speedMult || 1.75);
         }
 
         if (btn) {
           btn.classList.add("active");
           btn.classList.remove("cooldown", "ready");
         }
+        if (statusText) {
+          statusText.textContent = "ĐANG BẬT";
+        }
         if (timerBadge) {
           timerBadge.classList.remove("hidden");
           timerBadge.textContent = `${remainSec}s`;
-          timerBadge.style.color = "#ffffff";
+          timerBadge.style.color = "#fef08a";
         }
         if (prog) {
           const pct = Math.max(
@@ -3548,6 +3672,9 @@ export class ArgonTennisEngine {
           btn.classList.add("cooldown");
           btn.classList.remove("active", "ready");
         }
+        if (statusText) {
+          statusText.textContent = "HỒI CHIÊU";
+        }
         if (timerBadge) {
           timerBadge.classList.remove("hidden");
           timerBadge.textContent = `${cdRemainSec}s`;
@@ -3564,6 +3691,9 @@ export class ArgonTennisEngine {
         if (btn) {
           btn.classList.add("ready");
           btn.classList.remove("active", "cooldown");
+        }
+        if (statusText) {
+          statusText.textContent = "SẴN SÀNG";
         }
         if (timerBadge) {
           timerBadge.classList.add("hidden");
@@ -3584,27 +3714,56 @@ export class ArgonTennisEngine {
     }
 
     if (activeColor) {
-      if (!this.playerVipAuraMesh && this.player.root) {
-        const geo = new o.TorusGeometry(0.85, 0.045, 12, 36);
-        const mat = new o.MeshBasicMaterial({
+      if (!this.playerVipAuraGroup && this.player.root) {
+        const grp = new o.Group();
+        const outerGeo = new o.TorusGeometry(1.15, 0.055, 12, 42);
+        const outerMat = new o.MeshBasicMaterial({
           color: new o.Color(activeColor),
           transparent: true,
-          opacity: 0.85,
+          opacity: 0.9,
         });
-        this.playerVipAuraMesh = new o.Mesh(geo, mat);
-        this.playerVipAuraMesh.rotation.x = Math.PI / 2;
-        this.playerVipAuraMesh.position.y = 0.12;
-        this.player.root.add(this.playerVipAuraMesh);
+        const outerRing = new o.Mesh(outerGeo, outerMat);
+        outerRing.rotation.x = Math.PI / 2;
+        outerRing.position.y = 0.1;
+
+        const innerGeo = new o.TorusGeometry(0.75, 0.04, 12, 32);
+        const innerMat = new o.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.75,
+        });
+        const innerRing = new o.Mesh(innerGeo, innerMat);
+        innerRing.rotation.x = Math.PI / 2;
+        innerRing.position.y = 0.65;
+
+        const pillarGeo = new o.CylinderGeometry(0.95, 1.15, 2.2, 24, 1, true);
+        const pillarMat = new o.MeshBasicMaterial({
+          color: new o.Color(activeColor),
+          transparent: true,
+          opacity: 0.22,
+          side: o.DoubleSide,
+        });
+        const pillar = new o.Mesh(pillarGeo, pillarMat);
+        pillar.position.y = 1.1;
+
+        grp.add(outerRing, innerRing, pillar);
+        grp.userData = { outerMat, innerRing, pillarMat };
+        this.playerVipAuraGroup = grp;
+        this.player.root.add(grp);
       }
-      if (this.playerVipAuraMesh) {
-        this.playerVipAuraMesh.visible = true;
-        this.playerVipAuraMesh.rotation.z += dt * 4.5;
-        this.playerVipAuraMesh.material.color.set(activeColor);
-        const pulse = 0.85 + Math.sin(this.elapsedTime * 6.0) * 0.12;
-        this.playerVipAuraMesh.scale.set(pulse, pulse, pulse);
+      if (this.playerVipAuraGroup) {
+        this.playerVipAuraGroup.visible = true;
+        this.playerVipAuraGroup.rotation.y += dt * 5.2;
+        const { outerMat, innerRing, pillarMat } =
+          this.playerVipAuraGroup.userData;
+        outerMat.color.set(activeColor);
+        pillarMat.color.set(activeColor);
+        innerRing.position.y = 0.4 + Math.abs(Math.sin(this.elapsedTime * 5.5)) * 1.1;
+        const pulse = 0.92 + Math.sin(this.elapsedTime * 8.0) * 0.14;
+        this.playerVipAuraGroup.scale.set(pulse, 1, pulse);
       }
-    } else if (this.playerVipAuraMesh) {
-      this.playerVipAuraMesh.visible = false;
+    } else if (this.playerVipAuraGroup) {
+      this.playerVipAuraGroup.visible = false;
     }
   }
   update(e) {
@@ -4105,16 +4264,54 @@ export class ArgonTennisEngine {
             return;
           }
         } else {
-          const s = this.matchConfig.difficulty !== "pro",
-            n = s ? 0.85 : 1.3,
-            h = s ? 1.8 : 2.34;
+          const diff = this.matchConfig.difficulty,
+            isX2 = diff === "x2",
+            isCucCao = diff === "cuc_cao",
+            isSieuCao = diff === "sieu_cao",
+            isCao = diff === "cao" || diff === "pro",
+            isHighDiff = isX2 || isCucCao || isSieuCao || isCao,
+            s = !isHighDiff,
+            botReachBonus = Number(this.opponent.reachBonus || 0),
+            n = isX2 ? 3.2 : isCucCao ? 2.2 : isSieuCao ? 1.7 : isCao ? 1.45 : 0.85,
+            h = (s ? 1.85 : 2.55) + botReachBonus,
+            zWindow = isX2 ? 2.85 : isCucCao ? 2.15 : isSieuCao ? 1.75 : 1.45,
+            maxY = isX2 ? 3.6 : isCucCao ? 3.1 : isSieuCao ? 2.65 : 2.35;
+
+          // Continuously track the incoming ball in real-time so the bot never stands still waiting
+          this.opponent.targetPos.x = o.MathUtils.clamp(
+            o.MathUtils.lerp(
+              this.ball.targetLanding.x,
+              this.ball.pos.x,
+              isX2 || isCucCao ? 0.88 : 0.65,
+            ),
+            -S.DOUBLES_X + 0.3,
+            S.DOUBLES_X - 0.3,
+          );
+          if (this.ball.pos.z < -2.2) {
+            this.opponent.targetPos.z = o.MathUtils.clamp(
+              this.ball.pos.z - (isX2 ? 0.25 : 0.45),
+              -14.2,
+              -2.5,
+            );
+          }
+          if (this.opponentPartner && isHighDiff && this.ball.pos.z > -7.2) {
+            this.opponentPartner.targetPos.x = o.MathUtils.clamp(
+              this.ball.pos.x,
+              -S.SINGLES_X + 0.3,
+              S.SINGLES_X - 0.3,
+            );
+          }
+
           if (
-            !this.ball.isPowerShot &&
-            this.ball.shotType !== "LOB" &&
-            this.ball.rallyStrokeCount > 2 &&
-            Math.abs(this.ball.pos.z - this.opponentPartner.pos.z) < 0.88 &&
+            (isX2 ||
+              isCucCao ||
+              (!this.ball.isPowerShot &&
+                this.ball.shotType !== "LOB" &&
+                this.ball.rallyStrokeCount > 1)) &&
+            Math.abs(this.ball.pos.z - this.opponentPartner.pos.z) <
+              (isX2 ? 1.75 : 1.05) &&
             Math.abs(this.ball.pos.x - this.opponentPartner.pos.x) < n &&
-            this.ball.pos.y < 1.78 &&
+            this.ball.pos.y < (isX2 ? 2.85 : 2.05) &&
             (!s || Math.random() < 0.55)
           ) {
             this._executeOpponentReturn(this.opponentPartner);
@@ -4122,9 +4319,11 @@ export class ArgonTennisEngine {
           }
           const r = Math.abs(this.ball.pos.z - this.opponent.pos.z),
             l = Math.abs(this.ball.pos.x - this.opponent.pos.x);
-          if (r < 1.32 && this.ball.pos.y < 2.05) {
-            if (l <= h) this._executeOpponentReturn(this.opponent);
-            else if (l <= 3.45 && this.opponent.swingTimer <= 0) {
+          if (r < zWindow && this.ball.pos.y < maxY) {
+            if (l <= h) {
+              this._executeOpponentReturn(this.opponent);
+              return;
+            } else if (l <= 3.65 && this.opponent.swingTimer <= 0) {
               const p =
                 this.ball.pos.x < this.opponent.pos.x ? "backhand" : "forehand";
               ((this.opponent.swingType = p),
@@ -4156,14 +4355,21 @@ export class ArgonTennisEngine {
       if (this.ball.lastHitter === "opponent" && this.ball.pos.z > 1.2) {
         const partMods = characterShopManager.getEffectivePartnerModifiers(),
           partnerDz = Math.abs(this.ball.pos.z - this.playerPartner.pos.z),
-          partnerDx = Math.abs(this.ball.pos.x - this.playerPartner.pos.x);
+          partnerDx = Math.abs(this.ball.pos.x - this.playerPartner.pos.x),
+          isHighBotDiff =
+            this.matchConfig.difficulty === "x2" ||
+            this.matchConfig.difficulty === "cuc_cao" ||
+            this.matchConfig.difficulty === "sieu_cao";
+        // Only allow Partner Bot to auto-intercept if its AI IQ has been upgraded >= 3 AND player hasn't just whiffed/spammed swing
         if (
-          !this.pendingUserSwing &&
+          !isHighBotDiff &&
+          (partMods.aiIqLevel || 1) >= 3 &&
+          this.player.swingCooldown <= 0 &&
           this.playerPartner.swingCooldown <= 0 &&
-          this.ball.pos.z <= 6.8 &&
-          partnerDz < (partMods.interceptReachZ || 1.05) &&
-          partnerDx < (partMods.interceptReachX || 1.45) &&
-          this.ball.pos.y < 1.95 &&
+          this.ball.pos.z <= 5.8 &&
+          partnerDz < Math.min(1.15, partMods.interceptReachZ || 0.95) &&
+          partnerDx < Math.min(1.25, partMods.interceptReachX || 1.15) &&
+          this.ball.pos.y < 1.85 &&
           (!this.ball.isPowerShot || partMods.canInterceptPowerShot)
         ) {
           if (
@@ -4172,7 +4378,7 @@ export class ArgonTennisEngine {
           ) {
             this._partnerInterceptRolledForStroke = this.ball.rallyStrokeCount;
             this._partnerInterceptApproved =
-              Math.random() < (partMods.autoInterceptChance || 0.35);
+              Math.random() < (partMods.autoInterceptChance || 0);
           }
           if (
             this._partnerInterceptApproved &&
@@ -4180,55 +4386,27 @@ export class ArgonTennisEngine {
           )
             return;
         }
-        const s = Math.hypot(
-            this.ball.pos.x - this.player.pos.x,
-            this.ball.pos.z - this.player.pos.z,
-          ),
-          n = Math.hypot(
-            this.ball.pos.x - this.playerPartner.pos.x,
-            this.ball.pos.z - this.playerPartner.pos.z,
-          ),
-          h =
-            this.ball.pos.z <= 7.2 && n < s && n <= 3.8
-              ? this.playerPartner
-              : this.player,
-          r = this.ball.pos.z - h.pos.z,
-          l = Math.abs(this.ball.pos.x - h.pos.x);
+        const r = this.ball.pos.z - this.player.pos.z,
+          l = Math.abs(this.ball.pos.x - this.player.pos.x);
         if (this.playerRole !== "p2") {
           const p = o.MathUtils.clamp(0.5 + r * 0.16, 0.06, 0.94);
           this.hud.updateTimingGauge({
             cursorNormalized: p,
-            modeTitle:
-              h === this.playerPartner ? "NET VOLLEY TIMING" : "SWING TIMING",
+            modeTitle: "SWING TIMING",
             speedText:
-              r >= -1.45 && r <= 0.68
-                ? "SWEET SPOT!"
-                : r < -2.65
-                  ? "VERY EARLY"
-                  : r < -1.45
-                    ? "EARLY (CROSS)"
-                    : r > 1.35
-                      ? "TOO LATE!"
-                      : "LATE (LINE)",
+              l > 1.65
+                ? "DI CHUYỂN TỚI BÓNG!"
+                : r >= -1.25 && r <= 0.65
+                  ? "SWEET SPOT!"
+                  : r < -2.25
+                    ? "VERY EARLY"
+                    : r < -1.25
+                      ? "EARLY (CROSS)"
+                      : r > 1.25
+                        ? "TOO LATE!"
+                        : "LATE (LINE)",
           });
         }
-        if (this.pendingUserSwing)
-          if (this.elapsedTime > this.pendingUserSwing.expiresAt)
-            this.pendingUserSwing = null;
-          else {
-            const p = h === this.playerPartner ? 3.95 : 4.65;
-            if (
-              (!this.pendingUserSwing.waitForSweetSpot ||
-                (r >= -0.85 && r <= 0.65)) &&
-              Math.hypot(l, r) <= p &&
-              this.ball.pos.y < 2.35
-            ) {
-              const c = this.pendingUserSwing.evt;
-              ((this.pendingUserSwing = null),
-                this._attemptPlayerRallyStrike(c, !1));
-              return;
-            }
-          }
         if (
           this.autoPlayMode &&
           !this.userHasInteracted &&
@@ -4249,6 +4427,17 @@ export class ArgonTennisEngine {
     }
   }
   _stepActorFootwork(e, t) {
+    // If manualMovement is active and this is the human-controlled player, do not auto-walk to targetPos
+    if (
+      e === this.player &&
+      this.playerRole !== "p2" &&
+      !(this.autoPlayMode && !this.userHasInteracted) &&
+      this.motionController?.settings?.manualMovement !== !1
+    ) {
+      e.targetPos.copy(e.pos);
+      e.vel.set(0, 0, 0);
+      return;
+    }
     const i = e.targetPos.x - e.pos.x,
       a = e.targetPos.z - e.pos.z,
       s = Math.hypot(i, a);
@@ -4985,6 +5174,9 @@ export class ArgonTennisEngine {
           score: this.score,
           rallyCount: this.ball.rallyStrokeCount,
           camera: this.camera,
+          lastPointWinner: this.lastPointAward?.winner,
+          lastPointAward: this.lastPointAward,
+          lastBannerBroadcast: this.lastBannerBroadcast,
         }));
   }
   _updateCrowdAnimation(e) {
@@ -5084,6 +5276,9 @@ export class ArgonTennisEngine {
         i.set(winActor.pos.x, 1.05, winActor.pos.z));
       return { targetPos: t, targetLook: i };
     }
+    const isPortraitMobile =
+      typeof window !== "undefined" &&
+      window.innerHeight > window.innerWidth * 1.08;
     if (e === "INTRO_PAN") {
       const a = this.elapsedTime * 0.42;
       (t.set(Math.sin(a) * 9.5, 8.2, 16.5 + Math.cos(a) * 3.5),
@@ -5093,19 +5288,29 @@ export class ArgonTennisEngine {
     else if (e === "SERVE_CAM")
       if (this.playerRole === "p2") {
         const a = this.opponent.pos.x;
-        (t.set(a * 0.16, 7.8, -22.8), i.set(a * 0.08, 0.35, -1.8));
+        isPortraitMobile
+          ? (t.set(a * 0.14, 12.2, -28.2), i.set(a * 0.08, -0.9, -7.2))
+          : (t.set(a * 0.16, 7.8, -22.8), i.set(a * 0.08, 0.35, -1.8));
       } else {
         const a = this.player.pos.x;
-        (t.set(a * 0.16, 7.8, 22.8), i.set(a * 0.08, 0.35, 1.8));
+        isPortraitMobile
+          ? (t.set(a * 0.14, 12.2, 28.2), i.set(a * 0.08, -0.9, 7.2))
+          : (t.set(a * 0.16, 7.8, 22.8), i.set(a * 0.08, 0.35, 1.8));
       }
     else
       e === "REPLAY_CAM"
         ? (t.set(2.35, 1.48, 4.15), i.set(-1.45, 0.95, -1.35))
         : this.playerRole === "p2"
-          ? (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
-            i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
-          : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
-            i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
+          ? isPortraitMobile
+            ? (t.set(this.opponent.pos.x * 0.14, 12.2, -28.2),
+              i.set(this.ball.pos.x * 0.1, -0.9, -7.2))
+            : (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
+              i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
+          : isPortraitMobile
+            ? (t.set(this.player.pos.x * 0.14, 12.2, 28.2),
+              i.set(this.ball.pos.x * 0.1, -0.9, 7.2))
+            : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
+              i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
     return { targetPos: t, targetLook: i };
   }
   _snapCameraImmediate() {

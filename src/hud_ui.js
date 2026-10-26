@@ -712,11 +712,11 @@ export class HudUI {
     const skillPlayerNameEl = document.getElementById("victory-skill-player-name");
 
     if (banner) {
-      banner.textContent = playerWon ? "CHIẾN THẮNG!" : isOnline ? "THẤT BẠI!" : "HOÀN THÀNH TRẬN ĐẤU!";
-      banner.style.color = playerWon ? "#ffea28" : isOnline ? "#f43f5e" : "#9ad4ff";
+      banner.textContent = playerWon ? "CHIẾN THẮNG!" : "THẤT BẠI!";
+      banner.style.color = playerWon ? "#ffea28" : "#f43f5e";
     }
     if (winnerTagEl) {
-      winnerTagEl.textContent = playerWon ? "BẠN LÀ NHÀ VÔ ĐỊCH SÂN ĐẤU" : isOnline ? "ĐỐI THỦ GIÀNH CHIẾN THẮNG" : "KẾT QUẢ CHUNG CUỘC";
+      winnerTagEl.textContent = playerWon ? "BẠN LÀ NHÀ VÔ ĐỊCH SÂN ĐẤU" : "ĐỐI THỦ GIÀNH CHIẾN THẮNG";
     }
     if (scoreText) {
       scoreText.textContent = isOnline
@@ -747,10 +747,10 @@ export class HudUI {
       if (playerWon) {
         winnerNameEl.textContent = `${pChar.name} & Bot ${bChar.name} · VÔ ĐỊCH!`;
       } else {
-        if (winnerName) {
+        if (winnerName && isOnline) {
           winnerNameEl.textContent = `${winnerName} · VÔ ĐỊCH!`;
         } else {
-          winnerNameEl.textContent = isOnline ? "Đối Thủ · VÔ ĐỊCH!" : `Đối Thủ & Bot Maya`;
+          winnerNameEl.textContent = `${pChar.name} & Bot ${bChar.name} · THẤT BẠI`;
         }
       }
     }
@@ -795,10 +795,10 @@ export class HudUI {
     if (bonusMsgEl) {
       if (playerWon) {
         if (streakBonusCoins > 0) {
-          bonusMsgEl.innerHTML = `<span class="streak-bonus-highlight">+${streakBonusCoins} XU THƯỞNG CHUỖI THẮNG!</span> 🔥 Phong độ rực sáng!`;
+          bonusMsgEl.innerHTML = `<span class="streak-bonus-highlight">+${streakBonusCoins} XU THƯỞNG CHUỖI THẮNG!</span> Phong độ rực sáng!`;
           bonusMsgEl.classList.remove("hidden");
         } else if (curStreak >= 2) {
-          bonusMsgEl.textContent = `🔥 Đang có chuỗi ${curStreak} trận thắng liên tiếp!`;
+          bonusMsgEl.textContent = `Đang có chuỗi ${curStreak} trận thắng liên tiếp!`;
           bonusMsgEl.classList.remove("hidden");
         } else {
           bonusMsgEl.textContent = "Khởi đầu chuỗi thắng mới thành công!";
