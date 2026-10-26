@@ -111,11 +111,6 @@ function argonTennisRelayPlugin() {
       }
     }
   };
-  const cleanupInterval = setInterval(purgeExpiredRelayRooms, 60 * 1000);
-  if (typeof (cleanupInterval as any).unref === "function") {
-    (cleanupInterval as any).unref();
-  }
-
   const tunnelUrl = "https://argon-tennis-sandbox-170440.uc.r.appspot.com";
 
   const getOrCreateRoom = (rawRoomId?: string) => {
@@ -395,25 +390,39 @@ function argonTennisRelayPlugin() {
   return {
     name: "argon-tennis-relay",
     configureServer(server: any) {
+      const cleanupInterval = setInterval(purgeExpiredRelayRooms, 60 * 1000);
+      if (typeof (cleanupInterval as any).unref === "function") {
+        (cleanupInterval as any).unref();
+      }
       attachMiddlewares(server.middlewares);
     },
     configurePreviewServer(server: any) {
+      const cleanupInterval = setInterval(purgeExpiredRelayRooms, 60 * 1000);
+      if (typeof (cleanupInterval as any).unref === "function") {
+        (cleanupInterval as any).unref();
+      }
       attachMiddlewares(server.middlewares);
     }
   };
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   loadEnv(mode, ".", "");
   return {
     server: {
       port: 3000,
       host: "0.0.0.0",
+      allowedHosts: true,
       hmr: process.env.DISABLE_HMR !== "true"
+    },
+    preview: {
+      port: 3000,
+      host: "0.0.0.0",
+      allowedHosts: true
     },
     plugins: [
       react(),
-      argonTennisRelayPlugin(),
+      ...(command === "serve" ? [argonTennisRelayPlugin()] : []),
       VitePWA({
         registerType: "autoUpdate",
         devOptions: {

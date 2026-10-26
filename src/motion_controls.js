@@ -443,6 +443,7 @@ export class MotionController {
       this.joystickState.startX = centerX;
       this.joystickState.startY = centerY;
 
+      triggerPhysicalHardwareVibration("touch", { intensity: 0.8 });
       updateJoystickPos(touch.clientX, touch.clientY);
       e.preventDefault();
       e.stopPropagation();
@@ -539,6 +540,7 @@ export class MotionController {
         e.stopPropagation();
         btn.classList.add("btn-pressed");
         setTimeout(() => btn.classList.remove("btn-pressed"), 180);
+        triggerPhysicalHardwareVibration(btnId === "btn-touch-smash" ? "sweet_spot" : "button_tap", { intensity: 1.25 });
         callback();
       };
       btn.addEventListener("touchstart", trigger, { passive: false });
@@ -1597,54 +1599,135 @@ export class MotionController {
 
 export default MotionController;
 
+// Global AudioContext and User Gesture Unlock for Physical Acoustic/Taptic Vibration
+let _hapticAudioCtx = null;
+function getHapticAudioContext() {
+  if (typeof window === "undefined") return null;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!_hapticAudioCtx || _hapticAudioCtx.state === "closed") {
+    try {
+      _hapticAudioCtx = new AudioCtx({ latencyHint: "interactive" });
+    } catch {
+      _hapticAudioCtx = new AudioCtx();
+    }
+  }
+  if (_hapticAudioCtx && _hapticAudioCtx.state === "suspended") {
+    _hapticAudioCtx.resume().catch(() => {});
+  }
+  return _hapticAudioCtx;
+}
+
+// Auto unlock on first user interaction anywhere on the page
+if (typeof window !== "undefined") {
+  const unlockHaptics = () => {
+    getHapticAudioContext();
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      try { navigator.vibrate(1); } catch {}
+    }
+  };
+  window.addEventListener("touchstart", unlockHaptics, { passive: true, once: true });
+  window.addEventListener("pointerdown", unlockHaptics, { passive: true, once: true });
+  window.addEventListener("click", unlockHaptics, { passive: true, once: true });
+}
+
 export function triggerPhysicalHardwareVibration(kind = "hit", { intensity = 1, grade = "", durationMs = 60, pattern = null, role = null } = {}) {
   if (typeof window === "undefined") return;
 
-  // Filter role if specified (so P1 hits only buzz P1 device, P2 hits buzz P2 device)
-  if (role) {
-    const localRole = (typeof window !== "undefined" && window.__CURRENT_PLAYER_ROLE) ||
+  // Filter role only if in active multiplayer mode (never block single player)
+  if (role && window.__argonTennis?.isMultiplayer) {
+    const localRole = window.__CURRENT_PLAYER_ROLE ||
       (new URLSearchParams(window.location.search).get("role") === "p2" ? "p2" : "p1");
     if (role !== localRole) return;
   }
 
-  // 1. Resolve vibration pattern for navigator.vibrate
+  // 1. Resolve vibration pattern
   let vibPattern = pattern;
   if (!vibPattern) {
     if (kind === "match_won") {
-      vibPattern = [80, 45, 80, 45, 140, 60, 240];
+      vibPattern = [90, 45, 90, 45, 150, 60, 260];
     } else if (kind === "point_won") {
-      vibPattern = [45, 30, 45, 30, 95];
-    } else if (kind === "point_lost") {
-      vibPattern = [135];
+      vibPattern = [50, 30, 50, 30, 110];
+    } else if (kind === "point_lost" || kind === "fault" || kind === "whiff") {
+      vibPattern = [80, 40, 80];
     } else if (kind === "countdown_tick") {
       vibPattern = [45];
     } else if (kind === "serve_go") {
-      vibPattern = [65, 30, 90];
-    } else if (kind === "whiff" || kind === "fault" || kind === "out" || kind === "net") {
-      vibPattern = [65, 35, 65];
-    } else if (intensity >= 1.25 || /PERFECT|POWER|SMASH|SWEET/i.test(grade || "")) {
-      vibPattern = [45, 25, 85];
+      vibPattern = [70, 30, 95];
+    } else if (intensity >= 1.25 || /PERFECT|POWER|SMASH|SWEET/i.test(grade || "") || kind === "sweet_spot") {
+      vibPattern = [55, 25, 100];
+    } else if (kind === "button_tap" || kind === "touch") {
+      vibPattern = 32;
     } else if (kind === "swing" || kind === "toss") {
-      vibPattern = [22];
+      vibPattern = 35;
     } else {
-      vibPattern = [32];
+      vibPattern = 40;
     }
   }
 
-  // 2. Physical device vibration (Android Chrome / Mobile Safari PWA / Tablet / Phone)
+  // 2. Physical device motor vibration (Android, PWA, Chrome, Firefox)
   if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
     try {
-      navigator.vibrate(vibPattern);
+      const ok = navigator.vibrate(vibPattern);
+      if (ok === false && Array.isArray(vibPattern)) {
+        navigator.vibrate(vibPattern[0]);
+      }
     } catch {}
   }
 
-  // 3. Physical Gamepad / Controller Rumble (Xbox, DualShock, Pro Controller)
+  // 3. Acoustic Sub-bass Physical Resonant Transducer Pulse (iPhone / iPad iOS Safari & Android Speaker Coil)
+  // Low-frequency sine burst at 48-58Hz physically vibrates the device chassis and linear motor
+  try {
+    const ctx = getHapticAudioContext();
+    if (ctx && ctx.state === "running") {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      const isPower = kind === "sweet_spot" || kind === "match_won" || intensity >= 1.25;
+      const baseFreq = isPower ? 48 : 58;
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(baseFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(30, now + 0.08);
+
+      const dur = isPower ? 0.09 : kind === "button_tap" ? 0.035 : 0.06;
+      const amp = Math.min(1.0, Math.max(0.4, 0.85 * intensity));
+      gain.gain.setValueAtTime(amp, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + dur + 0.02);
+    }
+  } catch {}
+
+  // 4. Native iOS switch element toggle for iOS 17.4+ Taptic Engine
+  try {
+    if (!window.__argonIosSwitch && typeof document !== "undefined") {
+      const sw = document.createElement("input");
+      sw.type = "checkbox";
+      sw.setAttribute("switch", "");
+      sw.style.position = "fixed";
+      sw.style.opacity = "0";
+      sw.style.pointerEvents = "none";
+      sw.style.top = "-9999px";
+      document.body.appendChild(sw);
+      window.__argonIosSwitch = sw;
+    }
+    if (window.__argonIosSwitch) {
+      window.__argonIosSwitch.checked = !window.__argonIosSwitch.checked;
+    }
+  } catch {}
+
+  // 5. Gamepad / Controller Rumble (DualShock, Xbox, Pro Controller)
   if (typeof navigator !== "undefined" && typeof navigator.getGamepads === "function") {
     try {
       const pads = navigator.getGamepads();
       if (pads) {
-        const strong = Math.min(1.0, Math.max(0.2, (kind === "match_won" ? 1.0 : intensity >= 1.25 ? 0.85 : 0.45) * intensity));
-        const weak = Math.min(1.0, Math.max(0.15, (kind === "match_won" ? 0.9 : intensity >= 1.25 ? 0.75 : 0.35) * intensity));
+        const strong = Math.min(1.0, Math.max(0.2, (kind === "match_won" ? 1.0 : intensity >= 1.25 ? 0.9 : 0.5) * intensity));
+        const weak = Math.min(1.0, Math.max(0.15, (kind === "match_won" ? 0.9 : intensity >= 1.25 ? 0.8 : 0.4) * intensity));
         const dur = typeof vibPattern === "number" ? vibPattern : Array.isArray(vibPattern) ? vibPattern.reduce((a, b) => a + b, 0) : durationMs;
         for (let i = 0; i < pads.length; i++) {
           const gp = pads[i];

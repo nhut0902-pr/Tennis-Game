@@ -1092,6 +1092,268 @@ export const CHARACTER_ROSTER = [
       lashes: false,
       defaultAccessories: ["crown_gold", "cyber_halo", "cyber_wings", "thunder_gauntlets", "aura_gold"]
     }
+  },
+
+  // ============================================================================
+  // GROUP 6: CẦU THỦ VIP SIÊU MẠNH (VIP GOD ROSTER · OVR 180 -> 240)
+  // Chỉ tài khoản VIP tích lũy Xu VIP mới có thể sở hữu - Chỉ số và kỹ năng siêu mạnh!
+  // ============================================================================
+  {
+    id: "zeus_vip",
+    name: "Zeus Lôi Thần",
+    title: "[VIP BẬC THẦY] Thần Sấm Tối Cao",
+    roleTag: "VIP GOD POWER",
+    rarity: "VIP",
+    isVip: true,
+    vipPrice: 200000,
+    price: 0,
+    accentCss: "#facc15",
+    unlockedByDefault: false,
+    baseStats: { speed: 45, power: 50, spin: 46, reflex: 48 },
+    passiveName: "Lôi Điện Vạn Phút",
+    passiveDesc: "Cơ chế VIP Thần Sấm: Giao bóng sấm sét 275+ km/h, +45% Uy lực, +35% Tốc biến sân đấu & +600% Xu thưởng!",
+    mechanic: {
+      id: "zeus_lightning",
+      serveSpeedBonus: 0.45,
+      smashSpeedBonus: 0.5,
+      speedBurstMult: 0.35,
+      reachBonus: 0.75,
+      sweetSpotBonus: 0.35,
+      botInterceptBonus: 0.4,
+      knockbackImpulse: 1.1,
+      coinBonusPct: 6.0,
+      vipBonusPct: 2.5
+    },
+    appearance: {
+      shirtHex: 0xfacc15,
+      shirtDarkHex: 0xb45309,
+      shortsHex: 0x1e1b4b,
+      shoeHex: 0xfacc15,
+      hairHex: 0xfef08a,
+      headbandHex: 0xfacc15,
+      stripeHex: 0x38bdf8,
+      skinHex: 0xffdfc4,
+      hairStyle: "swept_puffs",
+      browTilt: "confident",
+      mouthStyle: "confident_smirk",
+      glasses: false,
+      lashes: false,
+      defaultAccessories: ["crown_gold", "aura_gold", "thunder_gauntlets"]
+    }
+  },
+  {
+    id: "kitsune_vip",
+    name: "Kitsune Cửu Vĩ",
+    title: "[VIP BẬC THẦY] Linh Hồ Vũ Điệu",
+    roleTag: "VIP GOD SPIN",
+    rarity: "VIP",
+    isVip: true,
+    vipPrice: 300000,
+    price: 0,
+    accentCss: "#ec4899",
+    unlockedByDefault: false,
+    baseStats: { speed: 48, power: 44, spin: 50, reflex: 49 },
+    passiveName: "Ảo Ảnh Cửu Vĩ",
+    passiveDesc: "Cơ chế VIP Hồ Ly: Đường bóng ảo ảnh xoáy 3 chiều uốn lượn, +50% Độ xoáy, +40% Bứt tốc phản xạ & +650% Xu thưởng!",
+    mechanic: {
+      id: "kitsune_mirage",
+      serveSpeedBonus: 0.35,
+      smashSpeedBonus: 0.4,
+      spinCurveMult: 0.5,
+      speedBurstMult: 0.4,
+      reachBonus: 0.7,
+      sweetSpotBonus: 0.35,
+      botInterceptBonus: 0.45,
+      coinBonusPct: 6.5,
+      vipBonusPct: 3.0
+    },
+    appearance: {
+      shirtHex: 0xec4899,
+      shirtDarkHex: 0x9d174d,
+      shortsHex: 0x18181b,
+      shoeHex: 0xf43f5e,
+      hairHex: 0xf472b6,
+      headbandHex: 0xffffff,
+      stripeHex: 0xfbcfe8,
+      skinHex: 0xffdfc4,
+      hairStyle: "side_part",
+      browTilt: "determined",
+      mouthStyle: "happy_grin",
+      glasses: false,
+      lashes: true,
+      defaultAccessories: ["kitsune_mask", "cyber_wings", "aura_gold"]
+    }
+  },
+  {
+    id: "ares_vip",
+    name: "Ares Chiến Thần",
+    title: "[VIP BẬC THẦY] Đại Bá Vương Chiến Trường",
+    roleTag: "VIP GOD SMASH",
+    rarity: "VIP",
+    isVip: true,
+    vipPrice: 400000,
+    price: 0,
+    accentCss: "#ef4444",
+    unlockedByDefault: false,
+    baseStats: { speed: 46, power: 50, spin: 45, reflex: 46 },
+    passiveName: "Búa Tạ Diệt Thế",
+    passiveDesc: "Cơ chế VIP Chiến Thần: Cú Smash búa bổ tạo sóng chấn động đẩy văng đối thủ, +55% Uy lực Smash & +700% Xu thưởng!",
+    mechanic: {
+      id: "ares_destruction",
+      serveSpeedBonus: 0.4,
+      smashSpeedBonus: 0.55,
+      knockbackImpulse: 1.35,
+      reachBonus: 0.8,
+      sweetSpotBonus: 0.38,
+      botInterceptBonus: 0.42,
+      coinBonusPct: 7.0,
+      vipBonusPct: 3.5
+    },
+    appearance: {
+      shirtHex: 0xd97706,
+      shirtDarkHex: 0x78350f,
+      shortsHex: 0x0f172a,
+      shoeHex: 0xef4444,
+      hairHex: 0x1c1917,
+      headbandHex: 0xd97706,
+      stripeHex: 0xef4444,
+      skinHex: 0xe0a96d,
+      hairStyle: "spiky_pro",
+      browTilt: "aggressive",
+      mouthStyle: "confident_smirk",
+      glasses: false,
+      lashes: false,
+      defaultAccessories: ["cyber_helmet", "thunder_gauntlets", "aura_gold"]
+    }
+  },
+  {
+    id: "chronos_vip",
+    name: "Chronos Bá Chủ",
+    title: "[VIP HUYỀN THOẠI] Chúa Tể Thời Không",
+    roleTag: "VIP GOD TIME",
+    rarity: "VIP",
+    isVip: true,
+    vipPrice: 600000,
+    price: 0,
+    accentCss: "#a855f7",
+    unlockedByDefault: false,
+    baseStats: { speed: 50, power: 48, spin: 48, reflex: 50 },
+    passiveName: "Ngưng Đọng Thời Không",
+    passiveDesc: "Cơ chế VIP Thời Gian: Làm chậm bóng 40% ở nửa sân nhà, tự động bọc vùng bắt lưới tuyệt đối & +850% Xu thưởng!",
+    mechanic: {
+      id: "chronos_timewarp",
+      serveSpeedBonus: 0.45,
+      smashSpeedBonus: 0.48,
+      speedBurstMult: 0.5,
+      reachBonus: 0.85,
+      sweetSpotBonus: 0.4,
+      botInterceptBonus: 0.5,
+      coinBonusPct: 8.5,
+      vipBonusPct: 4.0
+    },
+    appearance: {
+      shirtHex: 0x7c3aed,
+      shirtDarkHex: 0x4c1d95,
+      shortsHex: 0x090d16,
+      shoeHex: 0xa855f7,
+      hairHex: 0xc4b5fd,
+      headbandHex: 0x38bdf8,
+      stripeHex: 0xa855f7,
+      skinHex: 0xf8fafc,
+      hairStyle: "flowing_long",
+      browTilt: "determined",
+      mouthStyle: "neutral_cool",
+      glasses: true,
+      lashes: false,
+      defaultAccessories: ["cyber_halo", "cyber_wings", "aura_gold"]
+    }
+  },
+  {
+    id: "shenlong_vip",
+    name: "Mecha Shenlong",
+    title: "[VIP HUYỀN THOẠI] Long Thần Thái Cổ",
+    roleTag: "VIP GOD DRAGON",
+    rarity: "VIP",
+    isVip: true,
+    vipPrice: 800000,
+    price: 0,
+    accentCss: "#10b981",
+    unlockedByDefault: false,
+    baseStats: { speed: 50, power: 50, spin: 50, reflex: 50 },
+    passiveName: "Long Hống Thái Cổ",
+    passiveDesc: "Cơ chế VIP Long Thần: Quỹ đạo bóng cuộn lốc rồng xanh ngọc, không bao giờ tự đánh hỏng bóng & +1.000% Xu thưởng!",
+    mechanic: {
+      id: "shenlong_vortex",
+      serveSpeedBonus: 0.5,
+      smashSpeedBonus: 0.55,
+      spinCurveMult: 0.5,
+      speedBurstMult: 0.5,
+      reachBonus: 0.9,
+      sweetSpotBonus: 0.45,
+      botInterceptBonus: 0.55,
+      coinBonusPct: 10.0,
+      vipBonusPct: 5.0
+    },
+    appearance: {
+      shirtHex: 0x059669,
+      shirtDarkHex: 0x064e3b,
+      shortsHex: 0x022c22,
+      shoeHex: 0x34d399,
+      hairHex: 0x6ee7b7,
+      headbandHex: 0xfacc15,
+      stripeHex: 0x34d399,
+      skinHex: 0xd1fae5,
+      hairStyle: "wild_mohawk",
+      browTilt: "aggressive",
+      mouthStyle: "confident_smirk",
+      glasses: false,
+      lashes: false,
+      defaultAccessories: ["crown_gold", "cyber_wings", "aura_gold"]
+    }
+  },
+  {
+    id: "omnibot_max20",
+    name: "Omni-Bot Max 20",
+    title: "[VIP TOÀN NĂNG] Trùm Cuối Level 20",
+    roleTag: "LEVEL 20 MAX GOD",
+    rarity: "VIP",
+    isVip: true,
+    vipPrice: 1000000,
+    price: 0,
+    accentCss: "#f59e0b",
+    unlockedByDefault: false,
+    baseStats: { speed: 50, power: 50, spin: 50, reflex: 50 },
+    passiveName: "Bất Khả Chiến Bại Level 20",
+    passiveDesc: "Cơ chế VIP Trùm Cuối: Phiên bản cầu thủ của Bot X2 Level 20! Tốc độ ánh sáng, phản xạ tức thời, mọi chỉ số Max tuyệt đối & +2.000% Xu!",
+    mechanic: {
+      id: "omniverse_max20",
+      serveSpeedBonus: 0.6,
+      smashSpeedBonus: 0.65,
+      spinCurveMult: 0.6,
+      speedBurstMult: 0.6,
+      reachBonus: 1.0,
+      sweetSpotBonus: 0.5,
+      botInterceptBonus: 0.6,
+      knockbackImpulse: 1.6,
+      coinBonusPct: 20.0,
+      vipBonusPct: 10.0
+    },
+    appearance: {
+      shirtHex: 0x111827,
+      shirtDarkHex: 0x030712,
+      shortsHex: 0x0f172a,
+      shoeHex: 0xf59e0b,
+      hairHex: 0xf59e0b,
+      headbandHex: 0xfbbf24,
+      stripeHex: 0xf59e0b,
+      skinHex: 0xffedd5,
+      hairStyle: "spiky_pro",
+      browTilt: "aggressive",
+      mouthStyle: "confident_smirk",
+      glasses: true,
+      lashes: false,
+      defaultAccessories: ["crown_gold", "cyber_halo", "cyber_wings", "thunder_gauntlets", "aura_gold"]
+    }
   }
 ];
 
@@ -1112,6 +1374,363 @@ registerRosterMiiProfiles(
     }
   }))
 );
+
+export const VIP_SUBSCRIPTION_PACKAGES = [
+  {
+    id: "vip_1day",
+    name: "VIP 1 Ngày",
+    durationMs: 24 * 60 * 60 * 1000,
+    priceCoins: 2000,
+    bonusVipCoins: 5000,
+    coinMultiplier: 2.0,
+    badge: "2.000 XU",
+    tag: "GÓI TRẢI NGHIỆM",
+    desc: "Kích hoạt VIP 24h. Nhân x2 Xu thưởng trận, tặng ngay +5.000 Xu VIP!"
+  },
+  {
+    id: "vip_1week",
+    name: "VIP 1 Tuần",
+    durationMs: 7 * 24 * 60 * 60 * 1000,
+    priceCoins: 2000000,
+    bonusVipCoins: 150000,
+    coinMultiplier: 3.0,
+    badge: "2.000.000 XU",
+    tag: "GÓI PHỔ BIẾN",
+    desc: "Kích hoạt VIP 7 ngày. Nhân x3 Xu thưởng mọi trận, tặng ngay +150.000 Xu VIP!"
+  },
+  {
+    id: "vip_1month",
+    name: "VIP 1 Tháng (Đại Gia)",
+    durationMs: 30 * 24 * 60 * 60 * 1000,
+    priceCoins: 2000000000,
+    bonusVipCoins: 2000000,
+    coinMultiplier: 5.0,
+    badge: "2.000.000.000 XU",
+    tag: "ĐẠI GIA BẤT TỬ",
+    desc: "Đặc quyền Thần Thánh 30 ngày. Nhân x5 Xu thưởng, tặng ngay +2.000.000 Xu VIP, mở full cơ chế!"
+  }
+];
+
+export const CHARACTER_ACTIVE_MECHANICS = {
+  zeus_vip: [
+    {
+      id: "zeus_speed",
+      name: "⚡ Lôi Tốc Thần Thánh",
+      shortLabel: "LÔI TỐC",
+      icon: "⚡",
+      hotkey: "1",
+      color: "#facc15",
+      type: "speed",
+      speedMult: 1.8,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "+80% Tốc độ di chuyển và để lại tàn ảnh tia chớp vạn dặm trong 20s!"
+    },
+    {
+      id: "zeus_smash",
+      name: "⚡ Sấm Sét Huỷ Diệt",
+      shortLabel: "LÔI SMASH",
+      icon: "💥",
+      hotkey: "2",
+      color: "#eab308",
+      type: "smash",
+      powerMult: 1.85,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Mọi cú Smash hoá tia sét 280+ km/h xé toạc sân đấu trong 20s!"
+    },
+    {
+      id: "zeus_shield",
+      name: "🛡️ Lôi Khiên Bất Hoại",
+      shortLabel: "LÔI KHIÊN",
+      icon: "🛡️",
+      hotkey: "3",
+      color: "#38bdf8",
+      type: "magnet",
+      reachBoost: 3.5,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Lôi trường hút bóng 3.5m tự động hướng bóng vào điểm ngọt trong 20s!"
+    }
+  ],
+  kitsune_vip: [
+    {
+      id: "kitsune_dash",
+      name: "🦊 Hồ Ly Lướt Gió",
+      shortLabel: "HỒ DƯỢT",
+      icon: "🦊",
+      hotkey: "1",
+      color: "#ec4899",
+      type: "speed",
+      speedMult: 1.8,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Lướt gió cửu vĩ siêu thanh, tăng 80% tốc biến cứu bóng hiểm trong 20s!"
+    },
+    {
+      id: "kitsune_spin",
+      name: "🔥 Ma Hỏa Xoáy Ảo",
+      shortLabel: "MA HỎA",
+      icon: "🔥",
+      hotkey: "2",
+      color: "#f43f5e",
+      type: "spin",
+      curveMult: 2.2,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Bóng xoáy ma hỏa uốn lượn 3D cực dị khiến bot và đối thủ mất phương hướng!"
+    },
+    {
+      id: "kitsune_slow",
+      name: "✨ Cửu Vĩ Mê Hoặc",
+      shortLabel: "MÊ HOẶC",
+      icon: "✨",
+      hotkey: "3",
+      color: "#f472b6",
+      type: "time",
+      slowEnemy: 0.5,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Hào quang mị hoặc làm chậm 50% tốc độ chạy của đối thủ và bot trong 20s!"
+    }
+  ],
+  ares_vip: [
+    {
+      id: "ares_rage",
+      name: "⚔️ Chiến Thần Cuồng Nộ",
+      shortLabel: "CUỒNG NỘ",
+      icon: "⚔️",
+      hotkey: "1",
+      color: "#ef4444",
+      type: "smash",
+      powerMult: 2.0,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "+100% Uy lực mọi cú đánh, bóng bốc lửa đỏ rực đẩy văng đối thủ!"
+    },
+    {
+      id: "ares_stomp",
+      name: "💥 Địa Chấn Nẩy Thấp",
+      shortLabel: "ĐỊA CHẤN",
+      icon: "💥",
+      hotkey: "2",
+      color: "#b91c1c",
+      type: "spin",
+      lowBounce: 0.35,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Bóng chạm đất phát sóng chấn động nảy cực thấp sát mặt cỏ không thể cứu!"
+    },
+    {
+      id: "ares_will",
+      name: "🛡️ Giáp Chiến Bất Phá",
+      shortLabel: "CHIẾN GIÁP",
+      icon: "🛡️",
+      hotkey: "3",
+      color: "#f97316",
+      type: "magnet",
+      reachBoost: 3.2,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Kháng hoàn toàn đòn đánh bộc phá và tăng tầm với bóng thêm 3.2m!"
+    }
+  ],
+  chronos_vip: [
+    {
+      id: "chronos_freeze",
+      name: "⏳ Ngưng Đọng Thời Không",
+      shortLabel: "NGƯNG ĐỌNG",
+      icon: "⏳",
+      hotkey: "1",
+      color: "#a855f7",
+      type: "time",
+      slowEnemy: 0.45,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Làm chậm 55% toàn bộ thế giới xung quanh, bạn di chuyển tự do trong 20s!"
+    },
+    {
+      id: "chronos_warp",
+      name: "🌀 Cú Đánh Xuyên Không",
+      shortLabel: "XUYÊN KHÔNG",
+      icon: "🌀",
+      hotkey: "2",
+      color: "#c084fc",
+      type: "smash",
+      powerMult: 1.8,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Bóng dịch chuyển tức thời qua lưới hạ gục điểm đối phương tức thì!"
+    },
+    {
+      id: "chronos_shield",
+      name: "⌛ Vòng Lặp Vô Tận",
+      shortLabel: "VÔ TẬN",
+      icon: "⌛",
+      hotkey: "3",
+      color: "#818cf8",
+      type: "magnet",
+      reachBoost: 3.8,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Kéo giãn thời gian tiếp bóng và tự động hút bóng về mặt vợt trong 20s!"
+    }
+  ],
+  shenlong_vip: [
+    {
+      id: "shenlong_rush",
+      name: "🐉 Thần Long Xuất Hải",
+      shortLabel: "LONG THẦN",
+      icon: "🐉",
+      hotkey: "1",
+      color: "#10b981",
+      type: "speed",
+      speedMult: 1.85,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Hóa thân rồng thần lướt như bay trên sân đấu, tốc độ tăng 85% trong 20s!"
+    },
+    {
+      id: "shenlong_flame",
+      name: "🔥 Long Hỏa Thiêu Đốt",
+      shortLabel: "LONG HỎA",
+      icon: "🔥",
+      hotkey: "2",
+      color: "#34d399",
+      type: "smash",
+      powerMult: 1.95,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Cú đập rồng lửa cuộn lốc xanh ngọc, bóng găm góc chữ A cực kỳ hiểm hóc!"
+    },
+    {
+      id: "shenlong_domain",
+      name: "🌊 Long Vực Khí Hải",
+      shortLabel: "LONG VỰC",
+      icon: "🌊",
+      hotkey: "3",
+      color: "#059669",
+      type: "domain",
+      curveMult: 2.0,
+      reachBoost: 2.8,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Tạo lãnh địa rồng bảo hộ, không bao giờ đánh bóng rúc lưới hoặc ra ngoài!"
+    }
+  ],
+  omnibot_max20: [
+    {
+      id: "omni_overclock",
+      name: "🤖 Ép Xung Max 20",
+      shortLabel: "ÉP XUNG",
+      icon: "🤖",
+      hotkey: "1",
+      color: "#f59e0b",
+      type: "speed",
+      speedMult: 1.9,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Bản sao cơ chế Bot X2 Max 20: Tốc độ ánh sáng, lướt sân không độ trễ trong 20s!"
+    },
+    {
+      id: "omni_plasma",
+      name: "⚡ Tia Plasma Thần Cấp",
+      shortLabel: "PLASMA BEAM",
+      icon: "⚡",
+      hotkey: "2",
+      color: "#ef4444",
+      type: "smash",
+      powerMult: 2.1,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Quỹ đạo tia plasma siêu thanh không thể cản phá với vận tốc 300+ km/h!"
+    },
+    {
+      id: "omni_matrix",
+      name: "🛡️ Khiên Lượng Tử Tuyệt Đối",
+      shortLabel: "LƯỢNG TỬ",
+      icon: "🛡️",
+      hotkey: "3",
+      color: "#06b6d4",
+      type: "magnet",
+      reachBoost: 4.2,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "Bán kính hút bóng 4.2m bao phủ gần như toàn bộ phần sân đấu trong 20s!"
+    }
+  ]
+};
+
+export function getCharacterActiveMechanics(charId) {
+  if (CHARACTER_ACTIVE_MECHANICS[charId]) {
+    return CHARACTER_ACTIVE_MECHANICS[charId];
+  }
+  const char = CHARACTER_ROSTER.find((c) => c.id === charId);
+  if (!char) {
+    return [
+      {
+        id: "generic_sprint",
+        name: "⚡ Bứt Tốc Thể Lực",
+        shortLabel: "BỨT TỐC",
+        icon: "⚡",
+        hotkey: "1",
+        color: "#38bdf8",
+        type: "speed",
+        speedMult: 1.45,
+        durationMs: 20000,
+        cooldownMs: 60000,
+        desc: "+45% Tốc độ di chuyển trên sân trong 20s!"
+      }
+    ];
+  }
+
+  if (char.isPremium || char.isRobot) {
+    return [
+      {
+        id: `${charId}_rush`,
+        name: `⚡ Siêu Tốc: ${char.name}`,
+        shortLabel: "SIÊU TỐC",
+        icon: "⚡",
+        hotkey: "1",
+        color: char.accentCss || "#38bdf8",
+        type: "speed",
+        speedMult: 1.6,
+        durationMs: 20000,
+        cooldownMs: 60000,
+        desc: `Kích hoạt xung năng lượng tăng 60% tốc độ trong 20s!`
+      },
+      {
+        id: `${charId}_blast`,
+        name: `💥 Bộc Phá: ${char.passiveName || char.name}`,
+        shortLabel: "BỘC PHÁ",
+        icon: "💥",
+        hotkey: "2",
+        color: "#f59e0b",
+        type: "smash",
+        powerMult: 1.7,
+        durationMs: 20000,
+        cooldownMs: 60000,
+        desc: `Tăng 70% uy lực Smash và bóng bốc hiệu ứng rực rỡ trong 20s!`
+      }
+    ];
+  }
+
+  return [
+    {
+      id: `${charId}_sprint`,
+      name: `⚡ Bứt Tốc Thể Lực: ${char.name}`,
+      shortLabel: "BỨT TỐC",
+      icon: "⚡",
+      hotkey: "1",
+      color: char.accentCss || "#38bdf8",
+      type: "speed",
+      speedMult: 1.45,
+      durationMs: 20000,
+      cooldownMs: 60000,
+      desc: "+45% Tốc độ di chuyển trên sân đấu trong 20s!"
+    }
+  ];
+}
 
 export const OUTFIT_CATALOG = [
   {
@@ -1968,8 +2587,23 @@ class CharacterShopManager {
         power: 2,
         overdrive: 1,
         magnetNet: 1
-      }
+      },
+      winStreak: 0,
+      bestWinStreak: 0,
+      vipCoins: 10000,
+      vipTier: "VIP BRONZE",
+      vipExpiresAt: 0
     };
+  }
+
+  _computeVipTier(vipCoins = this.state?.vipCoins) {
+    const vc = Math.max(0, Number(vipCoins) || 0);
+    if (vc >= 1000000) return "VIP MAX 20 GOD";
+    if (vc >= 600000) return "VIP HUYỀN THOẠI";
+    if (vc >= 300000) return "VIP BẬC THẦY";
+    if (vc >= 100000) return "VIP GOLD";
+    if (vc >= 50000) return "VIP SILVER";
+    return "VIP BRONZE";
   }
 
   _computeProgressScore(s) {
@@ -2073,9 +2707,23 @@ class CharacterShopManager {
       ? Math.max(0, Math.round(Number(rawCoins)))
       : def.coins;
 
+    const rawVipCoins = parsed.vipCoins ?? rawInput.vipCoins ?? parsed.wallet?.vipCoins;
+    const vipCoins = Number.isFinite(Number(rawVipCoins))
+      ? Math.max(0, Math.round(Number(rawVipCoins)))
+      : def.vipCoins;
+    const vipTier = this._computeVipTier(vipCoins);
+
+    const rawVipExp = parsed.vipExpiresAt ?? rawInput.vipExpiresAt;
+    const vipExpiresAt = Number.isFinite(Number(rawVipExp))
+      ? Math.max(0, Math.round(Number(rawVipExp)))
+      : def.vipExpiresAt;
+
     const normalized = {
       ...def,
       coins,
+      vipCoins,
+      vipTier,
+      vipExpiresAt,
       selectedMapId:
         typeof (parsed.selectedMapId || rawInput.selectedMapId) === "string"
           ? parsed.selectedMapId || rawInput.selectedMapId
@@ -2159,7 +2807,9 @@ class CharacterShopManager {
         ...def.partnerAiUpgrades,
         ...(bUnit.aiUpgrades || {}),
         ...(parsed.partnerAiUpgrades || {})
-      }
+      },
+      winStreak: Math.max(0, parseInt(parsed.winStreak ?? rawInput.winStreak ?? def.winStreak, 10) || 0),
+      bestWinStreak: Math.max(0, parseInt(parsed.bestWinStreak ?? rawInput.bestWinStreak ?? def.bestWinStreak, 10) || 0)
     };
 
     const progScore = this._computeProgressScore(normalized);
@@ -2241,9 +2891,18 @@ class CharacterShopManager {
       mergedCoins = b.coins;
     }
 
+    let mergedVipCoins = Math.max(Number(a.vipCoins || 0), Number(b.vipCoins || 0));
+    if (mergedVipCoins === 0 && (a.vipCoins || b.vipCoins)) {
+      mergedVipCoins = a.vipCoins || b.vipCoins;
+    }
+    const mergedVipExpiresAt = Math.max(Number(a.vipExpiresAt || 0), Number(b.vipExpiresAt || 0));
+
     return {
       ...primary,
       coins: mergedCoins,
+      vipCoins: mergedVipCoins,
+      vipTier: this._computeVipTier(mergedVipCoins),
+      vipExpiresAt: mergedVipExpiresAt,
       updatedAtMs: Math.max(tsA, tsB),
       revision: Math.max(revA, revB),
       selectedMapId: primary.selectedMapId || secondary.selectedMapId || "melbourne_blue",
@@ -2254,7 +2913,9 @@ class CharacterShopManager {
       unlockedRackets: Array.from(new Set([...a.unlockedRackets, ...b.unlockedRackets])),
       unlockedStrikeVfx: Array.from(new Set([...a.unlockedStrikeVfx, ...b.unlockedStrikeVfx])),
       unlockedAccessories: Array.from(new Set([...a.unlockedAccessories, ...b.unlockedAccessories])),
-      partnerAiUpgrades: mergedPartnerAi
+      partnerAiUpgrades: mergedPartnerAi,
+      bestWinStreak: Math.max(Number(a.bestWinStreak || 0), Number(b.bestWinStreak || 0)),
+      winStreak: Number(primary.winStreak ?? secondary.winStreak ?? 0)
     };
   }
 
@@ -2272,6 +2933,8 @@ class CharacterShopManager {
       }
       const compact = {
         c: s.coins,
+        vc: Number(s.vipCoins || 0),
+        ve: Number(s.vipExpiresAt || 0),
         ts: s.updatedAtMs || Date.now(),
         rv: s.revision || 1,
         m: s.selectedMapId || "melbourne_blue",
@@ -2292,7 +2955,9 @@ class CharacterShopManager {
         ua: (s.unlockedAccessories || []).map((id) => ACCESSORY_CATALOG.findIndex((x) => x.id === id)).filter((i) => i >= 0),
         cu,
         sk: PLAYER_SPECIAL_SKILLS.map((k) => s.playerSpecialSkills?.[k.key] || 1),
-        ai: PARTNER_AI_UPGRADE_CONFIG.map((k) => s.partnerAiUpgrades?.[k.key] || 1)
+        ai: PARTNER_AI_UPGRADE_CONFIG.map((k) => s.partnerAiUpgrades?.[k.key] || 1),
+        ws: Number(s.winStreak || 0),
+        bws: Number(s.bestWinStreak || 0)
       };
       return btoa(encodeURIComponent(JSON.stringify(compact)));
     } catch {
@@ -2338,6 +3003,8 @@ class CharacterShopManager {
 
       return this._normalizeStateObject({
         coins: d.c,
+        vipCoins: d.vc != null ? Number(d.vc) : def.vipCoins,
+        vipExpiresAt: d.ve != null ? Number(d.ve) : def.vipExpiresAt,
         updatedAtMs: d.ts || 1000,
         revision: d.rv || 1,
         selectedMapId: d.m || "melbourne_blue",
@@ -2368,7 +3035,9 @@ class CharacterShopManager {
           : [],
         characterUpgrades,
         playerSpecialSkills,
-        partnerAiUpgrades
+        partnerAiUpgrades,
+        winStreak: Number(d.ws || 0),
+        bestWinStreak: Number(d.bws || 0)
       });
     } catch {
       return null;
@@ -2756,6 +3425,156 @@ class CharacterShopManager {
     return this.state.coins;
   }
 
+  addVipCoins(amount, reason = "") {
+    const add = Math.max(0, Math.round(Number(amount) || 0));
+    if (add <= 0) return this.state.vipCoins || 0;
+    this.state.vipCoins = (this.state.vipCoins || 0) + add;
+    this.state.vipTier = this._computeVipTier(this.state.vipCoins);
+    this._saveState();
+    return this.state.vipCoins;
+  }
+
+  getVipInfo() {
+    const vipCoins = Math.max(0, Number(this.state.vipCoins || 0));
+    const vipTier = this._computeVipTier(vipCoins);
+    const isSubActive = this.isVipSubscriptionActive();
+    return {
+      vipCoins,
+      vipTier,
+      isVipEligible: isSubActive || vipCoins > 0,
+      isSubActive,
+      remainingTime: this.getVipRemainingTimeFormatted(),
+      coinMultiplier: this.getVipCoinMultiplier()
+    };
+  }
+
+  isVipSubscriptionActive() {
+    const expiresAt = Number(this.state?.vipExpiresAt || 0);
+    const isSub = expiresAt > Date.now();
+    const hasGodTier = Number(this.state?.vipCoins || 0) >= 1000000;
+    return isSub || hasGodTier;
+  }
+
+  getVipCoinMultiplier() {
+    const expiresAt = Number(this.state?.vipExpiresAt || 0);
+    const diff = expiresAt - Date.now();
+    if (diff > 0) {
+      if (diff > 7 * 24 * 3600 * 1000) return 5.0; // Gói 1 tháng
+      if (diff > 24 * 3600 * 1000) return 3.0; // Gói 1 tuần
+      return 2.0; // Gói 1 ngày
+    }
+    const vipCoins = Number(this.state?.vipCoins || 0);
+    if (vipCoins >= 1000000) return 4.0;
+    if (vipCoins >= 300000) return 2.5;
+    if (vipCoins >= 50000) return 1.5;
+    return 1.0;
+  }
+
+  getVipRemainingTimeFormatted() {
+    const expiresAt = Number(this.state?.vipExpiresAt || 0);
+    const diff = expiresAt - Date.now();
+    if (diff <= 0) {
+      if (Number(this.state?.vipCoins || 0) >= 1000000) {
+        return "Vĩnh Viễn (VIP Level 20 God)";
+      }
+      return "Chưa Kích Hoạt";
+    }
+    const days = Math.floor(diff / (24 * 3600 * 1000));
+    const hours = Math.floor((diff % (24 * 3600 * 1000)) / (3600 * 1000));
+    const mins = Math.floor((diff % (3600 * 1000)) / (60 * 1000));
+    if (days > 0) return `${days} ngày ${hours} giờ`;
+    if (hours > 0) return `${hours} giờ ${mins} phút`;
+    return `${Math.max(1, mins)} phút`;
+  }
+
+  buyVipSubscription(packageId) {
+    const pkg = VIP_SUBSCRIPTION_PACKAGES.find((p) => p.id === packageId);
+    if (!pkg) return { ok: false, message: "Gói VIP không hợp lệ." };
+
+    const currentCoins = Number(this.state.coins || 0);
+    if (currentCoins < pkg.priceCoins) {
+      return {
+        ok: false,
+        message: `Bạn không đủ Xu. Cần ${pkg.priceCoins.toLocaleString("vi-VN")} Xu để kích hoạt ${pkg.name}!`
+      };
+    }
+
+    this.state.coins -= pkg.priceCoins;
+    const currentExpiry = Math.max(Date.now(), Number(this.state.vipExpiresAt || 0));
+    this.state.vipExpiresAt = currentExpiry + pkg.durationMs;
+    if (pkg.bonusVipCoins > 0) {
+      this.state.vipCoins = (this.state.vipCoins || 0) + pkg.bonusVipCoins;
+      this.state.vipTier = this._computeVipTier(this.state.vipCoins);
+    }
+    this._saveState();
+    return {
+      ok: true,
+      message: `Chúc mừng! Đã kích hoạt thành công ${pkg.name}! Nhận ngay +${pkg.bonusVipCoins.toLocaleString("vi-VN")} Xu VIP & nhân x${pkg.coinMultiplier} Xu thưởng!`
+    };
+  }
+
+  recordMatchWin() {
+    const prevStreak = Math.max(0, parseInt(this.state.winStreak || 0, 10));
+    const currentStreak = prevStreak + 1;
+    const prevBest = Math.max(0, parseInt(this.state.bestWinStreak || 0, 10));
+    const isNewBest = currentStreak > prevBest;
+    const bestStreak = Math.max(prevBest, currentStreak);
+
+    this.state.winStreak = currentStreak;
+    this.state.bestWinStreak = bestStreak;
+
+    // Consecutive streak bonus coin reward
+    let streakBonusCoins = 0;
+    if (currentStreak >= 10) streakBonusCoins = 600;
+    else if (currentStreak >= 5) streakBonusCoins = 300;
+    else if (currentStreak >= 3) streakBonusCoins = 150;
+    else if (currentStreak >= 2) streakBonusCoins = 75;
+
+    if (streakBonusCoins > 0) {
+      this.state.coins = (this.state.coins || 0) + streakBonusCoins;
+    }
+
+    this._saveState({ markUserChange: true });
+    this._notifyChange("winStreak", {
+      winStreak: currentStreak,
+      bestWinStreak: bestStreak,
+      isNewBest,
+      streakBonusCoins
+    });
+
+    return {
+      winStreak: currentStreak,
+      bestWinStreak: bestStreak,
+      isNewBest,
+      streakBonusCoins
+    };
+  }
+
+  recordMatchLoss() {
+    const bestStreak = Math.max(0, parseInt(this.state.bestWinStreak || 0, 10));
+    this.state.winStreak = 0;
+    this._saveState({ markUserChange: true });
+    this._notifyChange("winStreak", {
+      winStreak: 0,
+      bestWinStreak: bestStreak,
+      isNewBest: false,
+      streakBonusCoins: 0
+    });
+    return {
+      winStreak: 0,
+      bestWinStreak: bestStreak,
+      isNewBest: false,
+      streakBonusCoins: 0
+    };
+  }
+
+  getWinStreakStats() {
+    return {
+      winStreak: Math.max(0, parseInt(this.state.winStreak || 0, 10)),
+      bestWinStreak: Math.max(0, parseInt(this.state.bestWinStreak || 0, 10))
+    };
+  }
+
   getCharacterById(id) {
     return CHARACTER_ROSTER.find((c) => c.id === id) || CHARACTER_ROSTER[0];
   }
@@ -3079,14 +3898,27 @@ class CharacterShopManager {
       }
     }
 
-    if (this.state.coins < char.price) {
-      return {
-        ok: false,
-        message: `Cần ${char.price.toLocaleString("vi-VN")} Xu để mở khóa ${char.name}.`
-      };
+    if (char.isVip) {
+      const vipPrice = char.vipPrice || 200000;
+      const currentVip = this.state.vipCoins || 0;
+      if (currentVip < vipPrice) {
+        return {
+          ok: false,
+          message: `Cần ${vipPrice.toLocaleString("vi-VN")} Xu VIP để mở khóa Siêu Cầu Thủ VIP ${char.name}! (Hiện có: ${currentVip.toLocaleString("vi-VN")} VIP). Hãy thắng Bot Level 20 (X2) để nhận ngay 1.000.000 Xu VIP!`
+        };
+      }
+      this.state.vipCoins -= vipPrice;
+      this.state.vipTier = this._computeVipTier(this.state.vipCoins);
+    } else {
+      if (this.state.coins < char.price) {
+        return {
+          ok: false,
+          message: `Cần ${char.price.toLocaleString("vi-VN")} Xu để mở khóa ${char.name}.`
+        };
+      }
+      this.state.coins -= char.price;
     }
 
-    this.state.coins -= char.price;
     this.state.unlockedCharacters.push(charId);
     if (targetUnit === "partner") {
       this.state.partnerCharacterId = charId;
@@ -3098,7 +3930,7 @@ class CharacterShopManager {
     return {
       ok: true,
       action: "unlocked",
-      message: `Đã mở khóa ${char.name} và đưa vào đội hình!`
+      message: `Đã mở khóa siêu cầu thủ ${char.isVip ? "VIP " : ""}${char.name} và đưa vào đội hình!`
     };
   }
 
@@ -4903,9 +5735,17 @@ export class CharacterShopUI {
   }
 
   _renderCoinDisplays() {
-    const coins = this.shop.state.coins;
+    const coins = this.shop.state.coins || 0;
+    const vipCoins = this.shop.state.vipCoins || 0;
+    const vipTier = this.shop._computeVipTier(vipCoins);
     document.querySelectorAll("[data-shop-coins]").forEach((el) => {
       el.textContent = coins.toLocaleString("vi-VN");
+    });
+    document.querySelectorAll("[data-shop-vip-coins]").forEach((el) => {
+      el.textContent = vipCoins.toLocaleString("vi-VN");
+    });
+    document.querySelectorAll("[data-shop-vip-tier]").forEach((el) => {
+      el.textContent = vipTier;
     });
     this._refreshSaveVaultModalFields();
   }
@@ -6270,6 +7110,9 @@ export class CharacterShopUI {
 
     if (this.activeTab === "upgrades") {
       this._renderUpgradesAndSkillsTab(container);
+    } else if (this.activeTab === "vip") {
+      this.charCategoryFilter = "vip";
+      this._renderCharactersTab(container);
     } else if (this.activeTab === "characters") {
       this._renderCharactersTab(container);
     } else if (this.activeTab === "outfits") {
@@ -6511,30 +7354,33 @@ export class CharacterShopUI {
     const matchesFilter = (c) => {
       const r = (c.rarity || "").toUpperCase();
       if (activeFilter === "all") return true;
+      if (activeFilter === "vip") return !!c.isVip;
       if (activeFilter === "unlocked") return this.shop.state.unlockedCharacters.includes(c.id);
       if (activeFilter === "robot") return !!c.isRobot;
-      if (activeFilter === "mythic") return !!c.isPremium || r === "MYTHIC";
-      if (activeFilter === "master") return !c.isRobot && !c.isPremium && (r === "MASTER" || r === "EPIC" || r === "LEGENDARY");
-      if (activeFilter === "pro") return !c.isRobot && !c.isPremium && (r === "PRO" || r === "CLUB");
+      if (activeFilter === "mythic") return !c.isVip && (!!c.isPremium || r === "MYTHIC");
+      if (activeFilter === "master") return !c.isVip && !c.isRobot && !c.isPremium && (r === "MASTER" || r === "EPIC" || r === "LEGENDARY");
+      if (activeFilter === "pro") return !c.isVip && !c.isRobot && !c.isPremium && (r === "PRO" || r === "CLUB");
       return true;
     };
 
     const filteredRoster = CHARACTER_ROSTER.filter(matchesFilter);
 
+    const countVip = CHARACTER_ROSTER.filter((c) => !!c.isVip).length;
     const countPro = CHARACTER_ROSTER.filter((c) => {
       const r = (c.rarity || "").toUpperCase();
-      return !c.isRobot && !c.isPremium && (r === "PRO" || r === "CLUB");
+      return !c.isVip && !c.isRobot && !c.isPremium && (r === "PRO" || r === "CLUB");
     }).length;
     const countMaster = CHARACTER_ROSTER.filter((c) => {
       const r = (c.rarity || "").toUpperCase();
-      return !c.isRobot && !c.isPremium && (r === "MASTER" || r === "EPIC" || r === "LEGENDARY");
+      return !c.isVip && !c.isRobot && !c.isPremium && (r === "MASTER" || r === "EPIC" || r === "LEGENDARY");
     }).length;
     const countRobot = CHARACTER_ROSTER.filter((c) => !!c.isRobot).length;
-    const countMythic = CHARACTER_ROSTER.filter((c) => !!c.isPremium || (c.rarity || "").toUpperCase() === "MYTHIC").length;
+    const countMythic = CHARACTER_ROSTER.filter((c) => !c.isVip && (!!c.isPremium || (c.rarity || "").toUpperCase() === "MYTHIC")).length;
     const countUnlocked = this.shop.state.unlockedCharacters.length;
 
     const filterTabs = [
       { id: "all", label: `TẤT CẢ (${CHARACTER_ROSTER.length})` },
+      { id: "vip", label: `👑 VIP SIÊU CẤP (${countVip})` },
       { id: "pro", label: `PRO & CLB (${countPro})` },
       { id: "master", label: `CAO THỦ NGUYÊN TỐ (${countMaster})` },
       { id: "robot", label: `ROBOT & MECHA (${countRobot})` },
@@ -6557,16 +7403,73 @@ export class CharacterShopUI {
       )
       .join("");
 
+    const vipInfo = this.shop.getVipInfo();
+    const isVipSub = vipInfo.isSubActive;
+    const vipMultiplier = vipInfo.coinMultiplier;
+    const remainingTime = vipInfo.remainingTime;
+
+    const vipPackagesHtml = VIP_SUBSCRIPTION_PACKAGES.map((pkg) => {
+      const canBuy = coins >= pkg.priceCoins;
+      return `
+        <div class="vip-pkg-card ${canBuy ? "can-buy" : "locked"}" style="flex:1; min-width:210px; background:linear-gradient(145deg, rgba(30,27,75,0.7), rgba(15,23,42,0.85)); border:1px solid rgba(250,204,21,0.3); border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
+          <div class="vip-pkg-top" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="background:rgba(250,204,21,0.2); color:#facc15; font-size:10px; font-weight:800; padding:2px 8px; border-radius:4px; border:1px solid rgba(250,204,21,0.4);">${pkg.tag}</span>
+            <span style="color:#fde047; font-size:12px; font-weight:900;">${pkg.badge}</span>
+          </div>
+          <div>
+            <div style="font-size:14px; font-weight:900; color:#ffffff; margin-bottom:2px;">👑 ${pkg.name}</div>
+            <div style="font-size:11px; color:#cbd5e1; line-height:1.4;">${pkg.desc}</div>
+          </div>
+          <button type="button" class="vip-pkg-buy-btn" data-buy-vip-pkg="${pkg.id}"
+            style="width:100%; padding:8px 10px; border-radius:6px; font-size:11px; font-weight:900; letter-spacing:0.04em; border:none; cursor:${canBuy ? "pointer" : "not-allowed"}; background:${canBuy ? "linear-gradient(135deg, #f59e0b, #d97706)" : "rgba(100,116,139,0.3)"}; color:${canBuy ? "#0f172a" : "#64748b"}; transition:all 0.16s ease;">
+            ${canBuy ? `KÍCH HOẠT · ${pkg.badge}` : `THIẾU XU · ${pkg.badge}`}
+          </button>
+        </div>
+      `;
+    }).join("");
+
+    const vipBannerHtml = `
+      <div class="vip-membership-banner" style="background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(124,58,237,0.22), rgba(15,23,42,0.92)); border:1px solid rgba(250,204,21,0.45); border-radius:12px; padding:16px; margin-bottom:16px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; border-bottom:1px solid rgba(250,204,21,0.25); padding-bottom:10px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:20px;">👑</span>
+              <h3 style="font-size:16px; font-weight:900; color:#facc15; margin:0; letter-spacing:0.04em;">ĐẶC QUYỀN HỘI VIÊN VIP ARGON TENNIS</h3>
+              <span style="background:${isVipSub ? "#10b981" : "#475569"}; color:#ffffff; font-size:10px; font-weight:900; padding:3px 8px; border-radius:12px;">
+                ${isVipSub ? `ĐANG KÍCH HOẠT (${remainingTime})` : "CHƯA KÍCH HOẠT"}
+              </span>
+            </div>
+            <div style="font-size:11px; color:#e2e8f0; margin-top:4px;">
+              ⚡ Đặc quyền VIP: Nhân <strong>x${vipMultiplier} Xu thưởng</strong> mọi trận đấu · Mở quyền chiêu mộ 6 Siêu Cầu Thủ VIP OVR 200+ · Kích hoạt 3 Cơ chế Tối Thượng trong trận!
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(250,204,21,0.4); border-radius:8px; padding:6px 12px; text-align:right;">
+              <div style="font-size:9px; color:#94a3b8; font-weight:800;">XU VIP CỦA BẠN</div>
+              <div style="font-size:14px; font-weight:900; color:#facc15;">👑 ${(this.shop.state.vipCoins || 0).toLocaleString("vi-VN")} VIP</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          ${vipPackagesHtml}
+        </div>
+      </div>
+    `;
+
     const rosterHtml = filteredRoster
       .map((c, idx) => {
         const unlocked = this.shop.state.unlockedCharacters.includes(c.id);
         const isSelected = c.id === selectedId;
         const starTier = this.shop.getCharacterStarTier(c.id);
         const mods = this.shop.getEffectivePlayerModifiers(c.id);
-        const canAfford = coins >= c.price;
+        const isVip = !!c.isVip;
+        const vipCoins = this.shop.state.vipCoins || 0;
+        const canAfford = isVip ? vipCoins >= (c.vipPrice || 200000) : coins >= c.price;
         const r = (c.rarity || "").toUpperCase();
 
-        const rarityLabel = c.isPremium
+        const rarityLabel = isVip
+          ? "👑 SIÊU CẦU THỦ VIP"
+          : c.isPremium
           ? "MYTHIC PREMIUM"
           : c.isRobot
           ? "CYBER ROBOT"
@@ -6595,12 +7498,27 @@ export class CharacterShopUI {
           ? editUnit === "partner"
             ? "CHỌN LÀM BOT ĐỒNG ĐỘI"
             : "CHỌN VẬN ĐỘNG VIÊN"
+          : isVip
+          ? `MỞ KHÓA VIP · 👑 ${(c.vipPrice || 200000).toLocaleString("vi-VN")} VIP`
           : `CHIÊU MỘ · ${SVG_ICONS.coin("coin-svg-icon icon-xs")} ${c.price.toLocaleString("vi-VN")}`;
 
         const miiPortraitSvg = getMiiAvatarSVG(c.id, { uid: `shop-card-${c.id}` });
+        const mechs = getCharacterActiveMechanics(c.id);
+        const mechsHtml = `
+          <div class="shop-char-mechanics-strip" style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(148,163,184,0.2);">
+            <div style="font-size:9px; font-weight:800; color:#94a3b8; margin-bottom:4px; letter-spacing:0.04em;">CƠ CHẾ TRẬN ĐẤU (20S ACTIVE / 60S HỒI):</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+              ${mechs.map(m => `
+                <span style="font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; border:1px solid ${m.color}66; color:${m.color}; background:${m.color}18;" title="${m.desc}">
+                  ${m.icon} ${m.shortLabel}
+                </span>
+              `).join("")}
+            </div>
+          </div>
+        `;
 
         return `
-          <article class="shop-item-card char-card ${isSelected ? "active" : ""} ${!unlocked ? "locked-card" : ""}" style="--stagger-idx:${Math.min(idx, 12)}; --card-accent:${c.accentCss}">
+          <article class="shop-item-card char-card ${isVip ? "vip-card-theme" : ""} ${isSelected ? "active" : ""} ${!unlocked ? "locked-card" : ""}" style="--stagger-idx:${Math.min(idx, 12)}; --card-accent:${c.accentCss}">
             <div class="shop-card-visual-box char-visual-box">
               <div class="char-portrait-wrap">${miiPortraitSvg}</div>
               <div class="char-ovr-Lockup">
@@ -6613,6 +7531,7 @@ export class CharacterShopUI {
             <div class="shop-item-name">${c.name}</div>
             <div class="shop-item-role" style="color:${c.accentCss}; font-weight:800;">⚡ ${c.passiveName || c.title}</div>
             <div class="shop-item-desc">${c.passiveDesc}</div>
+            ${mechsHtml}
 
             <div class="shop-mini-bars">
               <div class="mini-bar-row"><span>TỐC</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${spdPct}%"></div></div><strong class="mini-bar-num">${spdVal}</strong></div>
@@ -6622,7 +7541,7 @@ export class CharacterShopUI {
             </div>
 
             <div class="shop-item-actions">
-              <button type="button" class="shop-action-btn ${isSelected ? "equipped" : unlocked ? "select" : canAfford ? "buy" : "buy locked"}"
+              <button type="button" class="shop-action-btn ${isSelected ? "equipped" : unlocked ? "select" : canAfford ? "buy" : "buy locked"} ${isVip ? "vip-buy-btn" : ""}"
                 data-char-action="${c.id}">
                 ${btnLabel}
               </button>
@@ -6634,6 +7553,8 @@ export class CharacterShopUI {
 
     container.innerHTML = `
       <div class="shop-section-block">
+        ${vipBannerHtml}
+
         <div class="shop-section-header">
           <div class="section-heading-group">
             <span class="section-index-tag">ROSTER // 30 PRO, ELEMENTAL, ROBOT &amp; MYTHIC LEGENDS</span>
@@ -6651,6 +7572,21 @@ export class CharacterShopUI {
         </div>
       </div>
     `;
+
+    container.querySelectorAll("[data-buy-vip-pkg]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const pkgId = btn.getAttribute("data-buy-vip-pkg");
+        const res = this.shop.buyVipSubscription(pkgId);
+        this._showToast(res.message);
+        if (res.ok) {
+          this._playSfx("unlock");
+          this._renderCoinDisplays();
+          this._renderCharactersTab(container);
+        } else {
+          this._playSfx("error");
+        }
+      });
+    });
 
     container.querySelectorAll("[data-char-filter]").forEach((btn) => {
       btn.addEventListener("click", () => {

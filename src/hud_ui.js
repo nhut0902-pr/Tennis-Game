@@ -136,11 +136,22 @@ export class HudUI {
   }
 
   _setDifficultySelection(diff, { notify = true } = {}) {
-    const target = ["casual", "pro", "1v1"].includes(diff) ? diff : "casual";
+    const validDiffs = ["de", "thap", "trung_binh", "cao", "sieu_cao", "cuc_cao", "x2", "casual", "pro", "1v1"];
+    const target = validDiffs.includes(diff) ? diff : "trung_binh";
     this.selectedDifficulty = target;
     document.querySelectorAll("#difficulty-mode-group .wii-green-choice").forEach(b => {
-      b.classList.toggle("selected", b.dataset.difficulty === target);
+      b.classList.toggle("selected", b.dataset.difficulty === target || (target === "casual" && b.dataset.difficulty === "trung_binh") || (target === "pro" && b.dataset.difficulty === "cao"));
     });
+
+    // Toggle X2 Boss Warning Banner
+    const x2Warning = document.getElementById("x2-boss-warning");
+    if (x2Warning) {
+      if (target === "x2") {
+        x2Warning.classList.remove("hidden");
+      } else {
+        x2Warning.classList.add("hidden");
+      }
+    }
 
     const matchLenSection = document.getElementById("match-length-section");
     if (target === "1v1") {
@@ -160,8 +171,13 @@ export class HudUI {
     const oppLabel = document.getElementById("setup-opponent-label");
     if (oppLabel && this.playerRole !== "p2") {
       if (target === "1v1") oppLabel.textContent = "Player 2";
-      else if (target === "pro") oppLabel.textContent = "Matt";
-      else oppLabel.textContent = "Club AI";
+      else if (target === "x2") oppLabel.textContent = "TRÙM BOT LV.20 (X2)";
+      else if (target === "cuc_cao") oppLabel.textContent = "Bot Lv.18 (Cực Cao)";
+      else if (target === "sieu_cao") oppLabel.textContent = "Bot Lv.16 (Siêu Cao)";
+      else if (target === "cao" || target === "pro") oppLabel.textContent = "Bot Lv.12 (Cao)";
+      else if (target === "thap") oppLabel.textContent = "Bot Lv.4 (Thấp)";
+      else if (target === "de") oppLabel.textContent = "Bot Lv.1 (Dễ)";
+      else oppLabel.textContent = "Bot Lv.8 (Trung Bình)";
     }
 
     this.updateOpponentPresence(this._lastRoomStatus || {});
@@ -343,6 +359,30 @@ export class HudUI {
         }
       });
     }
+
+    // Interactive Haptic Test Buttons
+    const bindTestHaptic = (btnId, kind, opts, msg) => {
+      const btn = document.getElementById(btnId);
+      const statusEl = document.getElementById("haptic-test-status");
+      if (!btn) return;
+      const doTest = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerPhysicalHardwareVibration(kind, opts);
+        if (statusEl) {
+          statusEl.innerHTML = `<span style="color:#38bdf8;font-weight:700">✓ Đang kích hoạt rung: ${msg}!</span> (Nếu không cảm nhận được, hãy bật gạt rung/chuông và mở âm lượng máy)`;
+          setTimeout(() => {
+            if (statusEl) statusEl.textContent = "💡 Chạm vào nút trên để cảm nhận độ rung thật trên máy. (Đảm bảo máy không bật chế độ Không làm phiền/Im lặng).";
+          }, 3200);
+        }
+      };
+      btn.addEventListener("touchstart", doTest, { passive: false });
+      btn.addEventListener("click", doTest);
+    };
+
+    bindTestHaptic("btn-test-vibrate-tap", "button_tap", { intensity: 1.0 }, "Chạm nhẹ (Tap)");
+    bindTestHaptic("btn-test-vibrate-hit", "hit", { intensity: 1.3, grade: "GOOD" }, "Đánh bóng tiếp xúc (Hit)");
+    bindTestHaptic("btn-test-vibrate-smash", "sweet_spot", { intensity: 1.6, grade: "PERFECT" }, "Smash uy lực (Power)");
 
     const setManualMovement = document.getElementById("setting-manual-movement");
     if (setManualMovement) {
@@ -651,15 +691,22 @@ export class HudUI {
     playerGames,
     opponentGames,
     coinsEarned = 0,
+    vipEarned = 0,
     isOnline = false,
     winnerName = null,
-    winnerRole = null
+    winnerRole = null,
+    winStreak = null,
+    bestWinStreak = null,
+    isNewBest = false,
+    streakBonusCoins = 0
   }) {
     if (!this.elVictoryModal) return;
     const banner = document.getElementById("victory-result-banner");
     const scoreText = document.getElementById("victory-match-score");
     const skillValue = document.getElementById("skill-rating-value");
     const coinText = document.getElementById("victory-coin-reward-text");
+    const vipRewardPill = document.getElementById("victory-vip-reward-pill");
+    const vipRewardText = document.getElementById("victory-vip-reward-text");
     const winnerTagEl = document.getElementById("victory-winner-tag");
     const winnerNameEl = document.getElementById("victory-winner-3d-name");
     const skillPlayerNameEl = document.getElementById("victory-skill-player-name");
@@ -679,6 +726,17 @@ export class HudUI {
     if (coinText) {
       const rewardAmt = coinsEarned > 0 ? coinsEarned : playerWon ? (isOnline ? 1400 : 950) : (isOnline ? 380 : 280);
       coinText.textContent = `+${rewardAmt.toLocaleString("vi-VN")} XU THƯỞNG${isOnline ? " ONLINE" : ""}`;
+    }
+
+    if (vipRewardPill) {
+      if (vipEarned > 0) {
+        vipRewardPill.classList.remove("hidden");
+        if (vipRewardText) {
+          vipRewardText.textContent = `+${vipEarned.toLocaleString("vi-VN")} XU VIP!`;
+        }
+      } else {
+        vipRewardPill.classList.add("hidden");
+      }
     }
 
     const shop = window.__argonTennis?.characterShop;
@@ -702,6 +760,57 @@ export class HudUI {
 
     const finalRating = playerWon ? 1165 : 1030;
     if (skillValue) skillValue.textContent = String(finalRating);
+
+    // Update Win Streak Counter & Personal Best
+    const streakCard = document.getElementById("victory-win-streak-card");
+    const streakCountEl = document.getElementById("victory-streak-count");
+    const bestStreakCountEl = document.getElementById("victory-best-streak-count");
+    const recordBadge = document.getElementById("victory-streak-record-badge");
+    const bonusMsgEl = document.getElementById("victory-streak-bonus-msg");
+
+    const curStreak = typeof winStreak === "number" ? winStreak : (shop?.getWinStreakStats()?.winStreak || 0);
+    const bestStreak = typeof bestWinStreak === "number" ? bestWinStreak : (shop?.getWinStreakStats()?.bestWinStreak || 0);
+
+    if (streakCountEl) streakCountEl.textContent = String(curStreak);
+    if (bestStreakCountEl) bestStreakCountEl.textContent = String(bestStreak);
+
+    if (streakCard) {
+      streakCard.classList.remove("streak-hot", "streak-fire", "streak-reset");
+      if (playerWon) {
+        if (curStreak >= 5) streakCard.classList.add("streak-fire");
+        else if (curStreak >= 3) streakCard.classList.add("streak-hot");
+      } else {
+        streakCard.classList.add("streak-reset");
+      }
+    }
+
+    if (recordBadge) {
+      if (isNewBest && curStreak > 1) {
+        recordBadge.classList.remove("hidden");
+      } else {
+        recordBadge.classList.add("hidden");
+      }
+    }
+
+    if (bonusMsgEl) {
+      if (playerWon) {
+        if (streakBonusCoins > 0) {
+          bonusMsgEl.innerHTML = `<span class="streak-bonus-highlight">+${streakBonusCoins} XU THƯỞNG CHUỖI THẮNG!</span> 🔥 Phong độ rực sáng!`;
+          bonusMsgEl.classList.remove("hidden");
+        } else if (curStreak >= 2) {
+          bonusMsgEl.textContent = `🔥 Đang có chuỗi ${curStreak} trận thắng liên tiếp!`;
+          bonusMsgEl.classList.remove("hidden");
+        } else {
+          bonusMsgEl.textContent = "Khởi đầu chuỗi thắng mới thành công!";
+          bonusMsgEl.classList.remove("hidden");
+        }
+      } else {
+        bonusMsgEl.textContent = bestStreak > 0
+          ? `Chuỗi thắng đã về 0. Kỷ lục cao nhất của bạn vẫn là ${bestStreak} trận!`
+          : "Đừng nản lòng, hãy bắt đầu chuỗi thắng đầu tiên!";
+        bonusMsgEl.classList.remove("hidden");
+      }
+    }
 
     document.querySelectorAll("[data-victory-pose]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-victory-pose") === "jump");
