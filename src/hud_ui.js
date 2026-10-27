@@ -429,11 +429,94 @@ export class HudUI {
       });
     }
 
+    const handleReturnToTitle = () => {
+      this.hideVictoryModal();
+      this.closePauseModal();
+      if (this.callbacks.onReturnTitle) {
+        this.callbacks.onReturnTitle();
+      } else {
+        this.showTitleModal();
+      }
+    };
+
     const btnReturnTitle = document.getElementById("btn-return-title");
     if (btnReturnTitle) {
-      btnReturnTitle.addEventListener("click", () => {
-        this.hideVictoryModal();
-        this.showTitleModal();
+      btnReturnTitle.addEventListener("click", handleReturnToTitle);
+    }
+
+    const btnVictoryTopExit = document.getElementById("btn-victory-top-exit");
+    if (btnVictoryTopExit) {
+      btnVictoryTopExit.addEventListener("click", handleReturnToTitle);
+    }
+
+    // In-game Pause & Exit controls
+    const btnHudPause = document.getElementById("btn-hud-pause");
+    const btnDockPause = document.getElementById("btn-dock-pause");
+    [btnHudPause, btnDockPause].forEach((btn) => {
+      if (btn) {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.openPauseModal();
+        });
+      }
+    });
+
+    const btnHudExit = document.getElementById("btn-hud-exit-match");
+    const btnDockExit = document.getElementById("btn-dock-exit");
+    const btnPauseExitTitle = document.getElementById("btn-pause-exit-title");
+    [btnHudExit, btnDockExit, btnPauseExitTitle].forEach((btn) => {
+      if (btn) {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleReturnToTitle();
+        });
+      }
+    });
+
+    const btnPauseResume = document.getElementById("btn-pause-resume");
+    if (btnPauseResume) {
+      btnPauseResume.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.closePauseModal();
+      });
+    }
+
+    const btnPauseRestart = document.getElementById("btn-pause-restart");
+    if (btnPauseRestart) {
+      btnPauseRestart.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.closePauseModal();
+        if (this.callbacks.onPlayAgain) this.callbacks.onPlayAgain();
+      });
+    }
+
+    const btnPauseCycleMap = document.getElementById("btn-pause-cycle-map");
+    if (btnPauseCycleMap) {
+      btnPauseCycleMap.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const nextMap = window.__argonTennis?.courtMapManager?.cycleMap?.(1);
+        const strip = document.getElementById("pause-match-info-strip");
+        if (strip && nextMap) {
+          strip.textContent = `Đã đổi sang sân: ${nextMap.name} (Thưởng x${nextMap.coinMultiplier || 1} Xu)`;
+        }
+      });
+    }
+
+    const btnPauseOpenShop = document.getElementById("btn-pause-open-shop");
+    if (btnPauseOpenShop) {
+      btnPauseOpenShop.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.closePauseModal();
+        window.__argonTennis?.characterShopUI?.openShop?.("vip");
+      });
+    }
+
+    const btnPauseControls = document.getElementById("btn-pause-controls");
+    if (btnPauseControls) {
+      btnPauseControls.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.closePauseModal();
+        this.openControlsModal();
       });
     }
 
@@ -448,14 +531,18 @@ export class HudUI {
     const btnVictoryAnalytics = document.getElementById("btn-victory-analytics");
     if (btnVictoryAnalytics) {
       btnVictoryAnalytics.addEventListener("click", () => {
-        const nextView = this._currentVictoryView === "analytics" ? "overview" : "analytics";
+        const nextView = this._currentVictoryView === "analytics" ? "all" : "analytics";
         this.switchVictoryView(nextView);
+        const analyticsEl = document.getElementById("victory-analytics-view");
+        if (analyticsEl) {
+          analyticsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
     }
 
     document.querySelectorAll("[data-victory-view-tab]").forEach((tabBtn) => {
       tabBtn.addEventListener("click", () => {
-        const target = tabBtn.getAttribute("data-victory-view-tab") || "overview";
+        const target = tabBtn.getAttribute("data-victory-view-tab") || "all";
         this.switchVictoryView(target);
       });
     });
@@ -482,6 +569,27 @@ export class HudUI {
         window.__argonTennis?.characterShopUI?.setVictoryPose?.(pose);
       });
     });
+  }
+
+  openPauseModal() {
+    const modal = document.getElementById("pause-game-modal");
+    if (!modal) return;
+    const engine = window.__argonTennis;
+    const strip = document.getElementById("pause-match-info-strip");
+    if (strip && engine) {
+      const mapName = engine.courtMapManager?.getSelectedMap?.()?.name || "Melbourne Blue";
+      const modeLabel = engine.isMultiplayer ? "Đấu Trực Tuyến 1v1" : "Đấu Với Máy (AI)";
+      const gamesLabel = `Set ${engine.matchState?.playerGames || 0} - ${engine.matchState?.opponentGames || 0}`;
+      strip.textContent = `${modeLabel} • Sân: ${mapName} • Tỷ số: ${gamesLabel}`;
+    }
+    modal.classList.remove("hidden");
+  }
+
+  closePauseModal() {
+    const modal = document.getElementById("pause-game-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+    }
   }
 
   openControlsModal(defaultTab = null) {
@@ -857,15 +965,22 @@ export class HudUI {
       p1Name: p1Label,
       p2Name: p2Label
     });
-    this.switchVictoryView("overview");
 
-    this._drawSkillGraph(playerWon);
     this.elVictoryModal.classList.remove("hidden");
+    this.switchVictoryView("all");
+    this._drawSkillGraph(playerWon);
+    if (this._lastRenderedAnalytics) {
+      this._drawPostMatchCourtHeatmap(this._lastRenderedAnalytics, this._heatmapFilter || "both");
+    }
 
     // Real hardware vibration for victory/defeat
     triggerPhysicalHardwareVibration(playerWon ? "match_won" : "point_lost", { intensity: playerWon ? 1.5 : 0.8 });
 
     setTimeout(() => {
+      this._drawSkillGraph(playerWon);
+      if (this._lastRenderedAnalytics) {
+        this._drawPostMatchCourtHeatmap(this._lastRenderedAnalytics, this._heatmapFilter || "both");
+      }
       window.__argonTennis?.characterShopUI?.startVictoryModal3D?.({
         playerWon,
         playerGames,
@@ -873,17 +988,21 @@ export class HudUI {
         coinsEarned,
         isOnline
       });
-    }, 30);
+    }, 45);
   }
 
-  switchVictoryView(viewName = "overview") {
-    this._currentVictoryView = viewName === "analytics" ? "analytics" : "overview";
+  switchVictoryView(viewName = "all") {
+    this._currentVictoryView =
+      viewName === "analytics" ? "analytics" : viewName === "overview" ? "overview" : "all";
     const overviewEl = document.getElementById("victory-overview-view");
     const analyticsEl = document.getElementById("victory-analytics-view");
     const btnAnalytics = document.getElementById("btn-victory-analytics");
 
-    if (overviewEl) overviewEl.classList.toggle("hidden", this._currentVictoryView !== "overview");
-    if (analyticsEl) analyticsEl.classList.toggle("hidden", this._currentVictoryView !== "analytics");
+    const showOverview = this._currentVictoryView === "overview" || this._currentVictoryView === "all";
+    const showAnalytics = this._currentVictoryView === "analytics" || this._currentVictoryView === "all";
+
+    if (overviewEl) overviewEl.classList.toggle("hidden", !showOverview);
+    if (analyticsEl) analyticsEl.classList.toggle("hidden", !showAnalytics);
 
     document.querySelectorAll("[data-victory-view-tab]").forEach((t) => {
       t.classList.toggle("active", t.getAttribute("data-victory-view-tab") === this._currentVictoryView);
@@ -892,11 +1011,11 @@ export class HudUI {
     if (btnAnalytics) {
       btnAnalytics.textContent =
         this._currentVictoryView === "analytics"
-          ? "Xem Bục Vinh Quang 3D"
-          : "Phân Tích & Heatmap 2 Bên";
+          ? "Xem Tất Cả Biểu Đồ"
+          : "Biểu Đồ & Heatmap";
     }
 
-    if (this._currentVictoryView === "analytics" && this._lastRenderedAnalytics) {
+    if (showAnalytics && this._lastRenderedAnalytics) {
       this._drawPostMatchCourtHeatmap(this._lastRenderedAnalytics, this._heatmapFilter || "both");
     }
   }

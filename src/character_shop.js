@@ -1380,33 +1380,36 @@ export const VIP_SUBSCRIPTION_PACKAGES = [
     id: "vip_1day",
     name: "VIP 1 Ngày",
     durationMs: 24 * 60 * 60 * 1000,
-    priceCoins: 100000,
-    bonusVipCoins: 5000,
+    priceCoins: 10000,
+    bonusVipCoins: 10000,
     coinMultiplier: 2.0,
-    badge: "100.000 XU",
-    tag: "GÓI NGÀY",
-    desc: "Kích hoạt VIP 24h. Nhân x2 Xu thưởng trận, tặng ngay +5.000 Xu VIP!"
+    badge: "10.000 XU",
+    tag: "GÓI NGÀY · X2 XU",
+    themeColor: "#38bdf8",
+    desc: "Kích hoạt VIP 24h. Nhân x2 Xu thưởng trận, tặng ngay +10.000 Xu VIP!"
   },
   {
     id: "vip_1week",
     name: "VIP 1 Tuần",
     durationMs: 7 * 24 * 60 * 60 * 1000,
-    priceCoins: 2000000,
+    priceCoins: 200000,
     bonusVipCoins: 150000,
     coinMultiplier: 3.0,
-    badge: "2.000.000 XU",
-    tag: "GÓI TUẦN",
+    badge: "200.000 XU",
+    tag: "GÓI TUẦN · X3 XU",
+    themeColor: "#facc15",
     desc: "Kích hoạt VIP 7 ngày. Nhân x3 Xu thưởng mọi trận, tặng ngay +150.000 Xu VIP!"
   },
   {
     id: "vip_1month",
     name: "VIP 1 Tháng",
     durationMs: 30 * 24 * 60 * 60 * 1000,
-    priceCoins: 2000000000,
+    priceCoins: 2000000,
     bonusVipCoins: 2000000,
     coinMultiplier: 5.0,
-    badge: "2.000.000.000 XU",
-    tag: "GÓI THÁNG",
+    badge: "2.000.000 XU",
+    tag: "GÓI THÁNG · X5 XU",
+    themeColor: "#f97316",
     desc: "Đặc quyền 30 ngày. Nhân x5 Xu thưởng, tặng ngay +2.000.000 Xu VIP, mở full cơ chế!"
   }
 ];
@@ -7411,18 +7414,34 @@ export class CharacterShopUI {
 
     const vipPackagesHtml = VIP_SUBSCRIPTION_PACKAGES.map((pkg) => {
       const canBuy = coins >= pkg.priceCoins;
+      const progressPct = Math.min(100, Math.max(6, Math.round((coins / pkg.priceCoins) * 100)));
+      const missingCoins = Math.max(0, pkg.priceCoins - coins);
       return `
-        <div class="vip-pkg-card ${canBuy ? "can-buy" : "locked"}">
+        <div class="vip-pkg-card ${canBuy ? "can-buy" : "locked"}" style="--pkg-color: ${pkg.themeColor || "#facc15"}">
           <div class="vip-pkg-top">
             <span class="vip-pkg-tag">${pkg.tag}</span>
             <span class="vip-pkg-price">${pkg.badge}</span>
           </div>
           <div class="vip-pkg-body">
-            <div class="vip-pkg-name">${pkg.name}</div>
+            <div class="vip-pkg-name-row">
+              <div class="vip-pkg-name">${pkg.name}</div>
+              <span class="vip-pkg-mult-chip">NHÂN X${pkg.coinMultiplier} XU</span>
+            </div>
             <div class="vip-pkg-desc">${pkg.desc}</div>
+            <div class="vip-pkg-progress-track" title="Tiến độ tích lũy Xu">
+              <div class="vip-pkg-progress-fill ${canBuy ? "ready" : ""}" style="width:${progressPct}%"></div>
+            </div>
           </div>
-          <button type="button" class="vip-pkg-buy-btn ${canBuy ? "ready" : "disabled"}" data-buy-vip-pkg="${pkg.id}">
-            ${canBuy ? `MUA GÓI · ${pkg.badge}` : `CẦN ${pkg.badge}`}
+          <button type="button" class="vip-pkg-buy-btn morph-game-btn ${canBuy ? "ready" : "disabled"}" data-buy-vip-pkg="${pkg.id}">
+            <span class="morph-btn-shimmer"></span>
+            <span class="morph-btn-content">
+              <span class="morph-btn-main">${canBuy ? `KÍCH HOẠT NGAY · ${pkg.badge}` : `CẦN ${pkg.badge}`}</span>
+              <span class="morph-btn-sub">${
+                canBuy
+                  ? `NHẬN LIỀN +${pkg.bonusVipCoins.toLocaleString("vi-VN")} XU VIP`
+                  : `CÒN THIẾU ${missingCoins.toLocaleString("vi-VN")} XU (${progressPct}%)`
+              }</span>
+            </span>
           </button>
         </div>
       `;
@@ -7540,14 +7559,24 @@ export class CharacterShopUI {
     container.querySelectorAll("[data-buy-vip-pkg]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const pkgId = btn.getAttribute("data-buy-vip-pkg");
+        const card = btn.closest(".vip-pkg-card");
+        btn.classList.remove("morph-activating", "morph-error-shake");
+        void btn.offsetWidth;
         const res = this.shop.buyVipSubscription(pkgId);
         this._showToast(res.message);
         if (res.ok) {
           this._playSfx("unlock");
+          btn.classList.add("morph-activating");
+          if (card) card.classList.add("card-morph-flash");
+          const mainText = btn.querySelector(".morph-btn-main");
+          if (mainText) mainText.textContent = "ĐÃ KÍCH HOẠT THÀNH CÔNG!";
           this._renderCoinDisplays();
-          this._renderVipTab(container);
+          setTimeout(() => {
+            this._renderVipTab(container);
+          }, 360);
         } else {
           this._playSfx("error");
+          btn.classList.add("morph-error-shake");
         }
       });
     });
@@ -7555,14 +7584,22 @@ export class CharacterShopUI {
     container.querySelectorAll("[data-char-action]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const cid = btn.getAttribute("data-char-action");
+        const card = btn.closest(".shop-item-card");
+        btn.classList.remove("morph-activating", "morph-error-shake");
+        void btn.offsetWidth;
         const res = this.shop.unlockOrSelectCharacter(cid, editUnit);
         this._showToast(res.message);
         if (res.ok) {
           this._playSfx(res.action === "unlocked" ? "unlock" : "equip");
+          btn.classList.add("morph-activating");
+          if (card) card.classList.add("card-morph-flash");
           this.triggerPreviewPose(res.action === "unlocked" ? "win" : "smash");
-          this._renderVipTab(container);
+          setTimeout(() => {
+            this._renderVipTab(container);
+          }, 260);
         } else {
           this._playSfx("error");
+          btn.classList.add("morph-error-shake");
         }
       });
     });

@@ -149,6 +149,16 @@
         <span class="game-bubble" data-slot="1"></span>
         <span class="game-bubble extra-slot hidden" data-slot="2"></span>
       </div>
+
+      <!-- In-Game Quick Pause & Exit Controls -->
+      <div id="in-game-match-controls" class="in-game-match-controls">
+        <button id="btn-hud-pause" type="button" class="hud-quick-ctrl-btn pause-btn morph-game-btn" title="Tạm dừng trận đấu (Phím P / Esc)">
+          <span>TẠM DỪNG</span>
+        </button>
+        <button id="btn-hud-exit-match" type="button" class="hud-quick-ctrl-btn exit-btn morph-game-btn" title="Thoát về màn hình chính">
+          <span>THOÁT</span>
+        </button>
+      </div>
     </header>
 
     <!-- Opponent Presence Tag -->
@@ -366,6 +376,12 @@
           <!-- Bottom Left Dock (Buttons Pill Row) -->
           <div id="bottom-left-dock" class="hud-corner-dock bottom-left-dock">
             <div class="dock-pill-row">
+              <button id="btn-dock-pause" class="hud-mini-btn highlight-pause" type="button" title="Tạm dừng trận đấu (P)">
+                <span>Dừng Game</span>
+              </button>
+              <button id="btn-dock-exit" class="hud-mini-btn highlight-exit" type="button" title="Thoát trận về sảnh chính">
+                <span>Thoát Trận</span>
+              </button>
               <button id="btn-hud-shop" class="hud-mini-btn highlight-shop" type="button" title="Mở Cửa Hàng & Nâng Cấp Nhân Vật 3D">
                 <span>Cửa Hàng 3D</span>
                 <span class="shop-coin-mini"><span data-shop-coins>1,850</span> XU</span>
@@ -538,13 +554,13 @@
       <div id="online-mode-options" class="mode-panel hidden">
         <div class="online-teaser-box">
           <div class="online-teaser-info">
-            <div class="online-teaser-title">CHẾ ĐỘ ĐỐI KHÁNG 1V1 TRỰC TUYẾN</div>
-            <div class="online-teaser-desc">Tạo phòng riêng gửi mã hoặc đường dẫn cho bạn bè, hoặc tham gia trực tiếp các phòng đang mở.</div>
+            <div class="online-teaser-title">CHẾ ĐỘ ĐỐI KHÁNG 1V1 TRỰC TUYẾN (TÙY CHỈNH SÂN, ĐIỂM &amp; XU THƯỞNG)</div>
+            <div class="online-teaser-desc">Hỗ trợ tự chọn Sân Đấu 3D (hoặc Auto Map ngẫu nhiên), tùy chỉnh điểm thắng từng Game và mức Xu thưởng tự chọn cho cả 2 đấu thủ.</div>
           </div>
         </div>
         <div class="wii-modal-actions">
-          <button id="btn-title-online" type="button" class="wii-ok-btn online-cta-btn">
-            <span>VÀO SẢNH CHỜ 1V1</span>
+          <button id="btn-title-online" type="button" class="wii-ok-btn online-cta-btn morph-game-btn">
+            <span>VÀO SẢNH TẠO PHÒNG &amp; CHỌN MAP 1V1</span>
           </button>
         </div>
       </div>
@@ -910,148 +926,219 @@
     </div>
   </div>
 
-  <!-- Victory / Match Results Modal with Live 3D Winner Celebration Stage -->
+  <!-- In-Game Pause & Quick Menu Modal -->
+  <div id="pause-game-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="pause-modal-title">
+    <div class="pause-modal-card">
+      <div class="pause-card-header">
+        <div>
+          <span class="pause-kicker">TRẬN ĐẤU ĐANG TẠM DỪNG</span>
+          <h2 id="pause-modal-title" class="pause-card-title">MENU TẠM DỪNG TRẬN ĐẤU</h2>
+        </div>
+        <span id="pause-score-badge" class="pause-score-badge">Tỷ Số: 0 - 0</span>
+      </div>
+
+      <div id="pause-match-info-strip" class="pause-match-info-strip">
+        Sân đấu hiện tại: Melbourne Blue • Thời tiết: Trời Quang
+      </div>
+
+      <div class="pause-actions-grid">
+        <button id="btn-pause-resume" type="button" class="pause-action-btn primary morph-game-btn">
+          <span class="morph-btn-shimmer"></span>
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">TIẾP TỤC TRẬN ĐẤU</span>
+            <span class="morph-btn-sub">Quay lại sân thi đấu ngay (Phím P / Esc)</span>
+          </span>
+        </button>
+
+        <button id="btn-pause-restart" type="button" class="pause-action-btn secondary morph-game-btn">
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">CHƠI LẠI TỪ ĐẦU</span>
+            <span class="morph-btn-sub">Đặt lại điểm số về 0 - 0 và giao bóng mới</span>
+          </span>
+        </button>
+
+        <button id="btn-pause-cycle-map" type="button" class="pause-action-btn secondary morph-game-btn">
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">ĐỔI SÂN ĐẤU 3D &amp; GIÓ BÃO</span>
+            <span class="morph-btn-sub">Chuyển sang Map tiếp theo ngay trong trận</span>
+          </span>
+        </button>
+
+        <button id="btn-pause-open-shop" type="button" class="pause-action-btn shop morph-game-btn">
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">PHÒNG THAY ĐỒ &amp; NÂNG CẤP 3D</span>
+            <span class="morph-btn-sub">Đổi cầu thủ, nâng cấp chỉ số &amp; gói VIP</span>
+          </span>
+        </button>
+
+        <button id="btn-pause-controls" type="button" class="pause-action-btn secondary morph-game-btn">
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">HƯỚNG DẪN &amp; CÀI ĐẶT ĐIỀU KHIỂN</span>
+            <span class="morph-btn-sub">Chỉnh tốc độ di chuyển, phím ảo &amp; rung</span>
+          </span>
+        </button>
+
+        <button id="btn-pause-exit-title" type="button" class="pause-action-btn danger morph-game-btn">
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">THOÁT VỀ MÀN HÌNH CHÍNH</span>
+            <span class="morph-btn-sub">Rời trận đấu hiện tại và về sảnh chọn chế độ</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory / Match Results Modal with Live 3D Winner Celebration Stage & Full Charts -->
   <div id="victory-modal" class="wii-modal-backdrop hidden">
-    <div id="victory-skill-card" class="wii-skill-card victory-pro-card">
+    <div id="victory-skill-card" class="wii-skill-card victory-pro-card victory-card-analytics-ready">
       <div class="victory-top-bar">
-        <div class="skill-card-header">
-          <svg class="ui-svg-icon stroke icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          <span>KẾT QUẢ &amp; PHÂN TÍCH TRẬN ĐẤU • PRO TOUR</span>
+        <div class="victory-header-row">
+          <div class="skill-card-header">
+            <span>KẾT QUẢ &amp; BIỂU ĐỒ PHÂN TÍCH TRẬN ĐẤU</span>
+          </div>
+          <button id="btn-victory-top-exit" type="button" class="victory-top-exit-btn morph-game-btn" title="Thoát ngay về màn hình chính">
+            <span>THOÁT VỀ SẢNH</span>
+          </button>
+        </div>
+
+        <div class="victory-rewards-strip">
+          <div id="victory-coin-reward-pill" class="victory-coin-reward-pill">
+            <span id="victory-coin-reward-text">+250 XU THƯỞNG</span>
+          </div>
+          <div id="victory-vip-reward-pill" class="victory-coin-reward-pill victory-vip-reward-pill hidden">
+            <span id="victory-vip-reward-text">+1.000.000 XU VIP!</span>
+          </div>
         </div>
 
         <div class="victory-view-tabs" role="tablist" aria-label="Chế độ xem sau trận đấu">
-          <button type="button" class="victory-view-tab active" data-victory-view-tab="overview">TỔNG QUAN &amp; BỤC VINH QUANG</button>
-          <button type="button" class="victory-view-tab" data-victory-view-tab="analytics">PHÂN TÍCH HEATMAP &amp; ĐỘ CHÍNH XÁC 2 BÊN</button>
-        </div>
-
-        <div id="victory-coin-reward-pill" class="victory-coin-reward-pill">
-          <svg class="coin-svg-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5"/><path d="M12 8v8M9.5 10.2h3.8a1.5 1.5 0 0 1 0 3H9.5h3.8a1.5 1.5 0 0 1 0 3H9.5" stroke="#fef08a" stroke-width="1.4" stroke-linecap="round"/></svg>
-          <span id="victory-coin-reward-text">+250 XU THƯỞNG</span>
-        </div>
-        <div id="victory-vip-reward-pill" class="victory-coin-reward-pill victory-vip-reward-pill hidden">
-          <span id="victory-vip-reward-text">+1.000.000 XU VIP!</span>
+          <button type="button" class="victory-view-tab active" data-victory-view-tab="all">TẤT CẢ: BỤC VINH QUANG &amp; BIỂU ĐỒ</button>
+          <button type="button" class="victory-view-tab" data-victory-view-tab="analytics">CHỈ XEM BIỂU ĐỒ HEATMAP &amp; ĐỘ CHÍNH XÁC</button>
+          <button type="button" class="victory-view-tab" data-victory-view-tab="overview">BỤC VINH QUANG 3D</button>
         </div>
       </div>
 
-      <!-- VIEW 1: Podium & Match Summary -->
-      <div id="victory-overview-view" class="skill-card-body victory-pro-body">
-        <!-- Live 3D Winning Character Celebration Podium -->
-        <div class="victory-3d-stage-wrap" id="victory-3d-stage-wrap">
-          <canvas id="victory-3d-canvas"></canvas>
-          <div class="victory-stage-badge">
-            <span id="victory-winner-tag" class="victory-winner-kicker">NHÀ VÔ ĐỊCH SÂN ĐẤU</span>
-            <strong id="victory-winner-3d-name" class="victory-winner-name">AMMAAR &amp; BOT MAYA</strong>
+      <div class="victory-scroll-content">
+        <!-- VIEW 1: Podium & Match Summary + Radar Skill Chart -->
+        <div id="victory-overview-view" class="skill-card-body victory-pro-body">
+          <!-- Live 3D Winning Character Celebration Podium -->
+          <div class="victory-3d-stage-wrap" id="victory-3d-stage-wrap">
+            <canvas id="victory-3d-canvas"></canvas>
+            <div class="victory-stage-badge">
+              <span id="victory-winner-tag" class="victory-winner-kicker">NHÀ VÔ ĐỊCH SÂN ĐẤU</span>
+              <strong id="victory-winner-3d-name" class="victory-winner-name">AMMAAR &amp; BOT MAYA</strong>
+            </div>
+            <div class="victory-pose-switcher" role="group" aria-label="Động tác ăn mừng chiến thắng">
+              <button type="button" class="victory-pose-btn active" data-victory-pose="jump">Nhảy Ăn Mừng</button>
+              <button type="button" class="victory-pose-btn" data-victory-pose="smash">Siêu Smash</button>
+              <button type="button" class="victory-pose-btn" data-victory-pose="spin">Xoay Vợt 360°</button>
+            </div>
           </div>
-          <div class="victory-pose-switcher" role="group" aria-label="Động tác ăn mừng chiến thắng">
-            <button type="button" class="victory-pose-btn active" data-victory-pose="jump">Nhảy Ăn Mừng</button>
-            <button type="button" class="victory-pose-btn" data-victory-pose="smash">Siêu Smash</button>
-            <button type="button" class="victory-pose-btn" data-victory-pose="spin">Xoay Vợt 360°</button>
+
+          <!-- Right Telemetry & Skill Rating Column -->
+          <div class="skill-mii-summary">
+            <div id="victory-result-banner" class="victory-result-banner">CHIẾN THẮNG!</div>
+            <div id="victory-match-score" class="victory-match-score">Tỷ Số Set: 2 - 0</div>
+
+            <!-- Win Streak Counter Badge & Personal Best -->
+            <div id="victory-win-streak-card" class="victory-win-streak-card" aria-label="Chuỗi thắng liên tiếp">
+              <div class="streak-header">
+                <div class="streak-title-wrap">
+                  <span class="streak-title">CHUỖI CHIẾN THẮNG</span>
+                </div>
+                <span id="victory-streak-record-badge" class="streak-record-badge hidden">KỶ LỤC MỚI</span>
+              </div>
+              <div class="streak-stats-row">
+                <div class="streak-stat-box current">
+                  <span class="streak-stat-label">Chuỗi Hiện Tại</span>
+                  <div class="streak-val-wrap">
+                    <span id="victory-streak-count" class="streak-stat-val">0</span>
+                    <span class="streak-stat-unit">Trận</span>
+                  </div>
+                </div>
+                <div class="streak-divider"></div>
+                <div class="streak-stat-box best">
+                  <span class="streak-stat-label">Kỷ Lục Cá Nhân</span>
+                  <div class="streak-val-wrap">
+                    <span id="victory-best-streak-count" class="streak-stat-val">0</span>
+                    <span class="streak-stat-unit">Trận</span>
+                  </div>
+                </div>
+              </div>
+              <div id="victory-streak-bonus-msg" class="streak-bonus-msg hidden"></div>
+            </div>
+
+            <div class="skill-score-pill">
+              <canvas id="victory-mii-icon" width="192" height="192"></canvas>
+              <div class="skill-score-meta">
+                <div class="skill-rating-number" id="skill-rating-value">1145</div>
+                <div id="victory-skill-player-name" class="skill-player-name">Ammaar (+125 Điểm Kỹ Năng)</div>
+              </div>
+            </div>
+
+            <div class="skill-chart-frame">
+              <div class="skill-chart-title">BIỂU ĐỒ CHỈ SỐ KỸ NĂNG (RADAR CHART)</div>
+              <div id="skill-graph-canvas" class="skill-radar-container"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Right Telemetry & Skill Rating Column -->
-        <div class="skill-mii-summary">
-          <div id="victory-result-banner" class="victory-result-banner">YOU WIN!</div>
-          <div id="victory-match-score" class="victory-match-score">Final Games: 2 - 0</div>
-
-          <!-- Win Streak Counter Badge & Personal Best -->
-          <div id="victory-win-streak-card" class="victory-win-streak-card" aria-label="Chuỗi thắng liên tiếp">
-            <div class="streak-header">
-              <div class="streak-title-wrap">
-                <span class="streak-title">CHUỖI CHIẾN THẮNG</span>
-              </div>
-              <span id="victory-streak-record-badge" class="streak-record-badge hidden">KỶ LỤC MỚI</span>
-            </div>
-            <div class="streak-stats-row">
-              <div class="streak-stat-box current">
-                <span class="streak-stat-label">Chuỗi Hiện Tại</span>
-                <div class="streak-val-wrap">
-                  <span id="victory-streak-count" class="streak-stat-val">0</span>
-                  <span class="streak-stat-unit">Trận</span>
+        <!-- VIEW 2: Post-Match Analytics (Ball Placement Heatmap & Swing Accuracy Percentages for Both Players) -->
+        <div id="victory-analytics-view" class="post-match-analytics-view" aria-label="Phân tích sau trận đấu: Bản đồ nhiệt điểm rơi bóng và tỷ lệ chính xác vung vợt 2 bên">
+          <div class="pma-grid">
+            <!-- Left Column: Full-Court 2D Ball Placement Heatmap -->
+            <div class="pma-card pma-heatmap-card">
+              <div class="pma-card-head">
+                <div>
+                  <span class="pma-kicker">BẢN ĐỒ NHIỆT ĐIỂM RƠI BÓNG (BALL PLACEMENT HEATMAP)</span>
+                  <h3 class="pma-title">PHÂN BỐ ĐIỂM RƠI TRÊN TOÀN MẶT SÂN</h3>
+                </div>
+                <div class="pma-filter-group" role="group" aria-label="Lọc người chơi trên bản đồ nhiệt">
+                  <button type="button" class="pma-filter-btn active" data-heatmap-filter="both">CẢ 2 BÊN</button>
+                  <button type="button" class="pma-filter-btn" data-heatmap-filter="player">ĐỘI BẠN (P1)</button>
+                  <button type="button" class="pma-filter-btn" data-heatmap-filter="opponent">ĐỐI THỦ (P2)</button>
                 </div>
               </div>
-              <div class="streak-divider"></div>
-              <div class="streak-stat-box best">
-                <span class="streak-stat-label">Kỷ Lục Cá Nhân</span>
-                <div class="streak-val-wrap">
-                  <span id="victory-best-streak-count" class="streak-stat-val">0</span>
-                  <span class="streak-stat-unit">Trận</span>
+
+              <div class="pma-court-canvas-wrap">
+                <canvas id="post-match-heatmap-canvas" width="380" height="520"></canvas>
+                <div class="pma-court-legend">
+                  <span class="pma-legend-item"><i class="pma-dot p1-dot"></i>Đội Bạn (P1 Đánh Sang)</span>
+                  <span class="pma-legend-item"><i class="pma-dot p2-dot"></i>Đối Thủ (P2 Đánh Sang)</span>
+                  <span class="pma-legend-item"><i class="pma-dot power-dot"></i>Power / Smash</span>
                 </div>
               </div>
-            </div>
-            <div id="victory-streak-bonus-msg" class="streak-bonus-msg hidden"></div>
-          </div>
 
-          <div class="skill-score-pill">
-            <canvas id="victory-mii-icon" width="192" height="192"></canvas>
-            <div class="skill-score-meta">
-              <div class="skill-rating-number" id="skill-rating-value">1145</div>
-              <div id="victory-skill-player-name" class="skill-player-name">Ammaar (+125 Điểm Kỹ Năng)</div>
-            </div>
-          </div>
-
-          <div class="skill-chart-frame">
-            <div id="skill-graph-canvas" class="skill-radar-container"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- VIEW 2: Post-Match Analytics (Ball Placement Heatmap & Swing Accuracy Percentages for Both Players) -->
-      <div id="victory-analytics-view" class="post-match-analytics-view hidden" aria-label="Phân tích sau trận đấu: Bản đồ nhiệt điểm rơi bóng và tỷ lệ chính xác vung vợt 2 bên">
-        <div class="pma-grid">
-          <!-- Left Column: Full-Court 2D Ball Placement Heatmap -->
-          <div class="pma-card pma-heatmap-card">
-            <div class="pma-card-head">
-              <div>
-                <span class="pma-kicker">BẢN ĐỒ NHIỆT ĐIỂM RƠI BÓNG (BALL PLACEMENT HEATMAP)</span>
-                <h3 class="pma-title">PHÂN BỐ ĐIỂM RƠI TRÊN TOÀN MẶT SÂN</h3>
-              </div>
-              <div class="pma-filter-group" role="group" aria-label="Lọc người chơi trên bản đồ nhiệt">
-                <button type="button" class="pma-filter-btn active" data-heatmap-filter="both">CẢ 2 BÊN</button>
-                <button type="button" class="pma-filter-btn" data-heatmap-filter="player">ĐỘI BẠN (P1)</button>
-                <button type="button" class="pma-filter-btn" data-heatmap-filter="opponent">ĐỐI THỦ (P2)</button>
-              </div>
+              <div id="pma-zone-breakdown" class="pma-zone-breakdown"></div>
             </div>
 
-            <div class="pma-court-canvas-wrap">
-              <canvas id="post-match-heatmap-canvas" width="380" height="520"></canvas>
-              <div class="pma-court-legend">
-                <span class="pma-legend-item"><i class="pma-dot p1-dot"></i>Đội Bạn (P1 Đánh Sang)</span>
-                <span class="pma-legend-item"><i class="pma-dot p2-dot"></i>Đối Thủ (P2 Đánh Sang)</span>
-                <span class="pma-legend-item"><i class="pma-dot power-dot"></i>Power / Smash</span>
+            <!-- Right Column: Swing Accuracy Percentages for Both Players & Growth Insights -->
+            <div class="pma-card pma-accuracy-card">
+              <div class="pma-card-head">
+                <div>
+                  <span class="pma-kicker">ĐỘ CHÍNH XÁC VUNG VỢT (SWING TIMING ACCURACY %)</span>
+                  <h3 class="pma-title">SO SÁNH HIỆU SUẤT ĐÁNH BÓNG 2 TAY VỢT</h3>
+                </div>
+                <span id="pma-rally-summary-badge" class="pma-summary-badge">TỔNG CHẠM: 0</span>
               </div>
-            </div>
 
-            <div id="pma-zone-breakdown" class="pma-zone-breakdown"></div>
-          </div>
+              <div id="pma-players-accuracy-comparison" class="pma-players-comparison"></div>
 
-          <!-- Right Column: Swing Accuracy Percentages for Both Players & Growth Insights -->
-          <div class="pma-card pma-accuracy-card">
-            <div class="pma-card-head">
-              <div>
-                <span class="pma-kicker">ĐỘ CHÍNH XÁC VUNG VỢT (SWING TIMING ACCURACY %)</span>
-                <h3 class="pma-title">SO SÁNH HIỆU SUẤT ĐÁNH BÓNG 2 TAY VỢT</h3>
+              <div class="pma-growth-card">
+                <div class="pma-growth-header">
+                  <span class="pma-kicker">PHÂN TÍCH PHÁT TRIỂN KỸ NĂNG (PLAYER GROWTH INSIGHTS)</span>
+                </div>
+                <div id="pma-growth-insights-list" class="pma-growth-list"></div>
               </div>
-              <span id="pma-rally-summary-badge" class="pma-summary-badge">TỔNG CHẠM: 0</span>
-            </div>
-
-            <div id="pma-players-accuracy-comparison" class="pma-players-comparison"></div>
-
-            <div class="pma-growth-card">
-              <div class="pma-growth-header">
-                <span class="pma-kicker">PHÂN TÍCH PHÁT TRIỂN KỸ NĂNG (PLAYER GROWTH INSIGHTS)</span>
-              </div>
-              <div id="pma-growth-insights-list" class="pma-growth-list"></div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="skill-card-footer victory-pro-footer">
-        <button id="btn-play-again" type="button" class="wii-footer-btn primary">Chơi lại (Play Again)</button>
-        <button id="btn-victory-analytics" type="button" class="wii-footer-btn highlight-analytics-btn">Phân Tích &amp; Heatmap 2 Bên</button>
-        <button id="btn-victory-open-shop" type="button" class="wii-footer-btn shop-btn">Cửa Hàng 3D</button>
-        <button id="btn-return-title" type="button" class="wii-footer-btn secondary">Menu chính</button>
+        <button id="btn-play-again" type="button" class="wii-footer-btn primary morph-game-btn">Chơi Lại</button>
+        <button id="btn-victory-analytics" type="button" class="wii-footer-btn highlight-analytics-btn morph-game-btn">Biểu Đồ Heatmap</button>
+        <button id="btn-victory-open-shop" type="button" class="wii-footer-btn shop-btn morph-game-btn">Cửa Hàng 3D</button>
+        <button id="btn-return-title" type="button" class="wii-footer-btn secondary exit-title-cta morph-game-btn">Thoát Về Sảnh</button>
       </div>
     </div>
   </div>
@@ -1097,17 +1184,77 @@
           <!-- Card 1: Tạo phòng mới (Host) -->
           <div class="lobby-panel host-panel">
             <div class="panel-header">
-              <h3 class="panel-title">TẠO PHÒNG & LINK CHIA SẺ</h3>
+              <h3 class="panel-title">TẠO PHÒNG ĐẤU 1V1 TÙY CHỈNH</h3>
             </div>
-            <p class="panel-desc">Sao chép đường dẫn chia sẻ hoặc mã phòng bên dưới gửi cho bạn bè, sau đó nhấn Tạo phòng để vào sảnh đợi đối thủ.</p>
+            <p class="panel-desc">Tùy chọn Sân Đấu (hoặc Auto Map), thể thức điểm số và mức Xu thưởng trận trước khi tạo phòng.</p>
+
+            <div class="lobby-custom-grid-2col">
+              <div class="panel-form-group">
+                <label for="host-map-select" class="panel-label">CHỌN SÂN ĐẤU (MAP / AUTO)</label>
+                <select id="host-map-select" class="lobby-select">
+                  <option value="auto" selected>Tự Động Chọn Ngẫu Nhiên (Auto Map)</option>
+                  <option value="melbourne_blue">Melbourne Grand Slam (Sân cứng xanh)</option>
+                  <option value="gale_canyon">Thung Lũng Gió Lốc (Gió tạt • +180% Xu)</option>
+                  <option value="storm_island">Đảo Bão Tố Sấm Sét (Mưa bão • +280% Xu)</option>
+                  <option value="typhoon_arena">Tâm Siêu Bão Cấp 12 (Siêu bão • +450% Xu)</option>
+                  <option value="roland_clay">Paris Đất Nện Đỏ (Sân đất nện)</option>
+                  <option value="wimbledon_grass">London Sân Cỏ Hoàng Gia (+10% Xu)</option>
+                  <option value="cyber_neon">Sân Cyber Neon 2099 (+25% Xu)</option>
+                  <option value="tokyo_sakura">Tokyo Hoa Anh Đào Đêm (+20% Xu)</option>
+                  <option value="golden_finals">Cung Điện Hoàng Kim Chung Kết (+35% Xu)</option>
+                  <option value="arctic_glacier">Đấu Trường Băng Cực Bắc (+30% Xu)</option>
+                  <option value="volcano_inferno">Hỏa Diệm Sơn Dung Nham (+40% Xu)</option>
+                </select>
+              </div>
+
+              <div class="panel-form-group">
+                <label for="host-weather-select" class="panel-label">HIỆU ỨNG THỜI TIẾT GIÓ BÃO</label>
+                <select id="host-weather-select" class="lobby-select">
+                  <option value="auto" selected>Theo Map / Tự Động (Auto)</option>
+                  <option value="calm">Trời Quang (Chuẩn giải đấu)</option>
+                  <option value="breeze">Gió Lốc Xoáy (+50% Xu)</option>
+                  <option value="storm">Mưa Bão Sấm Sét (+120% Xu)</option>
+                  <option value="typhoon">Siêu Bão Cấp 12 (+250% Xu)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="lobby-custom-grid-2col">
+              <div class="panel-form-group">
+                <label for="host-games-select" class="panel-label">SỐ GAME THẮNG SET</label>
+                <select id="host-games-select" class="lobby-select">
+                  <option value="1">1 Game (Đánh nhanh)</option>
+                  <option value="2" selected>Best of 3 (Thắng 2 Game)</option>
+                  <option value="3">Best of 5 (Thắng 3 Game)</option>
+                  <option value="5">Siêu Giải Đấu (Thắng 5 Game)</option>
+                </select>
+              </div>
+
+              <div class="panel-form-group">
+                <label for="host-points-select" class="panel-label">ĐIỂM THẮNG MỖI GAME</label>
+                <select id="host-points-select" class="lobby-select">
+                  <option value="4" selected>Chuẩn Tennis (15-30-40 / Deuce)</option>
+                  <option value="3">Đánh Nhanh (Chạm 3 Điểm)</option>
+                  <option value="5">Chạm 5 Điểm / Game</option>
+                  <option value="7">Tie-Break 7 Điểm / Game</option>
+                  <option value="10">Siêu Tie-Break 10 Điểm</option>
+                </select>
+              </div>
+            </div>
 
             <div class="panel-form-group">
-              <label for="host-games-select" class="panel-label">THỂ THỨC TRẬN ĐẤU</label>
-              <select id="host-games-select" class="lobby-select">
-                <option value="1">1 Game (Đánh nhanh)</option>
-                <option value="2" selected>Best of 3 (Thắng 2 game)</option>
-                <option value="3">Best of 5 (Thắng 3 game)</option>
-              </select>
+              <label for="host-custom-coins" class="panel-label">XU THƯỞNG TRẬN TÙY CHỈNH (TRAO CHO NGƯỜI THẮNG)</label>
+              <div class="lobby-coin-presets-row">
+                <button type="button" class="lobby-coin-chip" data-coin-preset="10000">10.000 Xu</button>
+                <button type="button" class="lobby-coin-chip active" data-coin-preset="50000">50.000 Xu</button>
+                <button type="button" class="lobby-coin-chip" data-coin-preset="200000">200.000 Xu</button>
+                <button type="button" class="lobby-coin-chip" data-coin-preset="500000">500.000 Xu</button>
+                <button type="button" class="lobby-coin-chip" data-coin-preset="1000000">1.000.000 Xu</button>
+              </div>
+              <div class="waiting-input-row">
+                <input type="number" id="host-custom-coins" class="waiting-clean-input" value="50000" min="1000" max="100000000" step="5000" placeholder="Nhập số Xu thưởng..." />
+                <span class="custom-coin-unit-tag">XU THƯỞNG</span>
+              </div>
             </div>
 
             <div class="panel-form-group">
@@ -1121,7 +1268,7 @@
             </div>
 
             <div class="panel-form-group">
-              <label for="host-preview-link" class="panel-label">LINK CHIA SẺ MỜI BẠN BÈ (CLICK ĐỂ CHÉP & MỞ PHÒNG)</label>
+              <label for="host-preview-link" class="panel-label">LINK CHIA SẺ MỜI BẠN BÈ (CLICK ĐỂ CHÉP &amp; MỞ PHÒNG)</label>
               <div class="waiting-input-row">
                 <input type="text" id="host-preview-link" class="waiting-clean-input link-input" readonly value="https://..." />
                 <button type="button" id="btn-copy-browse-link" class="btn-clean-copy copy-link-primary">
@@ -1130,8 +1277,9 @@
               </div>
             </div>
 
-            <button id="btn-host-create" type="button" class="lobby-action-btn primary">
-              <span>TẠO PHÒNG & VÀO SẢNH CHỜ</span>
+            <button id="btn-host-create" type="button" class="lobby-action-btn primary morph-game-btn">
+              <span class="morph-btn-shimmer"></span>
+              <span>TẠO PHÒNG &amp; VÀO SẢNH CHỜ</span>
             </button>
           </div>
 
@@ -1144,7 +1292,7 @@
 
             <div class="join-input-group">
               <input type="text" id="join-code-input" class="lobby-text-input uppercase" placeholder="Nhập mã phòng hoặc dán link..." maxlength="256" />
-              <button id="btn-join-room" type="button" class="lobby-action-btn secondary">
+              <button id="btn-join-room" type="button" class="lobby-action-btn secondary morph-game-btn">
                 <span>VÀO PHÒNG</span>
               </button>
             </div>
@@ -1184,6 +1332,9 @@
           <div class="waiting-header-left">
             <span class="waiting-header-title">PHÒNG CHỜ TRƯỚC TRẬN ĐẤU</span>
             <span id="waiting-games-badge" class="waiting-format-tag">Best of 3</span>
+            <span id="waiting-points-badge" class="waiting-format-tag">Chuẩn Tennis</span>
+            <span id="waiting-map-badge" class="waiting-format-tag map-tag">Auto Map</span>
+            <span id="waiting-coins-badge" class="waiting-format-tag coin-tag">Thưởng: 50.000 Xu</span>
             <span id="waiting-expiry-badge" class="waiting-expiry-tag">Tự xóa nếu trống sau: 05:00</span>
           </div>
           <div class="waiting-role-tag" id="waiting-my-role-badge">Vai trò: Chủ phòng (P1)</div>

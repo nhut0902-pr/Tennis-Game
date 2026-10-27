@@ -304,7 +304,15 @@ export class OnlineMatchmaker {
   /**
    * Tạo phòng đấu 1v1 mới (hoặc tự động vào phòng nếu người dùng nhập mã phòng đang chờ có sẵn)
    */
-  async createRoom({ customCode = "", hostName = "", gamesToWin = 1 } = {}) {
+  async createRoom({
+    customCode = "",
+    hostName = "",
+    gamesToWin = 1,
+    pointsToWinGame = 4,
+    mapId = "auto",
+    weatherId = "auto",
+    customCoinReward = 50000
+  } = {}) {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       throw new Error("Không có kết nối mạng. Vui lòng chuyển sang Chơi Offline với Máy (AI).");
     }
@@ -343,6 +351,27 @@ export class OnlineMatchmaker {
       this.hostLoadout = myLoadout;
       this.guestLoadout = null;
 
+      const availableMapIds = [
+        "melbourne_blue",
+        "gale_canyon",
+        "storm_island",
+        "typhoon_arena",
+        "roland_clay",
+        "wimbledon_grass",
+        "cyber_neon",
+        "tokyo_sakura",
+        "golden_finals",
+        "arctic_glacier",
+        "volcano_inferno"
+      ];
+      const mapSelectionMode = mapId === "auto" || !mapId ? "auto" : "manual";
+      const resolvedMapId =
+        mapSelectionMode === "auto"
+          ? availableMapIds[Math.floor(Math.random() * availableMapIds.length)]
+          : mapId;
+      const safeCoinReward = Math.max(1000, Math.min(100000000, Number(customCoinReward || 50000)));
+      const safePointsToWin = Number(pointsToWinGame || 4);
+
       const initialData = {
         roomId,
         hostId: user.uid,
@@ -353,6 +382,11 @@ export class OnlineMatchmaker {
         guestLoadout: null,
         status: "waiting", // waiting | playing | finished
         gamesToWin: Number(gamesToWin || 1),
+        pointsToWinGame: safePointsToWin,
+        mapId: resolvedMapId,
+        mapSelectionMode,
+        weatherId: weatherId || "auto",
+        customCoinReward: safeCoinReward,
         activeUserCount: 1,
         createdAtMs: now,
         lastActiveMs: now,
@@ -388,7 +422,12 @@ export class OnlineMatchmaker {
         hostName: finalHostName,
         hostLoadout: myLoadout,
         guestLoadout: null,
-        gamesToWin: Number(gamesToWin || 1)
+        gamesToWin: Number(gamesToWin || 1),
+        pointsToWinGame: safePointsToWin,
+        mapId: resolvedMapId,
+        mapSelectionMode,
+        weatherId: weatherId || "auto",
+        customCoinReward: safeCoinReward
       };
     } catch (err) {
       handleFirestoreError(err, `tạo phòng đấu [${roomId}]`, { roomId });
@@ -467,7 +506,12 @@ export class OnlineMatchmaker {
         guestName: finalGuestName,
         hostLoadout: data.hostLoadout || null,
         guestLoadout: myLoadout,
-        gamesToWin: data.gamesToWin
+        gamesToWin: data.gamesToWin || 1,
+        pointsToWinGame: data.pointsToWinGame || 4,
+        mapId: data.mapId || "melbourne_blue",
+        mapSelectionMode: data.mapSelectionMode || "manual",
+        weatherId: data.weatherId || "auto",
+        customCoinReward: Number(data.customCoinReward || 50000)
       };
     } catch (err) {
       handleFirestoreError(err, `tham gia phòng [${roomId}]`, { roomId });
@@ -574,6 +618,11 @@ export class OnlineMatchmaker {
               roomId,
               role: this.isHost ? "p1" : "p2",
               gamesToWin: data.gamesToWin || 1,
+              pointsToWinGame: data.pointsToWinGame || 4,
+              mapId: data.mapId || "melbourne_blue",
+              mapSelectionMode: data.mapSelectionMode || "manual",
+              weatherId: data.weatherId || "auto",
+              customCoinReward: Number(data.customCoinReward || 50000),
               isHost: this.isHost,
               hostName: data.hostName || "Player 1",
               guestName: data.guestName || "Player 2",

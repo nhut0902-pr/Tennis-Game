@@ -56,7 +56,11 @@ export class FirebaseLobbyUI {
 
     // Host room form elements
     this.btnHostCreate = document.getElementById("btn-host-create");
+    this.hostMapSelect = document.getElementById("host-map-select");
+    this.hostWeatherSelect = document.getElementById("host-weather-select");
     this.hostGamesSelect = document.getElementById("host-games-select");
+    this.hostPointsSelect = document.getElementById("host-points-select");
+    this.hostCustomCoinsInput = document.getElementById("host-custom-coins");
     this.hostCustomCodeInput = document.getElementById("host-custom-code");
     this.hostPreviewLinkInput = document.getElementById("host-preview-link");
     this.btnCopyBrowseCode = document.getElementById("btn-copy-browse-code");
@@ -71,6 +75,9 @@ export class FirebaseLobbyUI {
 
     // Dedicated Waiting Room Elements
     this.waitingGamesBadge = document.getElementById("waiting-games-badge");
+    this.waitingPointsBadge = document.getElementById("waiting-points-badge");
+    this.waitingMapBadge = document.getElementById("waiting-map-badge");
+    this.waitingCoinsBadge = document.getElementById("waiting-coins-badge");
     this.waitingMyRoleBadge = document.getElementById("waiting-my-role-badge");
     this.waitingExpiryBadge = document.getElementById("waiting-expiry-badge");
 
@@ -257,6 +264,21 @@ export class FirebaseLobbyUI {
           } catch {}
           await this._handleHostRoom();
         }
+      });
+    }
+
+    // Coin reward preset chips
+    if (this.modal) {
+      this.modal.querySelectorAll(".lobby-coin-chip[data-coin-preset]").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const val = parseInt(chip.dataset.coinPreset || "50000", 10);
+          if (this.hostCustomCoinsInput) {
+            this.hostCustomCoinsInput.value = String(val);
+          }
+          this.modal.querySelectorAll(".lobby-coin-chip[data-coin-preset]").forEach((c) => {
+            c.classList.toggle("active", c === chip);
+          });
+        });
       });
     }
 
@@ -518,7 +540,44 @@ export class FirebaseLobbyUI {
     this._ensureBrowseRoomCode();
   }
 
-  showWaitingRoomView({ roomId, isHost, hostName, guestName, hostLoadout = null, guestLoadout = null, gamesToWin }) {
+  _formatMapName(mapId, mapSelectionMode = "manual") {
+    const mapNames = {
+      melbourne_blue: "Melbourne Blue",
+      gale_canyon: "Gió Lốc Hẻm Núi",
+      storm_island: "Đảo Bão Sét",
+      typhoon_arena: "Siêu Bão Cuồng Phong",
+      roland_clay: "Roland Clay",
+      wimbledon_grass: "Wimbledon Grass",
+      cyber_neon: "Cyber Neon",
+      tokyo_sakura: "Tokyo Sakura",
+      golden_finals: "Golden Finals",
+      arctic_glacier: "Băng Cực Địa",
+      volcano_inferno: "Hỏa Diệm Sơn"
+    };
+    const baseName = mapNames[mapId] || "Melbourne Blue";
+    return mapSelectionMode === "auto" ? `Auto: ${baseName}` : `Map: ${baseName}`;
+  }
+
+  _formatPointsLabel(pointsToWinGame = 4) {
+    const pts = Number(pointsToWinGame || 4);
+    if (pts === 4) return "Điểm: Chuẩn Tennis";
+    return `Điểm: Chạm ${pts} Điểm`;
+  }
+
+  showWaitingRoomView({
+    roomId,
+    isHost,
+    hostName,
+    guestName,
+    hostLoadout = null,
+    guestLoadout = null,
+    gamesToWin = 1,
+    pointsToWinGame = 4,
+    mapId = "melbourne_blue",
+    mapSelectionMode = "manual",
+    weatherId = "auto",
+    customCoinReward = 50000
+  }) {
     const resolvedHostLoadout =
       hostLoadout ||
       onlineMatchmaker.hostLoadout ||
@@ -541,7 +600,12 @@ export class FirebaseLobbyUI {
       guestName,
       hostLoadout: resolvedHostLoadout,
       guestLoadout: resolvedGuestLoadout,
-      gamesToWin
+      gamesToWin,
+      pointsToWinGame,
+      mapId,
+      mapSelectionMode,
+      weatherId,
+      customCoinReward
     };
     this.isHost = isHost;
     this._startWaitingExpiryCountdown();
@@ -554,6 +618,15 @@ export class FirebaseLobbyUI {
     if (this.waitingGamesBadge) {
       const gNum = Number(gamesToWin || 1);
       this.waitingGamesBadge.textContent = gNum === 1 ? "1 Game" : `Best of ${gNum * 2 - 1} (Thắng ${gNum})`;
+    }
+    if (this.waitingPointsBadge) {
+      this.waitingPointsBadge.textContent = this._formatPointsLabel(pointsToWinGame);
+    }
+    if (this.waitingMapBadge) {
+      this.waitingMapBadge.textContent = this._formatMapName(mapId, mapSelectionMode);
+    }
+    if (this.waitingCoinsBadge) {
+      this.waitingCoinsBadge.textContent = `Thưởng: ${Number(customCoinReward || 50000).toLocaleString("vi-VN")} Xu`;
     }
 
     if (this.waitingMyRoleBadge) {
@@ -670,6 +743,21 @@ export class FirebaseLobbyUI {
     this.currentRoom.hostName = hostName;
     this.currentRoom.hostLoadout = hostLoadout;
     this.currentRoom.guestLoadout = guestLoadout;
+
+    if (roomData.pointsToWinGame) this.currentRoom.pointsToWinGame = roomData.pointsToWinGame;
+    if (roomData.mapId) this.currentRoom.mapId = roomData.mapId;
+    if (roomData.mapSelectionMode) this.currentRoom.mapSelectionMode = roomData.mapSelectionMode;
+    if (roomData.customCoinReward) this.currentRoom.customCoinReward = roomData.customCoinReward;
+
+    if (this.waitingPointsBadge && this.currentRoom.pointsToWinGame) {
+      this.waitingPointsBadge.textContent = this._formatPointsLabel(this.currentRoom.pointsToWinGame);
+    }
+    if (this.waitingMapBadge && this.currentRoom.mapId) {
+      this.waitingMapBadge.textContent = this._formatMapName(this.currentRoom.mapId, this.currentRoom.mapSelectionMode);
+    }
+    if (this.waitingCoinsBadge && this.currentRoom.customCoinReward) {
+      this.waitingCoinsBadge.textContent = `Thưởng: ${Number(this.currentRoom.customCoinReward).toLocaleString("vi-VN")} Xu`;
+    }
 
     if (this.waitingP1Name && hostName) {
       this.waitingP1Name.textContent = hostName;
@@ -865,7 +953,9 @@ export class FirebaseLobbyUI {
   _renderRoomsList(rooms) {
     if (!this.roomsListContainer) return;
 
-    const sig = JSON.stringify((rooms || []).map(r => `${r.roomId}:${r.hostName}:${r.gamesToWin}`));
+    const sig = JSON.stringify(
+      (rooms || []).map((r) => `${r.roomId}:${r.hostName}:${r.gamesToWin}:${r.pointsToWinGame}:${r.mapId}:${r.customCoinReward}`)
+    );
     if (sig === this._lastRenderedRoomsSig) return;
     this._lastRenderedRoomsSig = sig;
 
@@ -879,12 +969,16 @@ export class FirebaseLobbyUI {
     this.roomsListContainer.innerHTML = rooms.map((r) => {
       const isMine = this.currentRoom && r.roomId === this.currentRoom.roomId;
       const gamesLabel = r.gamesToWin === 1 ? "1 Game" : `Best of ${r.gamesToWin * 2 - 1}`;
+      const ptsLabel = this._formatPointsLabel(r.pointsToWinGame || 4);
+      const mapLabel = this._formatMapName(r.mapId || "melbourne_blue", r.mapSelectionMode || "manual");
+      const coinLabel = `+${Number(r.customCoinReward || 50000).toLocaleString("vi-VN")} Xu`;
       return `
         <div class="lobby-room-item ${isMine ? 'my-room' : ''}">
           <div class="room-item-info">
             <span class="room-item-code">${r.roomId}</span>
             <span class="room-item-host">Chủ phòng: <strong>${r.hostName || 'Player 1'}</strong></span>
-            <span class="room-item-games">${gamesLabel}</span>
+            <span class="room-item-games">${gamesLabel} • ${ptsLabel}</span>
+            <span class="room-item-games">${mapLabel} • <strong style="color:#fcd34d">${coinLabel}</strong></span>
           </div>
           <div class="room-item-actions">
             ${
@@ -914,6 +1008,10 @@ export class FirebaseLobbyUI {
     }
     const hostName = (this.profileNameInput?.value || "Player 1").trim();
     const gamesToWin = parseInt(this.hostGamesSelect?.value || "1", 10);
+    const pointsToWinGame = parseInt(this.hostPointsSelect?.value || "4", 10);
+    const mapId = this.hostMapSelect?.value || "auto";
+    const weatherId = this.hostWeatherSelect?.value || "auto";
+    const customCoinReward = Math.max(1000, parseInt(this.hostCustomCoinsInput?.value || "50000", 10) || 50000);
     const customCode = this._extractRoomCode(this.hostCustomCodeInput?.value || "");
 
     if (this.btnHostCreate) this.btnHostCreate.disabled = true;
@@ -923,7 +1021,11 @@ export class FirebaseLobbyUI {
       const res = await onlineMatchmaker.createRoom({
         customCode,
         hostName,
-        gamesToWin
+        gamesToWin,
+        pointsToWinGame,
+        mapId,
+        weatherId,
+        customCoinReward
       });
 
       const isHostRole = res.isHost !== false;
@@ -945,7 +1047,12 @@ export class FirebaseLobbyUI {
         guestName: res.guestName || null,
         hostLoadout: res.hostLoadout || null,
         guestLoadout: res.guestLoadout || null,
-        gamesToWin: res.gamesToWin || gamesToWin
+        gamesToWin: res.gamesToWin || gamesToWin,
+        pointsToWinGame: res.pointsToWinGame || pointsToWinGame,
+        mapId: res.mapId || "melbourne_blue",
+        mapSelectionMode: res.mapSelectionMode || (mapId === "auto" ? "auto" : "manual"),
+        weatherId: res.weatherId || weatherId,
+        customCoinReward: res.customCoinReward || customCoinReward
       });
 
       if (isHostRole) {
@@ -994,7 +1101,12 @@ export class FirebaseLobbyUI {
         guestName: res.guestName || guestName,
         hostLoadout: res.hostLoadout || null,
         guestLoadout: res.guestLoadout || null,
-        gamesToWin: res.gamesToWin || 1
+        gamesToWin: res.gamesToWin || 1,
+        pointsToWinGame: res.pointsToWinGame || 4,
+        mapId: res.mapId || "melbourne_blue",
+        mapSelectionMode: res.mapSelectionMode || "manual",
+        weatherId: res.weatherId || "auto",
+        customCoinReward: res.customCoinReward || 50000
       });
 
       this.showToast(`Đã vào phòng ${roomId}! Đang đợi chủ phòng bấm Bắt đầu.`);

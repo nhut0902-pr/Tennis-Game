@@ -739,7 +739,9 @@ export class ArgonTennisEngine {
       },
       onStartMatch: ({ gamesToWin: i, inputMode: a, difficulty: s }) => {
         ((this.matchConfig.gamesToWin = i),
+          (this.matchConfig.pointsToWinGame = 4),
           (this.matchConfig.inputMode = a),
+          (this.isMultiplayer = !1),
           s && this._applyDifficultyTuning(s),
           (this.autoPlayMode = !1),
           (this.userHasInteracted = !0),
@@ -815,6 +817,21 @@ export class ArgonTennisEngine {
           (this.userHasInteracted = !0),
           (this.persistentStateLock = !1),
           this.startNewMatch({ showStartBanner: !0 }));
+      },
+      onReturnTitle: () => {
+        if (this.isMultiplayer && this.onlineMatchmaker) {
+          this.onlineMatchmaker.leaveRoom?.().catch?.(() => {});
+        }
+        this.isMultiplayer = !1;
+        this.autoPlayMode = !0;
+        this.persistentStateLock = !1;
+        this.phase = "TITLE";
+        this.cameraMode = "INTRO_PAN";
+        this.manualCameraOverride = null;
+        this.hud?.hideVersusIntro?.();
+        this.hud?.hideVictoryModal?.();
+        this.hud?.closePauseModal?.();
+        this.hud?.showTitleModal?.();
       },
       onToggleControlsGuide: () => {
         this.hud && this.hud.openControlsModal && this.hud.openControlsModal();
@@ -899,6 +916,10 @@ export class ArgonTennisEngine {
         roomId: e,
         role: i,
         gamesToWin: a,
+        pointsToWinGame: pts,
+        mapId: mId,
+        weatherId: wId,
+        customCoinReward: cCoins,
         isHost: s,
         hostName: n,
         guestName: h,
@@ -907,9 +928,17 @@ export class ArgonTennisEngine {
       }) => {
         ((this.roomId = e), (this.playerRole = i));
         if (typeof window !== "undefined") window.__CURRENT_PLAYER_ROLE = i;
+        if (mId && mId !== "auto" && this.courtMapManager?.selectMap) {
+          this.courtMapManager.selectMap(mId);
+        }
+        if (wId && wId !== "auto" && this.courtMapManager?.selectWeather) {
+          this.courtMapManager.selectWeather(wId);
+        }
         ((this.isMultiplayer = !0),
           this._applyDifficultyTuning("1v1"),
-          (this.matchConfig.gamesToWin = a || 1),
+          (this.matchConfig.gamesToWin = Number(a || 1)),
+          (this.matchConfig.pointsToWinGame = Number(pts || 4)),
+          (this.matchConfig.customCoinReward = Math.max(1000, Number(cCoins || 50000))),
           this.syncOnlineSquadLoadouts({ hostLoadout: r, guestLoadout: l }),
           (this.autoPlayMode = !1),
           (this.userHasInteracted = !0),
@@ -988,11 +1017,20 @@ export class ArgonTennisEngine {
             this.audioEngine.playServeToss()));
     };
     window.addEventListener("keydown", (i) => {
-      if (
-        (i.target &&
-          (i.target.tagName === "INPUT" || i.target.tagName === "TEXTAREA")) ||
-        this._isAnyModalOpen()
-      ) {
+      if (i.target && (i.target.tagName === "INPUT" || i.target.tagName === "TEXTAREA")) {
+        return;
+      }
+      if ((i.code === "Escape" || i.code === "KeyP") && !this.autoPlayMode && this.phase !== "TITLE") {
+        const pauseModal = document.getElementById("pause-game-modal");
+        if (pauseModal && !pauseModal.classList.contains("hidden")) {
+          this.hud?.closePauseModal?.();
+          return;
+        } else if (!this._isAnyModalOpen()) {
+          this.hud?.openPauseModal?.();
+          return;
+        }
+      }
+      if (this._isAnyModalOpen()) {
         return;
       }
       if (i.code === "Digit1" || i.code === "KeyZ") {
@@ -1100,6 +1138,7 @@ export class ArgonTennisEngine {
       "firebase-lobby-modal",
       "controls-modal",
       "victory-modal",
+      "pause-game-modal",
       "companion-modal",
       "pwa-install-modal",
       "character-shop-modal",
@@ -4780,8 +4819,10 @@ export class ArgonTennisEngine {
         : (this.score.opponentPoints += 1),
       (this.score.deuceSide = !this.score.deuceSide));
     const a = this.score.playerPoints,
-      s = this.score.opponentPoints;
-    if ((a >= 4 || s >= 4) && Math.abs(a - s) >= 2) {
+      s = this.score.opponentPoints,
+      ptsTarget = Number(this.matchConfig.pointsToWinGame || 4),
+      winBy = ptsTarget === 4 ? 2 : 1;
+    if ((a >= ptsTarget || s >= ptsTarget) && Math.abs(a - s) >= winBy) {
       const w = this.playerRole === "p2" ? s > a : a > s;
       if (w && !this.autoPlayMode)
         this._rewardMatchCoins(
@@ -4805,12 +4846,13 @@ export class ArgonTennisEngine {
           v = this.playerRole === "p2" ? !p : p;
         triggerPhysicalHardwareVibration(v ? "match_won" : "point_lost");
         if (!this.autoPlayMode) {
+          const customOnlinePool = Math.max(1400, Number(this.matchConfig.customCoinReward || 50000));
           let matchBonus = v
             ? this.isMultiplayer
-              ? 1400
+              ? customOnlinePool
               : 950
             : this.isMultiplayer
-              ? 380
+              ? Math.max(500, Math.round(customOnlinePool * 0.2))
               : 280;
 
           let vipBonus = 0;
@@ -5139,7 +5181,8 @@ export class ArgonTennisEngine {
       }
       if (n.phase === "MATCH_OVER" && prevPhase !== "MATCH_OVER") {
         const p2Won = this.score.opponentGames >= this.score.playerGames,
-          bonus = p2Won ? 500 : 160;
+          customOnlinePool = Math.max(1400, Number(this.matchConfig.customCoinReward || 50000)),
+          bonus = p2Won ? customOnlinePool : Math.max(500, Math.round(customOnlinePool * 0.2));
         (this._rewardMatchCoins(
           bonus,
           p2Won ? "Thắng Trận Online 1v1!" : "Thưởng Hoàn Thành Online",
@@ -5281,7 +5324,16 @@ export class ArgonTennisEngine {
   }
   _formatCurrentScore() {
     const e = this.score.playerPoints,
-      t = this.score.opponentPoints;
+      t = this.score.opponentPoints,
+      ptsTarget = Number(this.matchConfig.pointsToWinGame || 4);
+    if (ptsTarget !== 4) {
+      return {
+        playerScoreText: String(e),
+        opponentScoreText: String(t),
+        deuceLabel: `Chạm ${ptsTarget}`,
+        bannerScoreText: `${e} - ${t}`,
+      };
+    }
     if (e >= 3 && t >= 3) {
       if (e === t)
         return {
@@ -5311,8 +5363,10 @@ export class ArgonTennisEngine {
   _getHighStakesPointLabel() {
     const e = this.score.playerPoints,
       t = this.score.opponentPoints,
-      i = e >= 3 && e - t >= 1,
-      a = t >= 3 && t - e >= 1;
+      ptsTarget = Number(this.matchConfig.pointsToWinGame || 4),
+      threshold = Math.max(1, ptsTarget - 1),
+      i = e >= threshold && e - t >= 1,
+      a = t >= threshold && t - e >= 1;
     return i
       ? this.score.playerGames + 1 >= this.matchConfig.gamesToWin
         ? "Match Point"
