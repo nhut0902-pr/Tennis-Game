@@ -224,6 +224,139 @@ export const COURT_MAPS = [
     coinBonusPct: 0.65,
     pattern: "cosmic_stars",
     propTheme: "cosmic_rings"
+  },
+  {
+    id: "windy_canyon",
+    name: "Gale Force Wind Canyon",
+    shortName: "Sân Gió Lốc (X2.5 Xu)",
+    subtitle: "Hẻm Núi Gió Xoáy Tạt Ngang Cực Mạnh",
+    surfaceLabel: "MAP GIÓ XOÁY • BÓNG LIỆNG • +150% XU",
+    badgeColor: "#0d9488",
+    accentCss: "#2dd4bf",
+    innerCourtHex: "#115e59",
+    outerCourtHex: "#134e4a",
+    lineHex: "#ccfbf1",
+    netTapeHex: 0x5eead4,
+    netMeshHex: 0x99f6e4,
+    skyTop: "#042f2e",
+    skyMid: "#0f766e",
+    skyBot: "#99f6e4",
+    fogHex: 0x115e59,
+    fogDensity: 0.0046,
+    sunHex: 0xccfbf1,
+    sunIntensity: 2.35,
+    hemiSkyHex: 0x5eead4,
+    hemiGroundHex: 0x042f2e,
+    bounceRestitution: 0.81,
+    surfaceFriction: 0.88,
+    coinBonusPct: 1.5,
+    defaultWeather: "wind",
+    windStrength: 2.4,
+    pattern: "wind_streaks",
+    propTheme: "wind_turbines"
+  },
+  {
+    id: "storm_thunder",
+    name: "Thunderstorm Tempest Arena",
+    shortName: "Đảo Bão Tố (X4.0 Xu)",
+    subtitle: "Đấu Trường Mưa Bão Sấm Sét Giữa Đại Dương",
+    surfaceLabel: "MAP MƯA BÃO • GIÓ GIẬT & SẤM SÉT • +300% XU",
+    badgeColor: "#1d4ed8",
+    accentCss: "#60a5fa",
+    innerCourtHex: "#1e293b",
+    outerCourtHex: "#0f172a",
+    lineHex: "#38bdf8",
+    netTapeHex: 0x60a5fa,
+    netMeshHex: 0x93c5fd,
+    skyTop: "#020617",
+    skyMid: "#1e293b",
+    skyBot: "#334155",
+    fogHex: 0x0f172a,
+    fogDensity: 0.0062,
+    sunHex: 0x93c5fd,
+    sunIntensity: 1.95,
+    hemiSkyHex: 0x38bdf8,
+    hemiGroundHex: 0x090d16,
+    bounceRestitution: 0.78,
+    surfaceFriction: 0.94,
+    coinBonusPct: 3.0,
+    defaultWeather: "storm",
+    windStrength: 3.8,
+    pattern: "storm_grid",
+    propTheme: "storm_towers"
+  },
+  {
+    id: "super_typhoon",
+    name: "Super Typhoon Eye Lv.12",
+    shortName: "Tâm Siêu Bão (X6.0 Xu)",
+    subtitle: "Tâm Bão Cuồng Phong Cấp 12 Siêu Thưởng Xu",
+    surfaceLabel: "SIÊU BÃO CẤP 12 • CUỒNG PHONG • +500% XU",
+    badgeColor: "#7e22ce",
+    accentCss: "#f43f5e",
+    innerCourtHex: "#1e1b4b",
+    outerCourtHex: "#090514",
+    lineHex: "#f43f5e",
+    netTapeHex: 0xfacc15,
+    netMeshHex: 0xf43f5e,
+    skyTop: "#030008",
+    skyMid: "#311042",
+    skyBot: "#4c0519",
+    fogHex: 0x130722,
+    fogDensity: 0.0072,
+    sunHex: 0xfda4af,
+    sunIntensity: 2.1,
+    hemiSkyHex: 0xf43f5e,
+    hemiGroundHex: 0x1e1b4b,
+    bounceRestitution: 0.85,
+    surfaceFriction: 0.93,
+    coinBonusPct: 5.0,
+    defaultWeather: "super_storm",
+    windStrength: 5.2,
+    pattern: "typhoon_vortex",
+    propTheme: "typhoon_spires"
+  }
+];
+
+export const COURT_WEATHER_MODES = [
+  {
+    id: "calm",
+    name: "Trời Quang",
+    shortLabel: "TRỜI QUANG",
+    desc: "Thời tiết ổn định, không có gió tạt ngang",
+    extraCoinBonusPct: 0,
+    windPower: 0,
+    rainCount: 0,
+    badgeColor: "#475569"
+  },
+  {
+    id: "wind",
+    name: "Gió Lốc Xoáy",
+    shortLabel: "GIÓ LỐC (+120% XU)",
+    desc: "Gió tạt ngang làm bóng uốn lượn trên không • Thưởng thêm +120% Xu",
+    extraCoinBonusPct: 1.2,
+    windPower: 2.35,
+    rainCount: 90,
+    badgeColor: "#0d9488"
+  },
+  {
+    id: "storm",
+    name: "Bão Mưa Sấm Sét",
+    shortLabel: "MƯA BÃO (+250% XU)",
+    desc: "Mưa bão lớn, sấm chớp và gió giật đảo chiều • Thưởng thêm +250% Xu",
+    extraCoinBonusPct: 2.5,
+    windPower: 3.75,
+    rainCount: 220,
+    badgeColor: "#2563eb"
+  },
+  {
+    id: "super_storm",
+    name: "Siêu Bão Cấp 12",
+    shortLabel: "SIÊU BÃO (+450% XU)",
+    desc: "Cuồng phong cấp 12 cực mạnh đẩy bóng xoáy gắt • Thưởng thêm +450% Xu",
+    extraCoinBonusPct: 4.5,
+    windPower: 5.1,
+    rainCount: 340,
+    badgeColor: "#e11d48"
   }
 ];
 
@@ -436,9 +569,15 @@ export class CourtMapManager {
   constructor(engine) {
     this.engine = engine;
     this.selectedMapId = this._loadSavedMapId();
+    this.selectedWeatherId = this._loadSavedWeatherId();
     this.surfaceMesh = null;
     this.propGroup = new THREE.Group();
     this.propGroup.name = "CourtMapCustomProps";
+    this.weatherGroup = new THREE.Group();
+    this.weatherGroup.name = "CourtWeatherEffectsGroup";
+    this.weatherDrops = [];
+    this.lightningTimer = 0;
+    this.nextLightningAt = 3.5;
     this._textureCache = new Map();
     this._skyCache = new Map();
 
@@ -467,8 +606,63 @@ export class CourtMapManager {
     return COURT_MAPS[0].id;
   }
 
+  _loadSavedWeatherId() {
+    try {
+      const saved = localStorage.getItem("argon_tennis_selected_weather_v2");
+      if (saved && COURT_WEATHER_MODES.some((w) => w.id === saved)) return saved;
+    } catch {}
+    const mapCfg = COURT_MAPS.find((m) => m.id === this.selectedMapId);
+    // Default to "storm" (Bão Mưa Sấm Sét) so players immediately see and feel the wind/storm challenge!
+    return mapCfg?.defaultWeather || "storm";
+  }
+
   getSelectedMap() {
     return COURT_MAPS.find((m) => m.id === this.selectedMapId) || COURT_MAPS[0];
+  }
+
+  getSelectedWeather() {
+    return (
+      COURT_WEATHER_MODES.find((w) => w.id === this.selectedWeatherId) ||
+      COURT_WEATHER_MODES[0]
+    );
+  }
+
+  getTotalCoinBonusPct() {
+    const mapCfg = this.getSelectedMap();
+    const weatherCfg = this.getSelectedWeather();
+    const mapBonus = Number(mapCfg?.coinBonusPct || 0);
+    const extraWeather =
+      mapCfg?.defaultWeather === weatherCfg?.id
+        ? Math.max(0, Number(weatherCfg?.extraCoinBonusPct || 0) * 0.4)
+        : Number(weatherCfg?.extraCoinBonusPct || 0);
+    return +(mapBonus + extraWeather).toFixed(2);
+  }
+
+  getCurrentWindVector(elapsedTime = 0) {
+    const mapCfg = this.getSelectedMap();
+    const weatherCfg = this.getSelectedWeather();
+    const baseWind = Math.max(
+      Number(mapCfg?.windStrength || 0),
+      Number(weatherCfg?.windPower || 0)
+    );
+    if (baseWind <= 0.05) {
+      return { x: 0, z: 0, strength: 0, speedKmh: 0, dirSign: 1, label: "TRỜI QUANG" };
+    }
+    // Dynamic gust oscillation so wind shifts direction every ~11 seconds and gusts strongly
+    const gustWave = Math.sin(elapsedTime * 1.15) + 0.45 * Math.cos(elapsedTime * 2.1);
+    const dirSign = Math.sin(elapsedTime * 0.26) >= 0 ? 1 : -1;
+    const gustFactor = 0.72 + 0.38 * Math.abs(gustWave);
+    const vx = dirSign * baseWind * gustFactor;
+    const vz = Math.cos(elapsedTime * 0.58) * baseWind * 0.35;
+    const speedKmh = Math.round(Math.abs(vx) * 26 + baseWind * 12);
+    return {
+      x: vx,
+      z: vz,
+      strength: baseWind,
+      speedKmh,
+      dirSign,
+      label: weatherCfg?.shortLabel || "GIÓ BÃO"
+    };
   }
 
   getMapById(id) {
@@ -481,12 +675,48 @@ export class CourtMapManager {
     return this.selectMap(next.id, { showBanner: true });
   }
 
+  cycleNextWeather() {
+    const idx = COURT_WEATHER_MODES.findIndex((w) => w.id === this.selectedWeatherId);
+    const next = COURT_WEATHER_MODES[(idx + 1) % COURT_WEATHER_MODES.length];
+    return this.selectWeather(next.id, { showBanner: true });
+  }
+
+  selectWeather(weatherId, { showBanner = false } = {}) {
+    const wCfg =
+      COURT_WEATHER_MODES.find((w) => w.id === weatherId) ||
+      COURT_WEATHER_MODES[0];
+    this.selectedWeatherId = wCfg.id;
+    try {
+      localStorage.setItem("argon_tennis_selected_weather_v2", wCfg.id);
+    } catch {}
+    this._rebuildWeatherParticles();
+    this.syncUiElements();
+
+    if (showBanner && this.engine?.hud) {
+      const totalBonus = Math.round(this.getTotalCoinBonusPct() * 100);
+      this.engine.hud.showCenterBanner(`THỜI TIẾT: ${wCfg.name.toUpperCase()}`, {
+        style: "style-gold",
+        subText: `${wCfg.desc} • TỔNG THƯỞNG +${totalBonus}% XU`,
+        durationMs: 1850
+      });
+    }
+    return wCfg;
+  }
+
   selectMap(mapId, { showBanner = false } = {}) {
     const mapCfg = this.getMapById(mapId);
     this.selectedMapId = mapCfg.id;
     try {
       localStorage.setItem("argon_tennis_selected_map_v1", mapCfg.id);
     } catch {}
+
+    // Automatically activate the map's signature wind/storm weather if it has one
+    if (mapCfg.defaultWeather) {
+      this.selectedWeatherId = mapCfg.defaultWeather;
+      try {
+        localStorage.setItem("argon_tennis_selected_weather_v2", this.selectedWeatherId);
+      } catch {}
+    }
 
     if (this.engine?.characterShop?.state && this.engine.characterShop.state.selectedMapId !== mapCfg.id) {
       this.engine.characterShop.state.selectedMapId = mapCfg.id;
@@ -497,9 +727,10 @@ export class CourtMapManager {
     this.syncUiElements();
 
     if (showBanner && this.engine?.hud) {
+      const totalBonus = Math.round(this.getTotalCoinBonusPct() * 100);
       this.engine.hud.showCenterBanner(mapCfg.name.toUpperCase(), {
         style: "style-gold",
-        subText: `${mapCfg.surfaceLabel} • +${Math.round(mapCfg.coinBonusPct * 100)}% XU`,
+        subText: `${mapCfg.surfaceLabel} • TỔNG THƯỞNG +${totalBonus}% XU`,
         durationMs: 1700
       });
     }
@@ -534,9 +765,9 @@ export class CourtMapManager {
     }
     this.surfaceMesh.material.map = this._textureCache.get(mapCfg.id);
     this.surfaceMesh.material.roughness =
-      mapCfg.id === "arctic_glacier" || mapCfg.id === "cyber_tokyo" ? 0.35 : 0.78;
+      mapCfg.id === "arctic_glacier" || mapCfg.id === "cyber_tokyo" || mapCfg.id === "storm_thunder" ? 0.32 : 0.78;
     this.surfaceMesh.material.metalness =
-      mapCfg.id === "cyber_tokyo" || mapCfg.id === "cosmic_nebula" ? 0.22 : 0.05;
+      mapCfg.id === "cyber_tokyo" || mapCfg.id === "cosmic_nebula" || mapCfg.id === "super_typhoon" ? 0.24 : 0.05;
     this.surfaceMesh.material.needsUpdate = true;
 
     // 2. Sky & Atmosphere & Lighting
@@ -569,6 +800,206 @@ export class CourtMapManager {
       this.propGroup.remove(child);
     }
     this._buildThemeProps(mapCfg);
+    this._rebuildWeatherParticles();
+  }
+
+  _rebuildWeatherParticles() {
+    const scene = this.engine?.scene;
+    if (!scene) return;
+    if (!this.weatherGroup.parent) {
+      scene.add(this.weatherGroup);
+    }
+    while (this.weatherGroup.children.length > 0) {
+      const c = this.weatherGroup.children.pop();
+      this.weatherGroup.remove(c);
+    }
+    this.weatherDrops = [];
+    this.windRibbons = [];
+    this.windDebris = [];
+
+    const mapCfg = this.getSelectedMap();
+    const wCfg = this.getSelectedWeather();
+    const isStormy =
+      wCfg.id === "wind" ||
+      wCfg.id === "storm" ||
+      wCfg.id === "super_storm" ||
+      !!mapCfg.defaultWeather;
+    if (!isStormy) return;
+
+    const isSuper = wCfg.id === "super_storm" || mapCfg.id === "super_typhoon";
+    const isStorm = wCfg.id === "storm" || mapCfg.id === "storm_thunder" || isSuper;
+
+    // 1. BOLD 3D HORIZONTAL WIND STREAM RIBBONS sweeping right across the court!
+    const ribbonCount = isSuper ? 46 : isStorm ? 36 : 28;
+    for (let i = 0; i < ribbonCount; i++) {
+      const len = 2.8 + (i % 4) * 0.95;
+      const rGeo = new THREE.PlaneGeometry(len, i % 3 === 0 ? 0.095 : 0.055);
+      const rMat = new THREE.MeshBasicMaterial({
+        color: isSuper
+          ? i % 2 === 0
+            ? 0xf43f5e
+            : 0xfde047
+          : isStorm
+            ? i % 2 === 0
+              ? 0x38bdf8
+              : 0xe0f2fe
+            : 0x5eead4,
+        transparent: true,
+        opacity: isSuper ? 0.72 : 0.58,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      const rMesh = new THREE.Mesh(rGeo, rMat);
+      rMesh.position.set(
+        (Math.random() - 0.5) * 20,
+        0.38 + Math.random() * 4.4,
+        (Math.random() - 0.5) * 25
+      );
+      rMesh.rotation.x = Math.PI * 0.15;
+      this.weatherGroup.add(rMesh);
+      this.windRibbons.push({
+        mesh: rMesh,
+        baseY: rMesh.position.y,
+        phase: Math.random() * Math.PI * 2,
+        speedMult: 0.85 + Math.random() * 0.65
+      });
+    }
+
+    // 2. SWIRLING WIND LEAVES / ENERGY DEBRIS blowing across the turf
+    const debrisGeo = new THREE.OctahedronGeometry(0.11, 0);
+    const debrisMat = new THREE.MeshBasicMaterial({
+      color: isSuper ? 0xfacc15 : 0x67e8f9,
+      transparent: true,
+      opacity: 0.82
+    });
+    for (let i = 0; i < 28; i++) {
+      const dMesh = new THREE.Mesh(debrisGeo, debrisMat);
+      dMesh.position.set(
+        (Math.random() - 0.5) * 18,
+        0.25 + Math.random() * 3.2,
+        (Math.random() - 0.5) * 24
+      );
+      this.weatherGroup.add(dMesh);
+      this.windDebris.push({
+        mesh: dMesh,
+        phase: Math.random() * Math.PI * 2,
+        speedMult: 0.9 + Math.random() * 0.7
+      });
+    }
+
+    // 3. DIAGONAL STORM RAIN SLASHES
+    const rainCount = isSuper ? 220 : isStorm ? 160 : 85;
+    const streakGeo = new THREE.BoxGeometry(0.045, isStorm ? 0.95 : 0.65, 0.045);
+    const streakMat = new THREE.MeshBasicMaterial({
+      color: isSuper ? 0xfda4af : 0xbae6fd,
+      transparent: true,
+      opacity: isStorm ? 0.68 : 0.45,
+      depthWrite: false
+    });
+
+    for (let i = 0; i < rainCount; i++) {
+      const mesh = new THREE.Mesh(streakGeo, streakMat);
+      mesh.position.set(
+        (Math.random() - 0.5) * 24,
+        0.4 + Math.random() * 10,
+        (Math.random() - 0.5) * 28
+      );
+      this.weatherGroup.add(mesh);
+      this.weatherDrops.push({
+        mesh,
+        speedY: (isStorm ? 13 : 8) + Math.random() * 5,
+        speedX: (isSuper ? 12 : isStorm ? 8.5 : 5.5) + Math.random() * 3.5
+      });
+    }
+  }
+
+  updateWeather(dt, elapsedTime = 0) {
+    const wind = this.getCurrentWindVector(elapsedTime);
+    this._updateLiveWindHudBadge(wind);
+
+    if (wind.strength <= 0.05) return;
+    const dirX = wind.x >= 0 ? 1 : -1;
+    const windSpeedX = Math.max(4.5, Math.abs(wind.x) * 3.8);
+
+    // 1. Animate horizontal 3D Wind Stream Ribbons across the court
+    if (this.windRibbons && this.windRibbons.length > 0) {
+      for (let i = 0; i < this.windRibbons.length; i++) {
+        const r = this.windRibbons[i];
+        r.mesh.position.x += dirX * windSpeedX * r.speedMult * dt;
+        r.mesh.position.z += wind.z * 0.85 * dt;
+        r.mesh.position.y =
+          r.baseY + Math.sin(elapsedTime * 4.5 + r.phase) * 0.28;
+        r.mesh.rotation.z = Math.sin(elapsedTime * 3.2 + r.phase) * 0.08;
+        if (r.mesh.position.x > 12.5) r.mesh.position.x = -12.5;
+        else if (r.mesh.position.x < -12.5) r.mesh.position.x = 12.5;
+        if (r.mesh.position.z > 15) r.mesh.position.z = -15;
+        else if (r.mesh.position.z < -15) r.mesh.position.z = 15;
+      }
+    }
+
+    // 2. Animate swirling wind debris
+    if (this.windDebris && this.windDebris.length > 0) {
+      for (let i = 0; i < this.windDebris.length; i++) {
+        const b = this.windDebris[i];
+        b.mesh.position.x += dirX * windSpeedX * 0.9 * b.speedMult * dt;
+        b.mesh.position.y =
+          0.35 + Math.abs(Math.sin(elapsedTime * 3.6 + b.phase)) * 2.4;
+        b.mesh.rotation.x += dt * 7;
+        b.mesh.rotation.y += dt * 9;
+        if (b.mesh.position.x > 11.5) b.mesh.position.x = -11.5;
+        else if (b.mesh.position.x < -11.5) b.mesh.position.x = 11.5;
+      }
+    }
+
+    // 3. Animate diagonal rain drops
+    if (this.weatherDrops && this.weatherDrops.length > 0) {
+      for (let i = 0; i < this.weatherDrops.length; i++) {
+        const d = this.weatherDrops[i];
+        d.mesh.position.x += dirX * d.speedX * dt;
+        d.mesh.position.y -= d.speedY * dt;
+        d.mesh.rotation.z = -dirX * 0.36;
+
+        if (d.mesh.position.y < 0.1) {
+          d.mesh.position.y = 9.5 + Math.random() * 3.5;
+          d.mesh.position.x = (Math.random() - 0.5) * 24;
+        }
+        if (d.mesh.position.x > 13) d.mesh.position.x = -13;
+        else if (d.mesh.position.x < -13) d.mesh.position.x = 13;
+      }
+    }
+
+    // 4. Lightning flash on Storm / Super Storm
+    const wCfg = this.getSelectedWeather();
+    const mapCfg = this.getSelectedMap();
+    if (
+      (wCfg.id === "storm" || wCfg.id === "super_storm" || mapCfg.id === "storm_thunder" || mapCfg.id === "super_typhoon") &&
+      this.engine?.sunLight
+    ) {
+      this.lightningTimer += dt;
+      if (this.lightningTimer >= this.nextLightningAt) {
+        this.lightningTimer = 0;
+        this.nextLightningAt = 2.8 + Math.random() * 3.8;
+        this.engine.sunLight.intensity = (mapCfg.sunIntensity || 2.2) + 2.8;
+        setTimeout(() => {
+          if (this.engine?.sunLight) {
+            this.engine.sunLight.intensity = mapCfg.sunIntensity || 2.2;
+          }
+        }, 120);
+      }
+    }
+  }
+
+  _updateLiveWindHudBadge(wind) {
+    const el = document.getElementById("hud-weather-live-label");
+    if (!el) return;
+    const wCfg = this.getSelectedWeather();
+    const totalBonusPct = Math.round(this.getTotalCoinBonusPct() * 100);
+    if (!wind || wind.strength <= 0.05) {
+      el.textContent = `Trời Quang (+${totalBonusPct}% Xu)`;
+      return;
+    }
+    const dirArrow = wind.dirSign < 0 ? "<<< GIÓ TẠT TRÁI" : "GIÓ TẠT PHẢI >>>";
+    el.textContent = `${wCfg.name}: ${dirArrow} ${wind.speedKmh} KM/H (+${totalBonusPct}% XU)`;
   }
 
   _buildThemeProps(mapCfg) {
@@ -581,17 +1012,18 @@ export class CourtMapManager {
       [9.2, 0]
     ];
 
-    if (mapCfg.propTheme === "cyber_pylons") {
+    if (mapCfg.propTheme === "cyber_pylons" || mapCfg.propTheme === "storm_towers" || mapCfg.propTheme === "typhoon_spires") {
+      const isTyphoon = mapCfg.propTheme === "typhoon_spires";
       const pylonGeo = new THREE.CylinderGeometry(0.18, 0.28, 4.6, 8);
       const pylonMat = new THREE.MeshStandardMaterial({
         color: 0x0f172a,
-        emissive: 0x00f5ff,
+        emissive: isTyphoon ? 0xf43f5e : 0x00f5ff,
         emissiveIntensity: 0.65,
         metalness: 0.8,
         roughness: 0.2
       });
       const ringGeo = new THREE.TorusGeometry(0.48, 0.06, 8, 24);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0xf43f5e });
+      const ringMat = new THREE.MeshBasicMaterial({ color: isTyphoon ? 0xfacc15 : 0x38bdf8 });
 
       corners.forEach(([x, z]) => {
         const m = new THREE.Mesh(pylonGeo, pylonMat);
@@ -604,11 +1036,12 @@ export class CourtMapManager {
         r.position.set(x, 4.2, z);
         this.propGroup.add(r);
       });
-    } else if (mapCfg.propTheme === "lava_monoliths") {
+    } else if (mapCfg.propTheme === "lava_monoliths" || mapCfg.propTheme === "wind_turbines") {
+      const isWind = mapCfg.propTheme === "wind_turbines";
       const rockGeo = new THREE.ConeGeometry(0.65, 3.8, 6);
       const rockMat = new THREE.MeshStandardMaterial({
-        color: 0x1c1917,
-        emissive: 0xea580c,
+        color: isWind ? 0x134e4a : 0x1c1917,
+        emissive: isWind ? 0x2dd4bf : 0xea580c,
         emissiveIntensity: 0.55,
         roughness: 0.85
       });
@@ -653,12 +1086,17 @@ export class CourtMapManager {
 
   syncUiElements() {
     const mapCfg = this.getSelectedMap();
+    const wCfg = this.getSelectedWeather();
+    const totalBonusPct = Math.round(this.getTotalCoinBonusPct() * 100);
 
-    // Update HUD map label
+    // Update HUD map label with wind/storm bonus info
     const hudMapLabel = document.getElementById("hud-map-label");
     if (hudMapLabel) {
-      hudMapLabel.textContent = mapCfg.shortName;
+      hudMapLabel.textContent = `${mapCfg.shortName}`;
     }
+
+    const wind = this.getCurrentWindVector(this.engine?.elapsedTime || 0);
+    this._updateLiveWindHudBadge(wind);
 
     // Update Title screen mini-court preview colors
     const miniTurf = document.querySelector(".mini-court-turf");
@@ -670,6 +1108,12 @@ export class CourtMapManager {
     // Update Map selector cards active state
     document.querySelectorAll("[data-court-map-id]").forEach((btn) => {
       const isSelected = btn.getAttribute("data-court-map-id") === mapCfg.id;
+      btn.classList.toggle("selected", isSelected);
+    });
+
+    // Update Weather selector buttons active state
+    document.querySelectorAll("[data-court-weather-id]").forEach((btn) => {
+      const isSelected = btn.getAttribute("data-court-weather-id") === wCfg.id;
       btn.classList.toggle("selected", isSelected);
     });
   }
@@ -685,7 +1129,7 @@ export class CourtMapManager {
           </span>
           <span class="map-card-meta">
             <strong class="map-card-title">${m.shortName}</strong>
-            <small class="map-card-sub" style="color:${m.accentCss}">+${Math.round(m.coinBonusPct * 100)}% Xu</small>
+            <small class="map-card-sub" style="color:${m.accentCss}">+${Math.round(m.coinBonusPct * 100)}% Xu${m.defaultWeather ? " • GIÓ BÃO" : ""}</small>
           </span>
         </button>
       `
@@ -699,12 +1143,60 @@ export class CourtMapManager {
       });
     }
 
+    // Inject or populate Weather Mode selector row right inside #court-map-section
+    const mapSection = document.getElementById("court-map-section");
+    if (mapSection) {
+      let weatherRow = document.getElementById("court-weather-selector-row");
+      if (!weatherRow) {
+        weatherRow = document.createElement("div");
+        weatherRow.id = "court-weather-selector-row";
+        weatherRow.className = "court-weather-selector-row";
+        mapSection.appendChild(weatherRow);
+      }
+      weatherRow.innerHTML = `
+        <div class="weather-selector-header">
+          <span class="setup-label">CHẾ ĐỘ THỜI TIẾT SÂN ĐẤU (GIÓ LỐC &amp; BÃO TỐ LÀM BÓNG LIỆNG KHÓ ĐÁNH • CỘNG CỰC NHIỀU XU)</span>
+        </div>
+        <div class="weather-choice-grid">
+          ${COURT_WEATHER_MODES.map(
+            (w) => `
+            <button type="button" class="weather-mode-btn ${w.id === this.selectedWeatherId ? "selected" : ""}" data-court-weather-id="${w.id}">
+              <strong class="weather-btn-title">${w.name}</strong>
+              <span class="weather-btn-bonus">${w.extraCoinBonusPct > 0 ? `+${Math.round(w.extraCoinBonusPct * 100)}% XU THƯỞNG` : "Không gió"}</span>
+            </button>
+          `
+          ).join("")}
+        </div>
+      `;
+      weatherRow.querySelectorAll("[data-court-weather-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const wid = btn.getAttribute("data-court-weather-id");
+          if (wid) this.selectWeather(wid, { showBanner: false });
+        });
+      });
+    }
+
     const hudBtn = document.getElementById("btn-map-cycle");
     if (hudBtn) {
       hudBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         this.cycleNextMap();
       });
+
+      // Inject live Wind/Storm toggle pill right after #btn-map-cycle if not present
+      if (!document.getElementById("btn-weather-cycle") && hudBtn.parentElement) {
+        const wBtn = document.createElement("button");
+        wBtn.id = "btn-weather-cycle";
+        wBtn.type = "button";
+        wBtn.className = "hud-mini-btn highlight-wind-storm";
+        wBtn.title = "Đổi chế độ Gió Lốc / Mưa Bão / Siêu Bão ngay trong trận";
+        wBtn.innerHTML = `<strong id="hud-weather-live-label">Mưa Bão: <<< GIÓ TẠT TRÁI 98 KM/H (+260% XU)</strong>`;
+        wBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.cycleNextWeather();
+        });
+        hudBtn.insertAdjacentElement("afterend", wBtn);
+      }
     }
 
     this.syncUiElements();

@@ -24,6 +24,7 @@ import {
   getCharacterActiveMechanics,
 } from "./character_shop.js";
 import { CourtMapManager } from "./court_maps.js";
+import { addictiveFeaturesManager } from "./addictive_features.js";
 const S = {
     BASELINE_Z: 11.89,
     SERVICE_LINE_Z: 6.4,
@@ -929,6 +930,8 @@ export class ArgonTennisEngine {
     this.lobbyUI = this.onlineLobbyUI;
     this.courtMapManager = new CourtMapManager(this);
     this.courtMapManager.initUiBindings();
+    this.addictiveFeatures = addictiveFeaturesManager;
+    this.addictiveFeatures.attachEngine(this);
     this.onlineMatchmaker.callbacks.onLoadoutSync = ({
       hostLoadout: e,
       guestLoadout: i,
@@ -1100,6 +1103,7 @@ export class ArgonTennisEngine {
       "companion-modal",
       "pwa-install-modal",
       "character-shop-modal",
+      "addictive-hub-modal",
     ];
     return e.some((t) => {
       const i = document.getElementById(t);
@@ -1770,7 +1774,110 @@ export class ArgonTennisEngine {
         }));
     }
   }
-  startNewMatch({ showStartBanner: e = !0, skipIntro: sIntro = !1 } = {}) {
+  _createEmptySideAnalytics() {
+    return {
+      totalSwings: 0,
+      sweetSpot: 0,
+      good: 0,
+      earlyLate: 0,
+      whiff: 0,
+      powerShots: 0,
+      totalSpeedKmh: 0,
+      hitCountForSpeed: 0,
+      maxSpeedKmh: 0,
+      byShotType: {
+        TOPSPIN: 0,
+        SLICE: 0,
+        FLAT: 0,
+        LOB: 0,
+        SMASH: 0,
+        SERVE: 0,
+      },
+      placements: [],
+    };
+  }
+  _initMatchAnalytics() {
+    this.matchAnalytics = {
+      startedAt: Date.now(),
+      player: this._createEmptySideAnalytics(),
+      opponent: this._createEmptySideAnalytics(),
+    };
+  }
+  _recordMatchSwing(
+    side = "player",
+    {
+      timing = "GOOD",
+      shotType = "TOPSPIN",
+      speedKmh = 140,
+      isPower = !1,
+      whiff = !1,
+    } = {},
+  ) {
+    if (this.autoPlayMode && !this.userHasInteracted) return;
+    if (!this.matchAnalytics) this._initMatchAnalytics();
+    const bucket =
+      side === "opponent"
+        ? this.matchAnalytics.opponent
+        : this.matchAnalytics.player;
+    bucket.totalSwings += 1;
+    if (whiff) {
+      bucket.whiff += 1;
+      return;
+    }
+    const tUp = String(timing || "GOOD").toUpperCase();
+    if (tUp.includes("PERFECT") || tUp.includes("SWEET")) {
+      bucket.sweetSpot += 1;
+    } else if (tUp.includes("EARLY") || tUp.includes("LATE")) {
+      bucket.earlyLate += 1;
+    } else {
+      bucket.good += 1;
+    }
+    if (isPower) bucket.powerShots += 1;
+    const spd = Math.round(Number(speedKmh) || 0);
+    if (spd > 0) {
+      bucket.totalSpeedKmh += spd;
+      bucket.hitCountForSpeed += 1;
+      if (spd > bucket.maxSpeedKmh) bucket.maxSpeedKmh = spd;
+    }
+    const normType = String(shotType || "TOPSPIN").toUpperCase();
+    const key =
+      normType === "POWER"
+        ? "SMASH"
+        : bucket.byShotType[normType] !== undefined
+          ? normType
+          : "TOPSPIN";
+    bucket.byShotType[key] = (bucket.byShotType[key] || 0) + 1;
+  }
+  _recordMatchPlacement(
+    side = "player",
+    { x = 0, z = 0, shotType = "TOPSPIN", isPower = !1, inBounds = !0 } = {},
+  ) {
+    if (this.autoPlayMode && !this.userHasInteracted) return;
+    if (!this.matchAnalytics) this._initMatchAnalytics();
+    const bucket =
+      side === "opponent"
+        ? this.matchAnalytics.opponent
+        : this.matchAnalytics.player;
+    bucket.placements.push({
+      x: +Number(x).toFixed(2),
+      z: +Number(z).toFixed(2),
+      shotType: String(shotType || "TOPSPIN").toUpperCase(),
+      isPower: !!isPower,
+      inBounds: !!inBounds,
+    });
+    if (bucket.placements.length > 90) {
+      bucket.placements.shift();
+    }
+  }
+  startNewMatch({ showStartBanner: e = !0, skipIntro: sIntro = !1, difficulty: customDiff = null, gamesToWin: customGames = null } = {}) {
+    this._initMatchAnalytics();
+    if (customDiff) {
+      this.matchConfig.difficulty = customDiff;
+      this._applyDifficultyTuning(customDiff);
+    }
+    if (customGames) {
+      this.matchConfig.gamesToWin = Number(customGames) || 1;
+    }
     if (
       !sIntro &&
       !this.autoPlayMode &&
@@ -1884,7 +1991,10 @@ export class ArgonTennisEngine {
   _rewardMatchCoins(amount, reason = "") {
     if (!amount || amount <= 0) return;
     const mapBonus =
-        this.courtMapManager?.getSelectedMap?.()?.coinBonusPct || 0,
+        this.courtMapManager?.getTotalCoinBonusPct?.() ??
+        (this.courtMapManager?.getSelectedMap?.()?.coinBonusPct || 0),
+      wCfg = this.courtMapManager?.getSelectedWeather?.(),
+      hasStormBonus = wCfg && wCfg.id !== "calm",
       cMult =
         Math.max(
           characterShopManager.getEffectivePlayerModifiers()?.coinBonusMult ||
@@ -1904,7 +2014,7 @@ export class ArgonTennisEngine {
       this._spawnFloatingCoinToast(
         finalAmt,
         cMult > 1.01 && reason
-          ? `${reason} (+${Math.round((cMult - 1) * 100)}% VIP)`
+          ? `${reason} (+${Math.round((cMult - 1) * 100)}% ${hasStormBonus ? "MAP GIÓ BÃO" : "THƯỞNG"})`
           : reason,
       ));
   }
@@ -2501,6 +2611,13 @@ export class ArgonTennisEngine {
           role: _,
         }));
     }
+    this._recordMatchSwing(e.role === "player" ? "player" : "opponent", {
+      timing: s ? "PERFECT" : n ? "EARLY" : "GOOD",
+      shotType: "SERVE",
+      speedKmh: w,
+      isPower: s,
+      whiff: !1,
+    });
     const x = e.role === "player" ? this.opponent : this.player;
     this._predictBallIntercept(x);
   }
@@ -2603,6 +2720,13 @@ export class ArgonTennisEngine {
           role: "p1",
           intensity: 0.65,
         }));
+      this._recordMatchSwing("player", {
+        timing: "WHIFF",
+        shotType: this.selectedShotType || "TOPSPIN",
+        speedKmh: 0,
+        isPower: !1,
+        whiff: !0,
+      });
       return !1;
     }
     p.swingCooldown = 0.32;
@@ -2843,6 +2967,19 @@ export class ArgonTennisEngine {
           { role: "p1", intensity: M ? 1.45 : _ ? 0.75 : 1.1 },
         ));
     }
+    this.addictiveFeatures?.onPlayerStroke?.({
+      shotType: d ? "SMASH" : T,
+      timing: u,
+      isPower: M,
+      speedKmh: F,
+    });
+    this._recordMatchSwing("player", {
+      timing: u,
+      shotType: d ? "SMASH" : T,
+      speedKmh: F,
+      isPower: M,
+      whiff: !1,
+    });
     return (
       this.hud.updateTimingGauge({
         cursorNormalized: w,
@@ -2974,6 +3111,13 @@ export class ArgonTennisEngine {
         intensity: isPower ? 1.35 : 1,
       }));
     const speedKmh = Math.round(this.ball.vel.length() * 6.8);
+    this._recordMatchSwing(isP2Partner ? "opponent" : "player", {
+      timing: isPower ? "PERFECT" : "GOOD",
+      shotType,
+      speedKmh,
+      isPower,
+      whiff: !1,
+    });
     if (!this.autoPlayMode) {
       const screenPos = this._projectToScreen(
         e.pos.clone().add(new o.Vector3(0, 2.35, 0)),
@@ -3183,6 +3327,13 @@ export class ArgonTennisEngine {
             ? "DOWN THE LINE"
             : `SWEET SPOT ${m}`,
       I = this._projectToScreen(l.pos.clone().add(new o.Vector3(0, 2.35, 0)));
+    this._recordMatchSwing("opponent", {
+      timing: u,
+      shotType: d ? "SMASH" : m,
+      speedKmh: O,
+      isPower: w,
+      whiff: !1,
+    });
     return (
       this.hud.showTimingPopup({
         grade: `P2 ${u} \u2022 ${N}!`,
@@ -3399,6 +3550,13 @@ export class ArgonTennisEngine {
       this.audioEngine.playSwingWhoosh(isX2 ? 1.35 : 1);
       this.audioEngine.playRacketHit(y.toLowerCase(), isX2 ? "perfect" : "good");
     }
+    this._recordMatchSwing("opponent", {
+      timing: isX2 || isCucCao ? "PERFECT" : h ? "LATE" : isHigh ? "PERFECT" : "GOOD",
+      shotType: y,
+      speedKmh: Math.round(this.ball.vel.length() * 6.8),
+      isPower: !!this.ball.isPowerShot,
+      whiff: !1,
+    });
     this.opponent.targetPos.set(
       o.MathUtils.clamp(-g * 0.25, -1.6, 1.6),
       0,
@@ -3459,22 +3617,23 @@ export class ArgonTennisEngine {
       }
       if (this.playerPartner) {
         const partMods = characterShopManager.getEffectivePartnerModifiers();
+        const stanceZ = this.playerPartner.customStanceZ || 4.8;
         this.playerPartner.maxSpeed = partMods.maxSpeed || 5.2;
         if (partMods.isUpgradedOrSpecial && t.z > 0) {
           this.playerPartner.targetPos.set(
             o.MathUtils.clamp(t.x, -S.DOUBLES_X + 0.45, S.DOUBLES_X - 0.45),
             0,
-            o.MathUtils.clamp(t.z * 0.56, 2.4, 6.4),
+            o.MathUtils.clamp(t.z * 0.56, Math.max(2.0, stanceZ - 2.0), stanceZ + 2.2),
           );
         } else {
           this.playerPartner.targetPos.set(
             o.MathUtils.clamp(
-              t.x * 0.35 + (this.score.deuceSide ? -1.4 : 1.4),
-              -2.8,
-              2.8,
+              t.x * 0.45 + (this.score.deuceSide ? -1.2 : 1.2),
+              -3.2,
+              3.2,
             ),
             0,
-            5.1,
+            stanceZ,
           );
         }
       }
@@ -3774,6 +3933,8 @@ export class ArgonTennisEngine {
   update(e) {
     ((this.elapsedTime += e),
       this._updateVipMechanics(e),
+      this.courtMapManager?.updateWeather?.(e, this.elapsedTime),
+      this.addictiveFeatures?.update?.(e),
       (this.cameraTrauma = Math.max(0, this.cameraTrauma - e * 1.4)));
     if (
       this.motionController &&
@@ -4028,6 +4189,11 @@ export class ArgonTennisEngine {
             this._startServeToss(this.player)),
       this.phase === "SERVE_TOSS")
     ) {
+      const tossWind = this.courtMapManager?.getCurrentWindVector?.(this.elapsedTime);
+      if (tossWind && tossWind.strength > 0.05) {
+        this.ball.vel.x += tossWind.x * e * 0.65;
+        this.ball.vel.z += tossWind.z * e * 0.28;
+      }
       (this.ball.pos.addScaledVector(this.ball.vel, e),
         (this.ball.vel.y -= L.GRAVITY * e));
       const t = o.MathUtils.clamp(
@@ -4075,10 +4241,13 @@ export class ArgonTennisEngine {
       if (this.autoPlayMode && !this.userHasInteracted) {
         const s = (this.elapsedTime * 0.85) % 1,
           n = 0.42 + 0.34 * Math.sin(s * Math.PI * 2),
+          previewWind = this.courtMapManager?.getCurrentWindVector?.(this.elapsedTime),
+          windCurveX = previewWind ? previewWind.x * Math.sin(n * Math.PI) * 0.55 : 0,
           h = new o.Vector3(1.42, 1.24, 10.85),
-          r = new o.Vector3(-1.35, 0.25, -8.5),
+          r = new o.Vector3(-1.35 + windCurveX, 0.25, -8.5),
           l = new o.Vector3().lerpVectors(h, r, n);
-        ((l.y += Math.sin(n * Math.PI) * 1.45),
+        ((l.x += windCurveX * 0.65),
+          (l.y += Math.sin(n * Math.PI) * 1.45),
           this.ball.pos.copy(l),
           this.ball.mesh && (this.ball.mesh.rotation.x -= e * 16),
           this.ballTrail.setStyle("TOPSPIN", !1),
@@ -4098,7 +4267,7 @@ export class ArgonTennisEngine {
             (this.player.racketKinematics.swingSide = "forehand"),
             (this.player.racketKinematics.swingElapsed = 0.12)),
           this.opponent.pos.set(
-            -1.35 + Math.cos(this.elapsedTime * 2.2) * 0.35,
+            -1.35 + windCurveX * 0.7 + Math.cos(this.elapsedTime * 2.2) * 0.35,
             0,
             -10.5,
           ),
@@ -4107,7 +4276,20 @@ export class ArgonTennisEngine {
       }
       const t = this.ball.pos.z,
         i = this.ball.vel.length(),
-        a = Math.max(0, 1 - L.AIR_DRAG * i * e);
+        a = Math.max(0, 1 - L.AIR_DRAG * i * e),
+        mapWind = this.courtMapManager?.getCurrentWindVector?.(this.elapsedTime);
+      if (mapWind && mapWind.strength > 0.05) {
+        const airborneFactor = this.ball.pos.y > 0.32 ? 2.15 : 0.75;
+        this.ball.vel.x += mapWind.x * e * airborneFactor;
+        this.ball.vel.z += mapWind.z * e * (airborneFactor * 0.42);
+        if (this.ball.targetLanding && this.ball.bounces === 0) {
+          this.ball.targetLanding.x = o.MathUtils.clamp(
+            this.ball.targetLanding.x + mapWind.x * e * 0.92,
+            -S.SINGLES_HALF_WIDTH - 1.15,
+            S.SINGLES_HALF_WIDTH + 1.15,
+          );
+        }
+      }
       if (
         (this.ball.vel.multiplyScalar(a),
         (this.ball.vel.y -= (L.GRAVITY + this.ball.spin.x * 0.14) * e),
@@ -4153,8 +4335,27 @@ export class ArgonTennisEngine {
             ),
           this.audioEngine &&
             this.audioEngine.playBallBounce(Math.min(1.2, s / 5)));
+        this.addictiveFeatures?.onBallBounceOnCourt?.(
+          this.ball.pos.x,
+          this.ball.pos.z,
+          this.ball.lastHitter,
+        );
         const n = this.ball.pos.z > 0,
           h = this.ball.lastHitter === "player";
+        if (this.ball.bounceCountOnCurrentSide === 0) {
+          const isOut =
+            (h && n) ||
+            (!h && !n) ||
+            Math.abs(this.ball.pos.x) > S.SINGLES_X + 0.22 ||
+            Math.abs(this.ball.pos.z) > S.BASELINE_Z + 0.28;
+          this._recordMatchPlacement(h ? "player" : "opponent", {
+            x: this.ball.pos.x,
+            z: this.ball.pos.z,
+            shotType: this.ball.shotType || "TOPSPIN",
+            isPower: !!this.ball.isPowerShot,
+            inBounds: !isOut,
+          });
+        }
         if ((h && n) || (!h && !n)) {
           if (!(this.isMultiplayer && this.playerRole === "p2"))
             this._awardPoint(h ? "opponent" : "player", "Out");
@@ -4498,6 +4699,7 @@ export class ArgonTennisEngine {
     const i = e === "player",
       y = this.playerRole === "p2" ? e === "opponent" : i;
     triggerPhysicalHardwareVibration(y ? "point_won" : "point_lost");
+    this.addictiveFeatures?.onPointFinished?.(e);
     if (!this.autoPlayMode) {
       if (y) {
         const x = this.isMultiplayer
@@ -4673,6 +4875,7 @@ export class ArgonTennisEngine {
                 tRes.title || "Thưởng Giải Đấu CLB!",
               ));
           }
+          this.addictiveFeatures?.onMatchFinished?.(v);
         }
         this.phase = "MATCH_OVER";
         const g = this.isMultiplayer
@@ -4715,6 +4918,7 @@ export class ArgonTennisEngine {
             bestWinStreak: sInfo.bestWinStreak,
             isNewBest: !!sInfo.isNewBest,
             streakBonusCoins: sInfo.streakBonusCoins || 0,
+            matchAnalytics: this.matchAnalytics,
           });
         }, 1800);
         return;
