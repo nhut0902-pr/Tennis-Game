@@ -6921,42 +6921,25 @@ kbd {
   align-items: center;
 }
 
-@media (max-width: 900px) {
-  .vip-mechanics-dock {
-    right: 10px;
-    top: 66px;
-    bottom: auto;
-  }
-  .vip-mechanics-strip {
-    gap: 5px;
-    padding: 4px 6px;
-  }
-  .vip-mech-btn {
-    min-width: 68px;
-    height: 44px;
-    padding: 4px 6px;
-  }
-}
-
 .vip-mechanics-strip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 14px;
-  background: rgba(10, 15, 28, 0.88);
-  border: 1.5px solid rgba(250, 204, 21, 0.5);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(10, 15, 28, 0.82);
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
 }
 
 .vip-mech-btn {
   position: relative;
-  min-width: 86px;
-  height: 58px;
-  border-radius: 10px;
-  background: linear-gradient(160deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.98));
-  border: 2px solid var(--mech-color, #facc15);
+  min-width: 72px;
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.96));
+  border: 1.5px solid var(--mech-color, #facc15);
   color: #ffffff;
   font-family: var(--wii-font);
   cursor: pointer;
@@ -6965,10 +6948,40 @@ kbd {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 6px 10px;
+  padding: 3px 8px;
   transition: transform 0.14s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   user-select: none;
   touch-action: manipulation;
+}
+
+@media (max-width: 900px) {
+  .vip-mechanics-dock {
+    right: 12px;
+    bottom: 196px;
+    top: auto;
+  }
+  .vip-mechanics-strip {
+    gap: 4px;
+    padding: 3px 5px;
+    border-radius: 9px;
+    background: rgba(10, 15, 28, 0.72);
+  }
+  .vip-mech-btn {
+    min-width: 52px;
+    height: 30px;
+    padding: 2px 5px;
+    border-radius: 6px;
+    border-width: 1px;
+  }
+  .mech-key-badge {
+    display: none;
+  }
+  .mech-short-label {
+    font-size: 8.5px !important;
+  }
+  .mech-status-text {
+    font-size: 7px !important;
+  }
 }
 
 .vip-mech-btn:hover {
@@ -6980,13 +6993,13 @@ kbd {
 }
 
 .vip-mech-btn.ready {
-  box-shadow: 0 0 12px var(--mech-color, #facc15);
+  box-shadow: 0 0 8px var(--mech-color, #facc15);
 }
 
 .vip-mech-btn.active {
   background: linear-gradient(145deg, rgba(234, 179, 8, 0.42), rgba(15, 23, 42, 0.96));
   border-color: #ffffff;
-  box-shadow: 0 0 22px var(--mech-color, #facc15);
+  box-shadow: 0 0 16px var(--mech-color, #facc15);
   animation: mechActivePulse 0.65s infinite alternate ease-in-out;
 }
 
@@ -7002,7 +7015,7 @@ kbd {
     transform: scale(1);
   }
   100% {
-    transform: scale(1.05);
+    transform: scale(1.04);
   }
 }
 
@@ -7013,32 +7026,32 @@ kbd {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 1px;
   width: 100%;
 }
 
 .mech-key-badge {
-  font-size: 8.5px;
+  font-size: 7.5px;
   font-weight: 900;
   color: #fde047;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .mech-short-label {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 900;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   color: #ffffff;
   text-align: center;
-  line-height: 1.15;
+  line-height: 1.1;
   white-space: nowrap;
 }
 
 .mech-status-text {
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 800;
   color: #94a3b8;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .vip-mech-btn.ready .mech-status-text {
@@ -7051,16 +7064,16 @@ kbd {
 
 .mech-timer-badge {
   position: absolute;
-  inset: -6px;
+  inset: -4px;
   background: rgba(9, 13, 22, 0.86);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 900;
   color: #ffffff;
   text-shadow: 0 2px 6px #000000;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .mech-cd-progress {

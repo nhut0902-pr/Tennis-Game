@@ -2230,8 +2230,6 @@ export class ArgonTennisEngine {
       this.pendingUserSwing = null;
       if (!this._attemptPlayerRallyStrike({ ...e, side: t }, !1)) {
         this.player.swingCooldown = 0.48;
-        this.playerPartner.swingCooldown = 0.48;
-        this._partnerInterceptApproved = !1;
         this.racketKinematics &&
           this.racketKinematics.triggerSwing(this.player, {
             shotType: i,
@@ -2536,23 +2534,27 @@ export class ArgonTennisEngine {
       n = this.ball.pos.z - this.playerPartner.pos.z,
       h = Math.abs(this.ball.pos.x - this.playerPartner.pos.x),
       r = Math.hypot(h, n),
-      partReach = Math.min(0.25, (partMods.reachAdd || 0) * 0.2),
+      partReach = Math.min(0.85, partMods.reachAdd || 0),
       l =
         !t &&
-        (partMods.aiIqLevel || 1) >= 3 &&
+        (partMods.isUpgradedOrSpecial || (partMods.aiIqLevel || 1) >= 3) &&
         this.ball.pos.z > 0.8 &&
-        this.ball.pos.z <= 5.8 &&
-        h <= 1.15 + partReach &&
-        Math.abs(n) <= 1.05 + partReach &&
+        this.ball.pos.z <= 7.6 &&
+        h <= (partMods.interceptReachX || 1.35) &&
+        Math.abs(n) <= (partMods.interceptReachZ || 1.15) &&
         r < s,
       p = l ? this.playerPartner : this.player,
       g = l ? n : i,
       c = l ? h : a,
       y = l ? r : s;
     if (!t && p.swingCooldown > 0) return !1;
-    const maxReachX = l ? 1.15 + partReach : 1.55 + reachBonus,
-      maxReachZ = l ? 1.05 + partReach : 1.45 + reachBonus * 0.5,
-      maxDist = l ? 1.35 + partReach : 1.78 + reachBonus;
+    const maxReachX = l ? partMods.interceptReachX || 1.35 : 1.55 + reachBonus,
+      maxReachZ = l
+        ? partMods.interceptReachZ || 1.15
+        : 1.45 + reachBonus * 0.5,
+      maxDist = l
+        ? Math.hypot(maxReachX, maxReachZ)
+        : 1.78 + reachBonus;
     if (
       !t &&
       (this.ball.pos.z <= 0.6 ||
@@ -2562,8 +2564,6 @@ export class ArgonTennisEngine {
         y > maxDist)
     ) {
       this.player.swingCooldown = 0.48;
-      this.playerPartner.swingCooldown = 0.48;
-      this._partnerInterceptApproved = !1;
       const A =
           this.ball.pos.z <= 0.6
             ? "ĐÁNH QUÁ SỚM! \u2022 KHÓA VỢT"
@@ -3459,15 +3459,20 @@ export class ArgonTennisEngine {
       }
       if (this.playerPartner) {
         const partMods = characterShopManager.getEffectivePartnerModifiers();
-        if ((partMods.aiIqLevel || 1) >= 4 && t.z > 0 && t.z < 6.2) {
+        this.playerPartner.maxSpeed = partMods.maxSpeed || 5.2;
+        if (partMods.isUpgradedOrSpecial && t.z > 0) {
           this.playerPartner.targetPos.set(
-            o.MathUtils.clamp(t.x * 0.55, -S.SINGLES_X + 0.5, S.SINGLES_X - 0.5),
+            o.MathUtils.clamp(t.x, -S.DOUBLES_X + 0.45, S.DOUBLES_X - 0.45),
             0,
-            5.1,
+            o.MathUtils.clamp(t.z * 0.56, 2.4, 6.4),
           );
         } else {
           this.playerPartner.targetPos.set(
-            this.score.deuceSide ? -1.85 : 1.85,
+            o.MathUtils.clamp(
+              t.x * 0.35 + (this.score.deuceSide ? -1.4 : 1.4),
+              -2.8,
+              2.8,
+            ),
             0,
             5.1,
           );
@@ -4352,24 +4357,36 @@ export class ArgonTennisEngine {
             return;
           }
         }
-      if (this.ball.lastHitter === "opponent" && this.ball.pos.z > 1.2) {
-        const partMods = characterShopManager.getEffectivePartnerModifiers(),
-          partnerDz = Math.abs(this.ball.pos.z - this.playerPartner.pos.z),
+      if (this.ball.lastHitter === "opponent" && this.ball.pos.z > 0.8) {
+        const partMods =
+          this.isMultiplayer && this.hostLoadout
+            ? characterShopManager.getPartnerModifiersFromLoadout(
+                this.hostLoadout,
+              )
+            : characterShopManager.getEffectivePartnerModifiers();
+        this.playerPartner.maxSpeed = partMods.maxSpeed || 5.2;
+        if (partMods.isUpgradedOrSpecial && this.ball.pos.z <= 8.2) {
+          this.playerPartner.targetPos.set(
+            o.MathUtils.clamp(
+              this.ball.pos.x,
+              -S.DOUBLES_X + 0.4,
+              S.DOUBLES_X - 0.4,
+            ),
+            0,
+            o.MathUtils.clamp(this.ball.pos.z, 2.2, 6.8),
+          );
+        }
+        const partnerDz = Math.abs(this.ball.pos.z - this.playerPartner.pos.z),
           partnerDx = Math.abs(this.ball.pos.x - this.playerPartner.pos.x),
-          isHighBotDiff =
-            this.matchConfig.difficulty === "x2" ||
-            this.matchConfig.difficulty === "cuc_cao" ||
-            this.matchConfig.difficulty === "sieu_cao";
-        // Only allow Partner Bot to auto-intercept if its AI IQ has been upgraded >= 3 AND player hasn't just whiffed/spammed swing
+          maxPartnerZ = partMods.isUpgradedOrSpecial ? 7.8 : 5.8,
+          maxPartnerY = partMods.isUpgradedOrSpecial ? 2.45 : 1.85;
         if (
-          !isHighBotDiff &&
-          (partMods.aiIqLevel || 1) >= 3 &&
-          this.player.swingCooldown <= 0 &&
+          (partMods.isUpgradedOrSpecial || (partMods.aiIqLevel || 1) >= 2) &&
           this.playerPartner.swingCooldown <= 0 &&
-          this.ball.pos.z <= 5.8 &&
-          partnerDz < Math.min(1.15, partMods.interceptReachZ || 0.95) &&
-          partnerDx < Math.min(1.25, partMods.interceptReachX || 1.15) &&
-          this.ball.pos.y < 1.85 &&
+          this.ball.pos.z <= maxPartnerZ &&
+          partnerDz < (partMods.interceptReachZ || 1.05) &&
+          partnerDx < (partMods.interceptReachX || 1.15) &&
+          this.ball.pos.y < maxPartnerY &&
           (!this.ball.isPowerShot || partMods.canInterceptPowerShot)
         ) {
           if (
@@ -4380,11 +4397,16 @@ export class ArgonTennisEngine {
             this._partnerInterceptApproved =
               Math.random() < (partMods.autoInterceptChance || 0);
           }
-          if (
-            this._partnerInterceptApproved &&
-            this._executePartnerBotReturn(this.playerPartner)
-          )
-            return;
+          if (this._partnerInterceptApproved) {
+            if (partMods.isUpgradedOrSpecial && partnerDx > 0.85) {
+              this.playerPartner.pos.x = o.MathUtils.lerp(
+                this.playerPartner.pos.x,
+                this.ball.pos.x,
+                0.72,
+              );
+            }
+            if (this._executePartnerBotReturn(this.playerPartner)) return;
+          }
         }
         const r = this.ball.pos.z - this.player.pos.z,
           l = Math.abs(this.ball.pos.x - this.player.pos.x);
@@ -5276,9 +5298,6 @@ export class ArgonTennisEngine {
         i.set(winActor.pos.x, 1.05, winActor.pos.z));
       return { targetPos: t, targetLook: i };
     }
-    const isPortraitMobile =
-      typeof window !== "undefined" &&
-      window.innerHeight > window.innerWidth * 1.08;
     if (e === "INTRO_PAN") {
       const a = this.elapsedTime * 0.42;
       (t.set(Math.sin(a) * 9.5, 8.2, 16.5 + Math.cos(a) * 3.5),
@@ -5288,29 +5307,19 @@ export class ArgonTennisEngine {
     else if (e === "SERVE_CAM")
       if (this.playerRole === "p2") {
         const a = this.opponent.pos.x;
-        isPortraitMobile
-          ? (t.set(a * 0.14, 12.2, -28.2), i.set(a * 0.08, -0.9, -7.2))
-          : (t.set(a * 0.16, 7.8, -22.8), i.set(a * 0.08, 0.35, -1.8));
+        (t.set(a * 0.16, 7.8, -22.8), i.set(a * 0.08, 0.35, -1.8));
       } else {
         const a = this.player.pos.x;
-        isPortraitMobile
-          ? (t.set(a * 0.14, 12.2, 28.2), i.set(a * 0.08, -0.9, 7.2))
-          : (t.set(a * 0.16, 7.8, 22.8), i.set(a * 0.08, 0.35, 1.8));
+        (t.set(a * 0.16, 7.8, 22.8), i.set(a * 0.08, 0.35, 1.8));
       }
     else
       e === "REPLAY_CAM"
         ? (t.set(2.35, 1.48, 4.15), i.set(-1.45, 0.95, -1.35))
         : this.playerRole === "p2"
-          ? isPortraitMobile
-            ? (t.set(this.opponent.pos.x * 0.14, 12.2, -28.2),
-              i.set(this.ball.pos.x * 0.1, -0.9, -7.2))
-            : (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
-              i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
-          : isPortraitMobile
-            ? (t.set(this.player.pos.x * 0.14, 12.2, 28.2),
-              i.set(this.ball.pos.x * 0.1, -0.9, 7.2))
-            : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
-              i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
+          ? (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
+            i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
+          : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
+            i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
     return { targetPos: t, targetLook: i };
   }
   _snapCameraImmediate() {

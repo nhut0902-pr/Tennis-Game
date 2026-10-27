@@ -3838,33 +3838,41 @@ class CharacterShopManager {
     const effPwr = Math.max(0, powerPoints - 4);
     const effSpn = Math.max(0, spinPoints - 4);
 
-    const autoInterceptChance =
-      iqLv <= 1 && !char.isRobot && !char.isVip
-        ? 0
-        : Math.min(
-            0.85,
-            (iqLv - 1) * 0.065 +
-              (mech.botInterceptBonus || 0) +
-              accBonus.botInterceptBonus +
-              (ovdLv - 1) * 0.02
-          );
-    const interceptReachX =
-      1.15 + (rflxLv - 1) * 0.14 + (magLv - 1) * 0.1 + (mech.reachBonus || 0) * 0.45;
-    const interceptReachZ =
-      0.95 + (rflxLv - 1) * 0.09 + (magLv - 1) * 0.07 + (mech.reachBonus || 0) * 0.35;
-    const canInterceptPowerShot = rflxLv >= 4 || iqLv >= 5 || Boolean(char.isRobot);
+    const totalUpg = iqLv + spdLv + rflxLv + pwrLv + ovdLv + magLv;
+    const isUpgradedOrSpecial = totalUpg > 6 || Boolean(char.isRobot) || Boolean(char.isVip) || (char.price || 0) >= 2500;
+
+    const autoInterceptChance = !isUpgradedOrSpecial
+      ? 0.08
+      : Math.min(
+          0.99,
+          0.45 +
+            iqLv * 0.055 +
+            (mech.botInterceptBonus || 0) +
+            accBonus.botInterceptBonus +
+            (ovdLv - 1) * 0.025 +
+            (char.isRobot ? 0.15 : 0) +
+            (char.isVip ? 0.2 : 0)
+        );
+    const interceptReachX = !isUpgradedOrSpecial
+      ? 1.05
+      : 1.65 + rflxLv * 0.22 + (magLv - 1) * 0.16 + (mech.reachBonus || 0) * 0.85;
+    const interceptReachZ = !isUpgradedOrSpecial
+      ? 0.85
+      : 1.35 + rflxLv * 0.14 + (magLv - 1) * 0.11 + (mech.reachBonus || 0) * 0.55;
+    const canInterceptPowerShot =
+      isUpgradedOrSpecial && (rflxLv >= 2 || iqLv >= 2 || Boolean(char.isRobot) || Boolean(char.isVip));
     const maxSpeed =
-      (4.35 + Math.min(18, effSpd) * 0.18 + Math.max(0, effSpd - 18) * 0.065) *
+      (4.5 + Math.min(18, effSpd) * 0.22 + Math.max(0, effSpd - 18) * 0.085) *
       (1 + (mech.speedBurstMult || 0) * 0.48);
     const volleyPowerMult =
       1.0 +
-      Math.min(18, effPwr) * 0.032 +
-      Math.max(0, effPwr - 18) * 0.015 +
+      Math.min(18, effPwr) * 0.036 +
+      Math.max(0, effPwr - 18) * 0.018 +
       (mech.botVolleyPowerBonus || 0) +
-      (ovdLv - 1) * 0.035;
+      (ovdLv - 1) * 0.04;
     const spinMult = 1.0 + Math.min(18, effSpn) * 0.035 + (mech.spinCurveMult || 0);
-    const autoSmashChance = Math.min(0.97, 0.28 + (ovdLv - 1) * 0.08 + (char.isRobot ? 0.18 : 0));
-    const smartPlacementAccuracy = Math.min(0.99, 0.4 + iqLv * 0.065);
+    const autoSmashChance = Math.min(0.98, 0.32 + (ovdLv - 1) * 0.08 + (char.isRobot ? 0.2 : 0) + (char.isVip ? 0.25 : 0));
+    const smartPlacementAccuracy = Math.min(0.99, 0.45 + iqLv * 0.065);
 
     const rawOvr =
       50 + (speedPoints + powerPoints + spinPoints + reflexPoints + iqPoints * 0.5) * 2.15;
@@ -3872,7 +3880,12 @@ class CharacterShopManager {
     return {
       mechanicId: mech.id || "standard",
       isRobot: Boolean(char.isRobot),
+      isVip: Boolean(char.isVip),
+      isUpgradedOrSpecial,
       aiIqLevel: iqLv,
+      aiIqLv: iqLv,
+      powerLv: pwrLv,
+      reachAdd: Math.max(0, interceptReachX - 1.1),
       autoInterceptChance: Number(autoInterceptChance.toFixed(2)),
       interceptReachX: Number(interceptReachX.toFixed(2)),
       interceptReachZ: Number(interceptReachZ.toFixed(2)),
