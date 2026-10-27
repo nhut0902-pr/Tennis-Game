@@ -8933,6 +8933,299 @@ html:not(.autoplay-mode) .in-game-match-controls {
   color: #fef08a;
 }
 
+/* ============================================================================
+   UNIVERSAL AAA GAME BUTTON SUPER-MORPH ANIMATION ENGINE
+   Applies tactile 3D squash-and-stretch morphing, liquid border-radius shifts,
+   cursor-tracked specular spotlight, diagonal light sweep, and shockwave ripples
+   to EVERY button in the game.
+   ============================================================================ */
+
+@keyframes superMorphElasticBounce {
+  0% {
+    transform: translateY(2px) scale3d(1.06, 0.9, 1);
+  }
+  30% {
+    transform: translateY(-3.5px) scale3d(0.96, 1.055, 1);
+  }
+  55% {
+    transform: translateY(-1px) scale3d(1.028, 0.98, 1);
+  }
+  78% {
+    transform: translateY(-0.5px) scale3d(0.992, 1.01, 1);
+  }
+  100% {
+    transform: translateY(0) scale3d(1, 1, 1);
+  }
+}
+
+@keyframes superMorphCircleBounce {
+  0% {
+    transform: scale3d(1.09, 0.88, 1);
+    border-radius: 45% 55% 47% 53% / 55% 45% 55% 45%;
+  }
+  34% {
+    transform: scale3d(0.93, 1.07, 1) translateY(-2px);
+    border-radius: 54% 46% 52% 48% / 46% 54% 46% 54%;
+  }
+  65% {
+    transform: scale3d(1.03, 0.975, 1);
+    border-radius: 49% 51% 50% 50% / 51% 49% 51% 49%;
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+    border-radius: 50%;
+  }
+}
+
+@keyframes superMorphRippleWave {
+  0% {
+    transform: translate(-50%, -50%) scale(0.08);
+    opacity: 0.78;
+  }
+  65% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.85);
+    opacity: 0;
+  }
+}
+
+@keyframes superMorphPrimarySheen {
+  0%, 100% {
+    box-shadow:
+      0 8px 22px -4px rgba(16, 185, 129, 0.42),
+      0 0 0 1px rgba(255, 255, 255, 0.22) inset,
+      0 2px 0 rgba(255, 255, 255, 0.35) inset;
+  }
+  50% {
+    box-shadow:
+      0 11px 28px -2px rgba(56, 189, 248, 0.52),
+      0 0 14px rgba(16, 185, 129, 0.35),
+      0 0 0 1.5px rgba(255, 255, 255, 0.34) inset,
+      0 2px 0 rgba(255, 255, 255, 0.48) inset;
+  }
+}
+
+/* Base Morph Upgrade for All Buttons & Interactive Game Controls */
+button:not(:disabled),
+.wii-btn,
+.wii-btn-primary,
+.wii-btn-secondary,
+.title-cta-btn,
+.seg-btn,
+.diff-btn,
+.map-pick-card,
+.weather-chip,
+.hud-quick-ctrl-btn,
+.shot-btn,
+.action-dock-btn,
+.vip-mech-btn,
+.ahud-pill,
+.ahud-hub-cta,
+.touch-action-btn,
+.shop-tab-btn,
+.char-subtab-btn,
+.char-filter-chip,
+.shop-action-btn,
+.vip-pkg-buy-btn,
+.morph-game-btn,
+.pose-btn,
+.lobby-btn,
+.btn-room-join,
+.lobby-coin-chip,
+.copy-inline-btn,
+.victory-btn,
+.victory-top-exit-btn,
+.victory-view-tab,
+.heatmap-filter-btn,
+.pause-action-btn,
+.ahub-tab,
+.ahub-btn,
+.ahub-close-btn,
+.controls-tab-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  will-change: transform, border-radius, box-shadow, filter;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1.35, 0.36, 1),
+    border-radius 0.32s cubic-bezier(0.22, 1.25, 0.36, 1),
+    box-shadow 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    filter 0.22s ease !important;
+}
+
+/* Diagonal Liquid Specular Sweep + Pointer Spotlight Overlay */
+button:not(:disabled)::after,
+.wii-btn::after,
+.map-pick-card::after,
+.weather-chip::after,
+.ahud-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(
+      130px circle at var(--morph-x, 50%) var(--morph-y, 50%),
+      rgba(255, 255, 255, 0.24),
+      transparent 72%
+    ),
+    linear-gradient(
+      112deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.28) 46%,
+      rgba(255, 255, 255, 0.06) 54%,
+      transparent 76%
+    );
+  background-size: 100% 100%, 240% 100%;
+  background-position: 0 0, 150% 0;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition:
+    opacity 0.26s ease,
+    background-position 0.58s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Hover Morph State: Organic Geometry Softening + 3D Lift + Light Glint */
+button:not(:disabled):not(.touch-action-btn):not(.shot-btn):hover,
+.wii-btn:hover,
+.map-pick-card:hover,
+.weather-chip:hover,
+.ahud-pill:hover {
+  transform: translateY(-3px) scale3d(1.032, 1.032, 1);
+  filter: brightness(1.09) saturate(1.08);
+  box-shadow:
+    0 12px 26px -6px rgba(2, 6, 23, 0.55),
+    0 0 16px rgba(56, 189, 248, 0.28),
+    0 1.5px 0 rgba(255, 255, 255, 0.36) inset;
+}
+
+button:not(:disabled):hover::after,
+.wii-btn:hover::after,
+.map-pick-card:hover::after,
+.weather-chip:hover::after,
+.ahud-pill:hover::after {
+  opacity: 1;
+  background-position: 0 0, -45% 0;
+}
+
+/* Rectangular / Pill Buttons Organic Corner Morph on Hover & Press */
+.wii-btn:not(.shot-btn):not(.touch-action-btn):hover,
+.title-cta-btn:hover,
+.vip-pkg-buy-btn:hover,
+.pause-action-btn:hover,
+.victory-btn:hover,
+.lobby-btn:hover,
+.shop-action-btn:hover,
+.ahub-btn:hover {
+  border-radius: 16px 20px 16px 20px / 18px 15px 18px 15px;
+}
+
+/* Active Press State: True AAA Squash-and-Stretch Compression */
+button:not(:disabled):not(.touch-action-btn):not(.shot-btn):active,
+.wii-btn:not(.shot-btn):not(.touch-action-btn):active,
+.map-pick-card:active,
+.weather-chip:active,
+.ahud-pill:active {
+  transform: translateY(2px) scale3d(1.055, 0.915, 1) !important;
+  border-radius: 20px 14px 20px 14px / 13px 19px 13px 19px;
+  filter: brightness(0.97) contrast(1.06);
+  box-shadow:
+    0 3px 8px rgba(2, 6, 23, 0.65),
+    0 0 12px rgba(56, 189, 248, 0.38),
+    0 2px 6px rgba(0, 0, 0, 0.35) inset !important;
+  transition-duration: 0.07s !important;
+}
+
+/* Circular Arcade Buttons (Swing, Toss, Lob, Slice, Smash) Morph into Organic Squircle on Press */
+.touch-action-btn:hover,
+.shot-btn:hover {
+  transform: translateY(-2.5px) scale3d(1.05, 1.05, 1);
+  filter: brightness(1.1);
+}
+
+.touch-action-btn:active,
+.shot-btn:active {
+  transform: scale3d(1.09, 0.89, 1) !important;
+  border-radius: 45% 55% 47% 53% / 55% 45% 55% 45% !important;
+  filter: brightness(1.14) saturate(1.15);
+  transition-duration: 0.06s !important;
+}
+
+/* Elastic Jelly Rebound Triggered on Release / Tap */
+button.is-super-morphing:not(.touch-action-btn):not(.shot-btn),
+.wii-btn.is-super-morphing:not(.touch-action-btn):not(.shot-btn),
+.map-pick-card.is-super-morphing,
+.weather-chip.is-super-morphing,
+.ahud-pill.is-super-morphing {
+  animation: superMorphElasticBounce 0.46s cubic-bezier(0.22, 1.4, 0.36, 1) forwards;
+}
+
+.touch-action-btn.is-super-morphing,
+.shot-btn.is-super-morphing {
+  animation: superMorphCircleBounce 0.44s cubic-bezier(0.22, 1.45, 0.36, 1) forwards;
+}
+
+/* Shockwave Ripple Element Injected on Pointerdown */
+.super-morph-ripple {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.68) 0%,
+    rgba(125, 211, 252, 0.42) 45%,
+    rgba(56, 189, 248, 0) 75%
+  );
+  transform: translate(-50%, -50%) scale(0.08);
+  animation: superMorphRippleWave 0.54s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hero CTA Idle Breathing Sheen */
+#btn-start-match,
+#btn-play-again,
+.pause-btn-resume {
+  animation: superMorphPrimarySheen 3.2s ease-in-out infinite;
+}
+
+/* Active Segment / Filter / Tab Pill Morph Highlight */
+.seg-btn.active,
+.diff-btn.active,
+.shop-tab-btn.active,
+.char-subtab-btn.active,
+.char-filter-chip.active,
+.victory-view-tab.active,
+.heatmap-filter-btn.active,
+.ahub-tab.active,
+.controls-tab-btn.active,
+.weather-chip.active {
+  transform: translateY(-1.5px) scale(1.025);
+  box-shadow:
+    0 6px 16px -3px rgba(14, 165, 233, 0.45),
+    0 1.5px 0 rgba(255, 255, 255, 0.42) inset;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.is-super-morphing,
+  .touch-action-btn.is-super-morphing,
+  .shot-btn.is-super-morphing,
+  #btn-start-match,
+  #btn-play-again,
+  .pause-btn-resume {
+    animation: none !important;
+  }
+}
+
+
 
 
 

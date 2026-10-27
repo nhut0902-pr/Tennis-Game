@@ -569,6 +569,91 @@ export class HudUI {
         window.__argonTennis?.characterShopUI?.setVictoryPose?.(pose);
       });
     });
+
+    this._initUniversalButtonMorphEngine();
+  }
+
+  _initUniversalButtonMorphEngine() {
+    if (window.__argonSuperMorphBound) return;
+    window.__argonSuperMorphBound = true;
+
+    const morphSelector = [
+      "button:not(:disabled)",
+      ".wii-btn",
+      ".map-pick-card",
+      ".weather-chip",
+      ".ahud-pill",
+      ".touch-action-btn",
+      ".shot-btn",
+      ".vip-pkg-buy-btn",
+      ".pause-action-btn",
+      ".victory-btn",
+      ".lobby-btn",
+      ".shop-action-btn"
+    ].join(",");
+
+    // Track pointer position for liquid specular spotlight
+    document.addEventListener(
+      "pointermove",
+      (e) => {
+        const target = e.target?.closest?.(morphSelector);
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          const x = Math.round(e.clientX - rect.left);
+          const y = Math.round(e.clientY - rect.top);
+          target.style.setProperty("--morph-x", `${x}px`);
+          target.style.setProperty("--morph-y", `${y}px`);
+        }
+      },
+      { passive: true }
+    );
+
+    // Spawn shockwave ripple + trigger elastic jelly morph rebound
+    document.addEventListener(
+      "pointerdown",
+      (e) => {
+        const target = e.target?.closest?.(morphSelector);
+        if (!target || target.disabled) return;
+
+        const rect = target.getBoundingClientRect();
+        const x = rect.width > 0 ? e.clientX - rect.left : rect.width * 0.5;
+        const y = rect.height > 0 ? e.clientY - rect.top : rect.height * 0.5;
+
+        target.style.setProperty("--morph-x", `${Math.round(x)}px`);
+        target.style.setProperty("--morph-y", `${Math.round(y)}px`);
+
+        // Create luminous shockwave ripple
+        const ripple = document.createElement("span");
+        ripple.className = "super-morph-ripple";
+        const maxDim = Math.max(rect.width || 80, rect.height || 44);
+        ripple.style.width = `${maxDim}px`;
+        ripple.style.height = `${maxDim}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        target.appendChild(ripple);
+        ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+        setTimeout(() => {
+          if (ripple.parentNode) ripple.remove();
+        }, 650);
+
+        // Trigger elastic jelly rebound class
+        target.classList.remove("is-super-morphing");
+        void target.offsetWidth;
+        target.classList.add("is-super-morphing");
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      "animationend",
+      (e) => {
+        if (e.animationName === "superMorphElasticBounce" || e.animationName === "superMorphCircleBounce") {
+          e.target?.classList?.remove("is-super-morphing");
+        }
+      },
+      { passive: true }
+    );
   }
 
   openPauseModal() {
