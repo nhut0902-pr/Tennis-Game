@@ -1015,6 +1015,141 @@ export class AudioEngine {
       osc.stop(t0 + 0.08);
     });
   }
+
+  playBroadcastReplayWipeSfx() {
+    if (this.muted) return;
+    const ctx = this._ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    // 1. Cinematic Broadcast Swoosh (White Noise Bandpass Sweep)
+    if (this._noiseBuffer) {
+      const src = ctx.createBufferSource();
+      src.buffer = this._noiseBuffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.Q.setValueAtTime(1.8, now);
+      filter.frequency.setValueAtTime(220, now);
+      filter.frequency.exponentialRampToValueAtTime(2400, now + 0.22);
+      filter.frequency.exponentialRampToValueAtTime(340, now + 0.52);
+
+      const nGain = ctx.createGain();
+      nGain.gain.setValueAtTime(0.001, now);
+      nGain.gain.linearRampToValueAtTime(0.14, now + 0.14);
+      nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.54);
+      src.connect(filter).connect(nGain).connect(this.sfxGain);
+      if (this.reverbSend) nGain.connect(this.reverbSend);
+      src.start(now, 0, 0.56);
+    }
+
+    // 2. TV Sports Broadcast Stinger Brass/Synth Fanfare (D4 -> A4 -> D5 -> F#5 -> A5)
+    const stingerNotes = [293.66, 440.0, 587.33, 739.99, 880.0];
+    stingerNotes.forEach((freq, idx) => {
+      const t0 = now + 0.05 + idx * 0.042;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc1.type = "sawtooth";
+      osc2.type = "triangle";
+      osc2.detune.setValueAtTime(12, t0);
+      osc1.frequency.setValueAtTime(freq, t0);
+      osc2.frequency.setValueAtTime(freq * 0.5, t0);
+
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.setValueAtTime(3200, t0);
+      lp.frequency.exponentialRampToValueAtTime(1200, t0 + 0.45);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(idx === 4 ? 0.085 : 0.055, t0 + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t0 + (idx === 4 ? 0.55 : 0.34));
+
+      osc1.connect(lp).connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.sfxGain);
+      if (this.reverbSend) gain.connect(this.reverbSend);
+      osc1.start(t0);
+      osc2.start(t0);
+      osc1.stop(t0 + 0.58);
+      osc2.stop(t0 + 0.58);
+    });
+  }
+
+  playBroadcastReplayStinger({
+    winner = "player",
+    scorerName = "Đội Bạn",
+    shotType = "SMASH",
+    speedKmh = 185,
+    scoreText = "15 - 00",
+    reason = "Nice Shot!"
+  } = {}) {
+    if (this.muted) return;
+
+    // 1. Play Broadcast Logo Wipe Swoosh + Stinger Chime
+    this.playBroadcastReplayWipeSfx();
+
+    // 2. Play Umpire / Broadcast "Replay!" preloaded voice clip immediately
+    this.playVoiceCallout("replay", { delayMs: 90, clearQueue: true });
+
+    // 3. Speak excited TV Football / Sports Commentator Voice Callout
+    if (this._replaySpeechTimer) {
+      clearTimeout(this._replaySpeechTimer);
+      this._replaySpeechTimer = null;
+    }
+
+    this._replaySpeechTimer = setTimeout(() => {
+      if (this.muted || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+        const viVoice = voices.find((v) => /vi(-|_)?vn|vietnam/i.test(`${v.lang} ${v.name}`));
+        const enVoice =
+          voices.find((v) => /en(-|_)?(gb|us|au)/i.test(v.lang) && /male|google|natural|daniel|david/i.test(v.name)) ||
+          voices.find((v) => /^en/i.test(v.lang));
+
+        const isPlayerGoal = winner === "player";
+        let speechText = "";
+        if (viVoice) {
+          speechText = isPlayerGoal
+            ? `Vàooo! Ghi điểm tuyệt đẹp cho ${scorerName}! Cú đánh ${shotType} tốc độ ${speedKmh} ki lô mét trên giờ! Hãy cùng xem lại pha quay chậm!`
+            : `Điểm số cho ${scorerName}! Hãy cùng xem lại tình huống ghi điểm vừa rồi!`;
+        } else {
+          const cleanShot = String(shotType || "power shot").toLowerCase();
+          speechText = isPlayerGoal
+            ? `Instant Replay! What a spectacular ${cleanShot} winner at ${speedKmh} kilometers per hour! Score is ${String(scoreText).replace(/\b00\b/g, "Love")}!`
+            : `Instant Replay! Let's take another look at that winning point!`;
+        }
+
+        const utter = new SpeechSynthesisUtterance(speechText);
+        if (viVoice) {
+          utter.voice = viVoice;
+          utter.lang = "vi-VN";
+          utter.rate = 1.12;
+          utter.pitch = 1.08;
+        } else if (enVoice) {
+          utter.voice = enVoice;
+          utter.lang = enVoice.lang || "en-US";
+          utter.rate = 1.08;
+          utter.pitch = 1.05;
+        }
+        utter.volume = Math.min(1, this.sfxVolume * 0.98);
+        window.speechSynthesis.speak(utter);
+      } catch {}
+    }, 620);
+  }
+
+  stopReplayCommentary() {
+    if (this._replaySpeechTimer) {
+      clearTimeout(this._replaySpeechTimer);
+      this._replaySpeechTimer = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {}
+    }
+  }
 }
 
 export default AudioEngine;
+

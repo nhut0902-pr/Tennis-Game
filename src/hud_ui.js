@@ -570,6 +570,22 @@ export class HudUI {
       });
     });
 
+    const btnReplaySwitchCam = document.getElementById("btn-replay-switch-cam");
+    if (btnReplaySwitchCam) {
+      btnReplaySwitchCam.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.__argonTennis?.cycleReplayCameraAngle?.();
+      });
+    }
+
+    const btnReplaySkip = document.getElementById("btn-replay-skip");
+    if (btnReplaySkip) {
+      btnReplaySkip.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.__argonTennis?.skipBroadcastReplay?.();
+      });
+    }
+
     this._initUniversalButtonMorphEngine();
   }
 
@@ -1856,9 +1872,128 @@ export class HudUI {
     if (this.elBannerLayer) this.elBannerLayer.classList.add("hidden");
   }
 
-  setReplayMode(active) {
+  setReplayMode(active, meta = null) {
     document.body.classList.toggle("replay-mode", !!active);
     if (this.elReplayBadge) this.elReplayBadge.classList.toggle("hidden", !active);
+    const sys = document.getElementById("broadcast-replay-system");
+    if (sys) {
+      if (active) {
+        sys.classList.remove("hidden");
+        if (meta) {
+          this._populateBroadcastReplayMeta(meta);
+        }
+      } else {
+        sys.classList.add("hidden");
+      }
+    }
+  }
+
+  _populateBroadcastReplayMeta({
+    winner = "player",
+    scorerName = "ĐỘI BẠN",
+    shotType = "SMASH",
+    speedKmh = 186,
+    rallyCount = 3,
+    scoreText = "15 - 00",
+    reason = "Nice Shot!",
+    camLabel = "GÓC MÁY: TRUYỀN HÌNH"
+  } = {}) {
+    const isPlayer = winner === "player";
+    const stingerCallout = document.getElementById("stinger-sub-callout");
+    if (stingerCallout) {
+      stingerCallout.textContent = isPlayer
+        ? `GHI ĐIỂM THÀNH CÔNG • ${scorerName.toUpperCase()}`
+        : `PHA GHI ĐIỂM • ${scorerName.toUpperCase()}`;
+    }
+
+    const teamBadge = document.getElementById("replay-lt-team-badge");
+    if (teamBadge) {
+      teamBadge.textContent = isPlayer ? "GHI BÀN / ĐIỂM!" : "ĐỐI THỦ GHI ĐIỂM";
+      teamBadge.classList.toggle("opponent-goal", !isPlayer);
+    }
+
+    const scorerEl = document.getElementById("replay-lt-scorer-name");
+    if (scorerEl) {
+      scorerEl.textContent = scorerName.toUpperCase();
+    }
+
+    const shotTagEl = document.getElementById("replay-lt-shot-tag");
+    if (shotTagEl) {
+      shotTagEl.textContent = `${String(shotType || "TOPSPIN").toUpperCase()} • ${speedKmh} KM/H`;
+    }
+
+    const commEl = document.getElementById("replay-lt-commentary");
+    if (commEl) {
+      if (reason === "Out") {
+        commEl.textContent = `Bóng ra ngoài sân sau chuỗi ${rallyCount} chạm • Điểm cho ${scorerName}!`;
+      } else if (reason === "Net") {
+        commEl.textContent = `Bóng chạm lưới sau chuỗi ${rallyCount} chạm • Điểm cho ${scorerName}!`;
+      } else {
+        commEl.textContent = `Pha dứt điểm ${shotType} (${speedKmh} km/h) ghi điểm tuyệt đẹp sau ${rallyCount} chạm!`;
+      }
+    }
+
+    const scoreValEl = document.getElementById("replay-lt-score-val");
+    if (scoreValEl) {
+      scoreValEl.textContent = scoreText || "15 - 00";
+    }
+
+    const camLabelEl = document.getElementById("replay-cam-angle-label");
+    if (camLabelEl && camLabel) {
+      camLabelEl.textContent = camLabel;
+    }
+  }
+
+  startBroadcastReplayOverlay(meta = {}) {
+    this._populateBroadcastReplayMeta(meta);
+    this.setReplayMode(true, meta);
+
+    const stinger = document.getElementById("replay-logo-stinger");
+    if (stinger) {
+      if (this._stingerHideTimer) clearTimeout(this._stingerHideTimer);
+      stinger.classList.remove("hidden", "stinger-exit");
+      stinger.classList.add("stinger-active");
+      this._stingerHideTimer = setTimeout(() => {
+        stinger.classList.remove("stinger-active");
+        stinger.classList.add("hidden");
+      }, 880);
+    }
+
+    this.updateBroadcastReplayProgress(0, meta.durationSec || 3.1);
+  }
+
+  updateBroadcastReplayProgress(progress01 = 0, durationSec = 3.1) {
+    const clamped = Math.max(0, Math.min(1, Number(progress01) || 0));
+    const fill = document.getElementById("replay-youtube-scrub-fill");
+    if (fill) {
+      fill.style.width = `${(clamped * 100).toFixed(1)}%`;
+    }
+    const timeLabel = document.getElementById("replay-yt-time-label");
+    if (timeLabel) {
+      const curSec = (clamped * durationSec).toFixed(1);
+      const totSec = Number(durationSec).toFixed(1);
+      timeLabel.textContent = `00:0${curSec} / 00:0${totSec}`;
+    }
+  }
+
+  updateReplayCamLabel(label = "GÓC MÁY: TRUYỀN HÌNH") {
+    const camLabelEl = document.getElementById("replay-cam-angle-label");
+    if (camLabelEl) {
+      camLabelEl.textContent = label;
+    }
+  }
+
+  endBroadcastReplayOverlay() {
+    if (this._stingerHideTimer) {
+      clearTimeout(this._stingerHideTimer);
+      this._stingerHideTimer = null;
+    }
+    const stinger = document.getElementById("replay-logo-stinger");
+    if (stinger) {
+      stinger.classList.remove("stinger-active", "stinger-exit");
+      stinger.classList.add("hidden");
+    }
+    this.setReplayMode(false);
   }
 
   updateTimingGauge({ cursorNormalized = 0.5, modeTitle = "SWING TIMING", speedText = "READY" }) {

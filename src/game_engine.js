@@ -781,11 +781,13 @@ export class ArgonTennisEngine {
           this.hud.setReplayMode(this.manualCameraOverride === "REPLAY_CAM"));
       },
       onToggleReplay: () => {
-        this.phase === "REPLAY"
-          ? ((this.persistentStateLock = !1),
-            this.hud.setReplayMode(!1),
-            this._setupPointServe({ showBanner: !1 }))
-          : this._enterInstantReplayState({ persistent: !1 });
+        if (this.phase === "REPLAY") {
+          this.skipBroadcastReplay();
+        } else if (this._lastCompletedReplayClip && this._lastCompletedReplayClip.frames?.length >= 4) {
+          this._startBroadcastPointReplay(this._lastCompletedReplayClip);
+        } else {
+          this._enterInstantReplayState({ persistent: !1 });
+        }
       },
       onToggleWebcam: async () => {
         if (this.motionController)
@@ -1040,11 +1042,17 @@ export class ArgonTennisEngine {
       } else if (i.code === "Digit3" || i.code === "KeyV") {
         this._triggerVipMechanic(2);
       } else if (i.code === "KeyC") {
-        this.hud.callbacks.onCycleCamera();
+        if (this.phase === "REPLAY" && this._activeBroadcastReplay) {
+          this.cycleReplayCameraAngle();
+        } else {
+          this.hud.callbacks.onCycleCamera();
+        }
       } else if (i.code === "KeyM") {
         this.courtMapManager && this.courtMapManager.cycleNextMap();
       } else if (i.code === "KeyR") {
         this.hud.callbacks.onToggleReplay();
+      } else if ((i.code === "Space" || i.code === "Enter") && this.phase === "REPLAY" && this._activeBroadcastReplay && this.phaseTimer > 0.35) {
+        this.skipBroadcastReplay();
       } else if (
         this.isMultiplayer &&
         (i.code === "ShiftRight" || i.code === "KeyK" || i.code === "Numpad0")
@@ -2083,7 +2091,13 @@ export class ArgonTennisEngine {
     ((this.phase = "SERVE_STANCE"),
       (this.phaseTimer = 0),
       (this.cameraMode = "SERVE_CAM"),
-      this.hud.setReplayMode(!1),
+      (this._activeBroadcastReplay = null),
+      (this._pendingPostPointReplay = null),
+      (this._replayFrameBuffer = []),
+      (this._replaySampleAccum = 0),
+      this.hud.endBroadcastReplayOverlay
+        ? this.hud.endBroadcastReplayOverlay()
+        : this.hud.setReplayMode(!1),
       this.ballTrail.clear(),
       this.swingVfx && this.swingVfx.clearAllTrails());
     const s = this.score.deuceSide ? 1.35 : -0.55,
@@ -2220,15 +2234,134 @@ export class ArgonTennisEngine {
         }),
       this._predictBallIntercept(this.opponent));
   }
+  _recordLiveReplayFrame(dt = 0.016, forceCapture = !1) {
+    if (!this._replayFrameBuffer) this._replayFrameBuffer = [];
+    this._replaySampleAccum = (this._replaySampleAccum || 0) + dt;
+    if (!forceCapture && this._replaySampleAccum < 0.028) return;
+    this._replaySampleAccum = 0;
+
+    if (this.ball.inPlay && this.ball.vel.lengthSq() > 4) {
+      this._lastRecordedBallSpeed = this.ball.vel.length();
+    }
+
+    const snapActor = (a) => ({
+      px: +a.pos.x.toFixed(3),
+      py: +a.pos.y.toFixed(3),
+      pz: +a.pos.z.toFixed(3),
+      ry: +(a.root?.rotation?.y || 0).toFixed(3),
+      st: a.swingType || "forehand",
+      sw: +(a.swingTimer || 0).toFixed(3),
+      sp: +(a.stridePhase || 0).toFixed(3),
+    });
+
+    this._replayFrameBuffer.push({
+      bx: +this.ball.pos.x.toFixed(3),
+      by: +this.ball.pos.y.toFixed(3),
+      bz: +this.ball.pos.z.toFixed(3),
+      vx: +this.ball.vel.x.toFixed(2),
+      vy: +this.ball.vel.y.toFixed(2),
+      vz: +this.ball.vel.z.toFixed(2),
+      shotType: this.ball.shotType || "TOPSPIN",
+      isPower: !!this.ball.isPowerShot,
+      lastHitter: this.ball.lastHitter || "player",
+      p1: snapActor(this.player),
+      p1b: snapActor(this.playerPartner),
+      p2: snapActor(this.opponent),
+      p2b: snapActor(this.opponentPartner),
+    });
+
+    if (this._replayFrameBuffer.length > 90) {
+      this._replayFrameBuffer.shift();
+    }
+  }
+  _startBroadcastPointReplay(clip) {
+    if (!clip || !clip.frames || clip.frames.length < 2) {
+      this._setupPointServe({ showBanner: !0 });
+      return;
+    }
+    this.phase = "REPLAY";
+    this.phaseTimer = 0;
+    this.cameraMode = "REPLAY_CAM";
+    this.persistentStateLock = !1;
+    this._activeBroadcastReplay = {
+      ...clip,
+      durationSec: clip.durationSec || 3.1,
+      lastAppliedIdx: -1,
+    };
+    this._replayCameraAngleIdx = 0;
+    this.hud.hideCenterBanner();
+    this.ballTrail.clear();
+
+    const camLabels = [
+      "GÓC MÁY: TRUYỀN HÌNH CẬN CẢNH",
+      "GÓC MÁY: TRÊN CAO TOÀN SÂN",
+      "GÓC MÁY: GÓC ĐÁNH GHI ĐIỂM",
+    ];
+    const meta = {
+      ...clip,
+      camLabel: camLabels[this._replayCameraAngleIdx],
+    };
+
+    if (this.hud.startBroadcastReplayOverlay) {
+      this.hud.startBroadcastReplayOverlay(meta);
+    } else {
+      this.hud.setReplayMode(!0, meta);
+    }
+
+    if (this.audioEngine && this.audioEngine.playBroadcastReplayStinger) {
+      this.audioEngine.playBroadcastReplayStinger(meta);
+    } else if (this.audioEngine) {
+      this.audioEngine.playVoiceCallout("replay");
+    }
+  }
+  cycleReplayCameraAngle() {
+    this._replayCameraAngleIdx = ((this._replayCameraAngleIdx || 0) + 1) % 3;
+    const camLabels = [
+      "GÓC MÁY: TRUYỀN HÌNH CẬN CẢNH",
+      "GÓC MÁY: TRÊN CAO TOÀN SÂN",
+      "GÓC MÁY: GÓC ĐÁNH GHI ĐIỂM",
+    ];
+    this.hud?.updateReplayCamLabel?.(camLabels[this._replayCameraAngleIdx]);
+    this.audioEngine?.playUiClick?.("camera");
+  }
+  skipBroadcastReplay() {
+    this.persistentStateLock = !1;
+    this._activeBroadcastReplay = null;
+    this._pendingPostPointReplay = null;
+    this.audioEngine?.stopReplayCommentary?.();
+    this.audioEngine?.playBroadcastReplayWipeSfx?.();
+    if (this.hud?.endBroadcastReplayOverlay) {
+      this.hud.endBroadcastReplayOverlay();
+    } else {
+      this.hud?.setReplayMode?.(!1);
+    }
+    this._setupPointServe({ showBanner: !0 });
+  }
   _enterInstantReplayState({ persistent: e = !1 } = {}) {
+    const pChar = characterShopManager?.getSelectedCharacter?.("player") || { name: "Ammaar" };
+    const defaultMeta = {
+      winner: "player",
+      scorerName: `Đội Bạn (${pChar.name})`,
+      shotType: this.ball.shotType || "SMASH",
+      speedKmh: 188,
+      rallyCount: Math.max(2, this.ball.rallyStrokeCount || 3),
+      scoreText: this._formatCurrentScore()?.bannerScoreText || "15 - 00",
+      reason: "Nice Shot!",
+    };
     ((this.phase = "REPLAY"),
       (this.phaseTimer = 0),
       (this.cameraMode = "REPLAY_CAM"),
       (this.persistentStateLock = e),
       this.hud.hideCenterBanner(),
-      this.hud.setReplayMode(!0),
+      !e && this.hud.startBroadcastReplayOverlay
+        ? this.hud.startBroadcastReplayOverlay(defaultMeta)
+        : this.hud.setReplayMode(!0, defaultMeta),
       (this.cheerEnergy = 0.85),
-      this.audioEngine && !e && this.audioEngine.playVoiceCallout("replay"),
+      this.audioEngine &&
+        !e &&
+        (this.audioEngine.playBroadcastReplayStinger
+          ? this.audioEngine.playBroadcastReplayStinger(defaultMeta)
+          : this.audioEngine.playVoiceCallout("replay")),
       this._resetReplayNetExchangePose());
   }
   _resetReplayNetExchangePose() {
@@ -2291,6 +2424,10 @@ export class ArgonTennisEngine {
   _handleUserTossInput(e = {}) {
     if (this._isAnyModalOpen()) return !1;
     this.userHasInteracted = !0;
+    if (this.phase === "REPLAY" && !this.persistentStateLock && this.phaseTimer > 0.35) {
+      this.skipBroadcastReplay();
+      return !0;
+    }
     if (this.isMultiplayer && this.playerRole === "p2") {
       this.onlineMatchmaker &&
         this.onlineMatchmaker.currentRoomId &&
@@ -2313,6 +2450,10 @@ export class ArgonTennisEngine {
   _handleUserSwingInput(e = {}) {
     if (this._isAnyModalOpen()) return;
     this.userHasInteracted = !0;
+    if (this.phase === "REPLAY" && !this.persistentStateLock && this.phaseTimer > 0.35) {
+      this.skipBroadcastReplay();
+      return;
+    }
     if (this.isMultiplayer && this.playerRole === "p2") {
       this.onlineMatchmaker &&
         this.onlineMatchmaker.currentRoomId &&
@@ -4041,7 +4182,7 @@ export class ArgonTennisEngine {
       }
     }
     const t = this.swingVfx ? this.swingVfx.consumeHitStop(e) : e,
-      i = this.phase === "REPLAY" ? 0.38 : 1;
+      i = this.phase === "REPLAY" && !this._activeBroadcastReplay ? 0.38 : 1;
     for (
       this.physicsAccumulator = Math.min(
         this.physicsAccumulator + t * i,
@@ -4207,12 +4348,80 @@ export class ArgonTennisEngine {
             (this.opponent.racketKinematics.swingElapsed = 0.11)));
         return;
       }
+
+      if (this._activeBroadcastReplay && this._activeBroadcastReplay.frames?.length >= 2) {
+        const clip = this._activeBroadcastReplay,
+          frames = clip.frames,
+          dur = clip.durationSec || 3.1,
+          prog = Math.min(1, this.phaseTimer / dur),
+          exactIdx = prog * (frames.length - 1),
+          i0 = Math.floor(exactIdx),
+          i1 = Math.min(frames.length - 1, i0 + 1),
+          alpha = exactIdx - i0,
+          f0 = frames[i0],
+          f1 = frames[i1];
+
+        this.hud?.updateBroadcastReplayProgress?.(prog, dur);
+
+        this.ball.pos.set(
+          o.MathUtils.lerp(f0.bx, f1.bx, alpha),
+          o.MathUtils.lerp(f0.by, f1.by, alpha),
+          o.MathUtils.lerp(f0.bz, f1.bz, alpha),
+        );
+        this.ball.vel.set(f0.vx, f0.vy, f0.vz);
+        this.ball.shotType = f0.shotType || "TOPSPIN";
+        this.ball.isPowerShot = !!f0.isPower;
+        this.ballTrail.setStyle(this.ball.shotType, this.ball.isPowerShot);
+        this.ballTrail.pushPoint(this.ball.pos);
+
+        const applyActorPose = (actor, s0, s1) => {
+          if (!actor || !s0 || !s1) return;
+          actor.pos.set(
+            o.MathUtils.lerp(s0.px, s1.px, alpha),
+            o.MathUtils.lerp(s0.py, s1.py, alpha),
+            o.MathUtils.lerp(s0.pz, s1.pz, alpha),
+          );
+          actor.targetPos.copy(actor.pos);
+          if (actor.root) {
+            actor.root.rotation.y = o.MathUtils.lerp(s0.ry, s1.ry, alpha);
+          }
+          actor.stridePhase = o.MathUtils.lerp(s0.sp, s1.sp, alpha);
+          if (s0.sw > 0.05 && actor.swingTimer <= 0.04) {
+            actor.swingType = s0.st || "forehand";
+            actor.swingTimer = s0.sw;
+            actor.arcVisibleTimer = 0.35;
+            if (this.racketKinematics) {
+              this.racketKinematics.triggerSwing(actor, {
+                shotType: (f0.shotType || "topspin").toLowerCase(),
+                side:
+                  s0.st === "backhand"
+                    ? "backhand"
+                    : s0.st === "smash"
+                      ? "overhead"
+                      : "forehand",
+                speed: 1.15,
+                timing: "sweet",
+              });
+            }
+          }
+        };
+
+        applyActorPose(this.player, f0.p1, f1.p1);
+        applyActorPose(this.playerPartner, f0.p1b, f1.p1b);
+        applyActorPose(this.opponent, f0.p2, f1.p2);
+        applyActorPose(this.opponentPartner, f0.p2b, f1.p2b);
+
+        if (this.phaseTimer >= dur) {
+          this.skipBroadcastReplay();
+        }
+        return;
+      }
+
       (this.ball.pos.addScaledVector(this.ball.vel, e),
         (this.ball.vel.y -= L.GRAVITY * 0.65 * e),
         this.ballTrail.pushPoint(this.ball.pos),
-        this.phaseTimer > 1.45 &&
-          (this.hud.setReplayMode(!1),
-          this._setupPointServe({ showBanner: !0 })));
+        this.phaseTimer > 1.85 &&
+          this.skipBroadcastReplay());
       return;
     }
     if (
@@ -4228,6 +4437,7 @@ export class ArgonTennisEngine {
             this._startServeToss(this.player)),
       this.phase === "SERVE_TOSS")
     ) {
+      !this.autoPlayMode && this._recordLiveReplayFrame(e);
       const tossWind = this.courtMapManager?.getCurrentWindVector?.(this.elapsedTime);
       if (tossWind && tossWind.strength > 0.05) {
         this.ball.vel.x += tossWind.x * e * 0.65;
@@ -4273,10 +4483,19 @@ export class ArgonTennisEngine {
       return;
     }
     if (this.phase === "POINT_OVER") {
+      if (this._pendingPostPointReplay && !this.autoPlayMode) {
+        if (this.phaseTimer > 1.12) {
+          const clip = this._pendingPostPointReplay;
+          this._pendingPostPointReplay = null;
+          this._startBroadcastPointReplay(clip);
+        }
+        return;
+      }
       this.phaseTimer > 2.15 && this._setupPointServe({ showBanner: !0 });
       return;
     }
     if (this.phase === "RALLY" && this.ball.inPlay) {
+      !this.autoPlayMode && this._recordLiveReplayFrame(e);
       if (this.autoPlayMode && !this.userHasInteracted) {
         const s = (this.elapsedTime * 0.85) % 1,
           n = 0.42 + 0.34 * Math.sin(s * Math.PI * 2),
@@ -4722,6 +4941,7 @@ export class ArgonTennisEngine {
   }
   _awardPoint(e, t = "") {
     if (this.isMultiplayer && this.playerRole === "p2") return;
+    !this.autoPlayMode && this._recordLiveReplayFrame(0.03, !0);
     ((this.phase = "POINT_OVER"),
       (this.phaseTimer = 0),
       (this.ball.inPlay = !1),
@@ -4966,6 +5186,34 @@ export class ArgonTennisEngine {
         return;
       }
       const l = `Games: ${this.score.playerGames} - ${this.score.opponentGames}`;
+      if (!this.autoPlayMode && this._replayFrameBuffer?.length >= 4) {
+        const pChar = characterShopManager?.getSelectedCharacter?.("player") || { name: "Ammaar" };
+        const scorerName =
+          e === "player"
+            ? this.isMultiplayer
+              ? this.roomStatus?.hostName || "Player 1"
+              : `Đội Bạn (${pChar.name})`
+            : this.isMultiplayer
+              ? this.roomStatus?.guestName || "Player 2"
+              : "Đối Thủ (Bot AI)";
+        const shotType = String(this.ball.shotType || "TOPSPIN").toUpperCase();
+        const speedKmh = Math.max(
+          128,
+          Math.min(242, Math.round((this._lastRecordedBallSpeed || 24) * 6.8)),
+        );
+        this._pendingPostPointReplay = {
+          frames: this._replayFrameBuffer.slice(-72),
+          winner: e,
+          reason: t || "Game Point!",
+          scorerName,
+          shotType,
+          speedKmh,
+          rallyCount: Math.max(1, Number(this.ball.rallyStrokeCount || 1)),
+          scoreText: `SET ${this.score.playerGames} - ${this.score.opponentGames}`,
+          durationSec: 3.1,
+        };
+        this._lastCompletedReplayClip = this._pendingPostPointReplay;
+      }
       (this._recordBannerBroadcast("Game!", "style-gold", l),
         this.hud.showCenterBanner("Game!", {
           style: "style-gold",
@@ -4978,6 +5226,34 @@ export class ArgonTennisEngine {
     this._syncScoreboardHUD();
     const { bannerScoreText: n } = this._formatCurrentScore(),
       h = t === "Out" || t === "Net" ? "style-fault" : "style-score";
+    if (!this.autoPlayMode && this._replayFrameBuffer?.length >= 4) {
+      const pChar = characterShopManager?.getSelectedCharacter?.("player") || { name: "Ammaar" };
+      const scorerName =
+        e === "player"
+          ? this.isMultiplayer
+            ? this.roomStatus?.hostName || "Player 1"
+            : `Đội Bạn (${pChar.name})`
+          : this.isMultiplayer
+            ? this.roomStatus?.guestName || "Player 2"
+            : "Đối Thủ (Bot AI)";
+      const shotType = String(this.ball.shotType || "TOPSPIN").toUpperCase();
+      const speedKmh = Math.max(
+        125,
+        Math.min(242, Math.round((this._lastRecordedBallSpeed || 23) * 6.8)),
+      );
+      this._pendingPostPointReplay = {
+        frames: this._replayFrameBuffer.slice(-72),
+        winner: e,
+        reason: t || "Nice Shot!",
+        scorerName,
+        shotType,
+        speedKmh,
+        rallyCount: Math.max(1, Number(this.ball.rallyStrokeCount || 1)),
+        scoreText: n,
+        durationSec: 3.1,
+      };
+      this._lastCompletedReplayClip = this._pendingPostPointReplay;
+    }
     (this._recordBannerBroadcast(n, h, t || ""),
       this.hud.showCenterBanner(n, {
         style: h,
@@ -5570,14 +5846,46 @@ export class ArgonTennisEngine {
         const a = this.player.pos.x;
         (t.set(a * 0.16, 7.8, 22.8), i.set(a * 0.08, 0.35, 1.8));
       }
-    else
-      e === "REPLAY_CAM"
-        ? (t.set(2.35, 1.48, 4.15), i.set(-1.45, 0.95, -1.35))
-        : this.playerRole === "p2"
-          ? (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
-            i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
-          : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
-            i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
+    else if (e === "REPLAY_CAM") {
+      if (this._activeBroadcastReplay && !this.persistentStateLock) {
+        const angleIdx = this._replayCameraAngleIdx || 0,
+          winSide = this._activeBroadcastReplay.winner === "opponent" ? -1 : 1,
+          scorerActor = winSide > 0 ? this.player : this.opponent,
+          orbit = Math.sin(this.phaseTimer * 0.95) * 1.85;
+        if (angleIdx === 0) {
+          // Angle 0: TV Broadcast Action Tracking Cam (follows ball & court action)
+          t.set(
+            o.MathUtils.clamp(this.ball.pos.x * 0.65 + 4.8 + orbit, -7.5, 7.5),
+            3.35,
+            o.MathUtils.clamp(this.ball.pos.z * 0.48 + 7.2 * winSide, -16.5, 16.5),
+          );
+          i.set(
+            this.ball.pos.x * 0.75,
+            Math.max(0.55, this.ball.pos.y * 0.7),
+            this.ball.pos.z * 0.65,
+          );
+        } else if (angleIdx === 1) {
+          // Angle 1: Stadium High Aerial Cam
+          t.set(Math.sin(this.phaseTimer * 0.6) * 6.5, 11.8, 17.2 * winSide);
+          i.set(this.ball.pos.x * 0.5, 0.45, this.ball.pos.z * 0.4);
+        } else {
+          // Angle 2: Behind Scorer Hero Cam
+          t.set(
+            scorerActor.pos.x + orbit * 0.65,
+            2.45,
+            scorerActor.pos.z + 5.2 * winSide,
+          );
+          i.set(this.ball.pos.x * 0.85, 0.85, this.ball.pos.z * 0.85);
+        }
+      } else {
+        (t.set(2.35, 1.48, 4.15), i.set(-1.45, 0.95, -1.35));
+      }
+    } else
+      this.playerRole === "p2"
+        ? (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
+          i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
+        : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
+          i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
     return { targetPos: t, targetLook: i };
   }
   _snapCameraImmediate() {

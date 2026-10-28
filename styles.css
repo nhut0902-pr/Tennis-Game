@@ -9225,6 +9225,629 @@ button.is-super-morphing:not(.touch-action-btn):not(.shot-btn),
   }
 }
 
+/* ============================================================================
+   TV SPORTS / YOUTUBE FOOTBALL BROADCAST REPLAY SYSTEM & LOGO STINGER WIPE
+   ============================================================================ */
+
+body.replay-mode #touch-gamepad-layer,
+body.replay-mode #vip-mechanics-dock,
+body.replay-mode #timing-gauge-card,
+body.replay-mode #pc-hint-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease;
+}
+
+.broadcast-replay-system {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  pointer-events: none;
+  overflow: hidden;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.broadcast-replay-system.hidden {
+  display: none !important;
+}
+
+/* 1. Full-Screen TV Football Broadcast Logo Stinger Wipe */
+.replay-logo-stinger {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.replay-logo-stinger.hidden {
+  display: none !important;
+}
+
+.stinger-slash-bg {
+  position: absolute;
+  inset: -25%;
+  transform: rotate(-14deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stinger-blade {
+  width: 150%;
+  height: 28%;
+  transform: translateX(-120%);
+}
+
+.stinger-blade.blade-1 {
+  background: linear-gradient(90deg, #020617 0%, #0f172a 45%, #e11d48 85%, #f43f5e 100%);
+  box-shadow: 0 0 40px rgba(225, 29, 72, 0.75);
+}
+.stinger-blade.blade-2 {
+  background: linear-gradient(90deg, #090d16 0%, #1e293b 35%, #0284c7 75%, #38bdf8 100%);
+  box-shadow: 0 0 50px rgba(56, 189, 248, 0.8);
+}
+.stinger-blade.blade-3 {
+  background: linear-gradient(90deg, #0f172a 0%, #b45309 45%, #f59e0b 80%, #fde047 100%);
+  box-shadow: 0 0 50px rgba(250, 204, 21, 0.85);
+}
+.stinger-blade.blade-4 {
+  background: linear-gradient(90deg, #020617 0%, #0f172a 55%, #10b981 90%, #34d399 100%);
+}
+
+@keyframes stingerBladeSweep {
+  0% {
+    transform: translateX(-115%);
+  }
+  38%, 62% {
+    transform: translateX(-8%);
+  }
+  100% {
+    transform: translateX(115%);
+  }
+}
+
+@keyframes stingerCrestPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.35) rotate(-12deg);
+    filter: blur(8px);
+  }
+  32% {
+    opacity: 1;
+    transform: scale(1.08) rotate(0deg);
+    filter: blur(0px);
+  }
+  68% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+    filter: blur(6px);
+  }
+}
+
+.replay-logo-stinger.stinger-active .stinger-blade.blade-1 {
+  animation: stingerBladeSweep 0.84s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
+}
+.replay-logo-stinger.stinger-active .stinger-blade.blade-2 {
+  animation: stingerBladeSweep 0.84s cubic-bezier(0.22, 1, 0.36, 1) 0.04s forwards;
+}
+.replay-logo-stinger.stinger-active .stinger-blade.blade-3 {
+  animation: stingerBladeSweep 0.84s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+}
+.replay-logo-stinger.stinger-active .stinger-blade.blade-4 {
+  animation: stingerBladeSweep 0.84s cubic-bezier(0.22, 1, 0.36, 1) 0.11s forwards;
+}
+
+.stinger-center-emblem {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 48px;
+}
+
+.replay-logo-stinger.stinger-active .stinger-center-emblem {
+  animation: stingerCrestPop 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stinger-orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.stinger-orbit-ring.ring-outer {
+  width: 280px;
+  height: 280px;
+  border: 3px solid rgba(250, 204, 21, 0.75);
+  box-shadow: 0 0 40px rgba(250, 204, 21, 0.55), inset 0 0 25px rgba(56, 189, 248, 0.45);
+}
+
+.stinger-orbit-ring.ring-inner {
+  width: 224px;
+  height: 224px;
+  border: 2px dashed rgba(56, 189, 248, 0.85);
+}
+
+.stinger-shield-crest {
+  position: relative;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+  border: 2.5px solid #facc15;
+  border-radius: 22px;
+  padding: 18px 36px;
+  text-align: center;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.85),
+    0 0 36px rgba(250, 204, 21, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.stinger-tv-tag {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.stinger-main-wordmark {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(44px, 8vw, 72px);
+  font-weight: 900;
+  font-style: italic;
+  line-height: 0.95;
+  letter-spacing: 0.06em;
+  background: linear-gradient(180deg, #ffffff 0%, #fef08a 55%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(245, 158, 11, 0.6));
+}
+
+.stinger-sub-callout {
+  margin-top: 8px;
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e11d48, #be123c);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+/* 2. Broadcast TV & YouTube Sports Replay Overlay Frame */
+.broadcast-replay-hud {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 64px 20px 14px;
+  background:
+    radial-gradient(circle at center, transparent 58%, rgba(2, 6, 23, 0.42) 100%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+
+.replay-tv-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 5;
+}
+
+.replay-tv-bug-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.replay-rec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  border: 1.5px solid #fda4af;
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.5);
+}
+
+.replay-rec-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+  animation: replayRecBlink 0.9s ease-in-out infinite;
+}
+
+@keyframes replayRecBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(0.8); }
+}
+
+.replay-rec-text {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+}
+
+.replay-slowmo-pill,
+.replay-cam-pill {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  color: #e0f2fe;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(8px);
+}
+
+.replay-tv-channel-logo {
+  display: flex;
+  align-items: center;
+}
+
+.tv-logo-emblem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
+  border: 1.5px solid rgba(250, 204, 21, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.tv-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #020617;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  font-style: italic;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.tv-logo-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.tv-logo-title {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #f8fafc;
+  line-height: 1.05;
+}
+
+.tv-hd-tag {
+  display: inline-block;
+  padding: 1px 5px;
+  margin-left: 3px;
+  border-radius: 4px;
+  background: #38bdf8;
+  color: #020617;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.tv-logo-sub {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #facc15;
+}
+
+/* Broadcast Viewfinder Corner Brackets */
+.replay-frame-brackets {
+  position: absolute;
+  inset: 58px 18px 105px;
+  pointer-events: none;
+}
+
+.r-bracket {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(250, 204, 21, 0.55);
+  border-style: solid;
+}
+.r-bracket.tl { top: 0; left: 0; border-width: 2.5px 0 0 2.5px; }
+.r-bracket.tr { top: 0; right: 0; border-width: 2.5px 2.5px 0 0; }
+.r-bracket.bl { bottom: 0; left: 0; border-width: 0 0 2.5px 2.5px; }
+.r-bracket.br { bottom: 0; right: 0; border-width: 0 2.5px 2.5px 0; }
+
+/* Bottom Football / YouTube Lower-Third Scorer Card & Scrub Bar */
+.replay-tv-bottom-dock {
+  position: relative;
+  z-index: 6;
+  width: min(940px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.replay-lower-third-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(2, 6, 23, 0.95) 0%, rgba(15, 23, 42, 0.94) 70%, rgba(30, 41, 59, 0.92) 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.45);
+  border-left: 5px solid #facc15;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+}
+
+.replay-lt-badge {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 1px solid #6ee7b7;
+  color: #ffffff;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.replay-lt-badge.opponent-goal {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #fde047;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.replay-lt-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.replay-lt-headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.replay-lt-scorer {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.replay-lt-shot-tag {
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  color: #7dd3fc;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.replay-lt-subline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.replay-lt-commentary {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replay-voice-wave {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(234, 179, 8, 0.16);
+  border: 1px solid rgba(250, 204, 21, 0.45);
+}
+
+.replay-voice-wave .vw-bar {
+  width: 3px;
+  height: 10px;
+  border-radius: 2px;
+  background: #facc15;
+  display: inline-block;
+  animation: voiceWaveEq 0.55s ease-in-out infinite alternate;
+}
+.replay-voice-wave .vw-bar.b2 { animation-delay: 0.12s; height: 13px; }
+.replay-voice-wave .vw-bar.b3 { animation-delay: 0.24s; height: 8px; }
+.replay-voice-wave .vw-bar.b4 { animation-delay: 0.36s; height: 12px; }
+
+@keyframes voiceWaveEq {
+  0% { transform: scaleY(0.35); }
+  100% { transform: scaleY(1.1); }
+}
+
+.replay-voice-wave .vw-label {
+  margin-left: 4px;
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #fef08a;
+}
+
+.replay-lt-score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(250, 204, 21, 0.4);
+  flex-shrink: 0;
+}
+
+.replay-lt-score-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.replay-lt-score-val {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  font-weight: 900;
+  color: #facc15;
+}
+
+.replay-lt-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.replay-ctrl-btn {
+  padding: 8px 13px;
+  border-radius: 9px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.replay-ctrl-btn.cam-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 1.5px solid #7dd3fc;
+  color: #ffffff;
+}
+
+.replay-ctrl-btn.skip-btn {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  border: 1.5px solid #fda4af;
+  color: #ffffff;
+}
+
+/* YouTube-Style Red Timeline Progress Bar */
+.replay-youtube-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.replay-yt-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  position: relative;
+  overflow: visible;
+}
+
+.replay-yt-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff0033, #ff3355);
+  position: relative;
+  box-shadow: 0 0 12px rgba(255, 0, 51, 0.8);
+  transition: width 0.05s linear;
+}
+
+.replay-yt-playhead {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ff0033;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(255, 0, 51, 0.95);
+}
+
+.replay-yt-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(248, 250, 252, 0.82);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+  .broadcast-replay-hud {
+    padding: 52px 10px 10px;
+  }
+  .replay-lower-third-card {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .replay-lt-score-box {
+    padding: 3px 10px;
+  }
+  .replay-lt-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .replay-ctrl-btn {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 7px 10px;
+  }
+}
+
+
 
 
 

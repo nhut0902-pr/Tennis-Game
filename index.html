@@ -199,7 +199,111 @@
         <i class="dot dot-2"></i>
         <i class="dot dot-3"></i>
       </span>
-      <span class="replay-label">Replay</span>
+      <span class="replay-label">REPLAY • QUAY CHẬM</span>
+    </div>
+
+    <!-- TV Sports / YouTube Football Style Post-Point Replay System -->
+    <div id="broadcast-replay-system" class="broadcast-replay-system hidden" aria-live="polite">
+      <!-- 1. Full-Screen Broadcast Logo Stinger Wipe (Hiệu ứng chuyển cảnh Logo Replay kiểu Bóng đá / YouTube) -->
+      <div id="replay-logo-stinger" class="replay-logo-stinger hidden">
+        <div class="stinger-slash-bg">
+          <div class="stinger-blade blade-1"></div>
+          <div class="stinger-blade blade-2"></div>
+          <div class="stinger-blade blade-3"></div>
+          <div class="stinger-blade blade-4"></div>
+        </div>
+        <div class="stinger-center-emblem">
+          <div class="stinger-orbit-ring ring-outer"></div>
+          <div class="stinger-orbit-ring ring-inner"></div>
+          <div class="stinger-shield-crest">
+            <div class="stinger-tv-tag">ARGON SPORTS HD • LIVE BROADCAST</div>
+            <div class="stinger-main-wordmark">REPLAY</div>
+            <div id="stinger-sub-callout" class="stinger-sub-callout">PHA GHI ĐIỂM ĐẲNG CẤP</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Broadcast TV & YouTube Sports Replay Overlay Frame -->
+      <div id="broadcast-replay-hud" class="broadcast-replay-hud">
+        <!-- Top Bar: Left REC Replay Bug & Right TV Channel Logo -->
+        <div class="replay-tv-topbar">
+          <div class="replay-tv-bug-left">
+            <div class="replay-rec-pill">
+              <span class="replay-rec-dot"></span>
+              <span class="replay-rec-text">REPLAY</span>
+            </div>
+            <div class="replay-slowmo-pill" id="replay-slowmo-label">SLOW-MO 0.55x</div>
+            <div class="replay-cam-pill" id="replay-cam-angle-label">GÓC MÁY: TRUYỀN HÌNH</div>
+          </div>
+
+          <!-- Top-Right YouTube / Football TV Broadcast Logo Watermark -->
+          <div class="replay-tv-channel-logo">
+            <div class="tv-logo-emblem">
+              <span class="tv-logo-badge">AT</span>
+              <div class="tv-logo-text-group">
+                <span class="tv-logo-title">ARGON SPORTS <strong class="tv-hd-tag">HD</strong></span>
+                <span class="tv-logo-sub">OFFICIAL HIGHLIGHT REPLAY</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Corner Broadcast Frame Brackets -->
+        <div class="replay-frame-brackets" aria-hidden="true">
+          <span class="r-bracket tl"></span>
+          <span class="r-bracket tr"></span>
+          <span class="r-bracket bl"></span>
+          <span class="r-bracket br"></span>
+        </div>
+
+        <!-- Bottom Lower-Third Football Goal / Point Scorer Ticker & YouTube Scrub Bar -->
+        <div class="replay-tv-bottom-dock">
+          <div class="replay-lower-third-card">
+            <div class="replay-lt-badge" id="replay-lt-team-badge">GHI ĐIỂM!</div>
+            <div class="replay-lt-info">
+              <div class="replay-lt-headline">
+                <span id="replay-lt-scorer-name" class="replay-lt-scorer">ĐỘI BẠN (AMMAAR)</span>
+                <span id="replay-lt-shot-tag" class="replay-lt-shot-tag">SMASH • 196 KM/H</span>
+              </div>
+              <div class="replay-lt-subline">
+                <span id="replay-lt-commentary" class="replay-lt-commentary">Pha dứt điểm ghi bàn không thể cản phá!</span>
+                <span class="replay-voice-wave" id="replay-voice-wave" title="Bình luận viên đang phát">
+                  <i class="vw-bar b1"></i>
+                  <i class="vw-bar b2"></i>
+                  <i class="vw-bar b3"></i>
+                  <i class="vw-bar b4"></i>
+                  <span class="vw-label">VOICE BLV</span>
+                </span>
+              </div>
+            </div>
+            <div class="replay-lt-score-box">
+              <span class="replay-lt-score-label">TỶ SỐ HIỆN TẠI</span>
+              <strong id="replay-lt-score-val" class="replay-lt-score-val">15 - 00</strong>
+            </div>
+            <div class="replay-lt-actions">
+              <button id="btn-replay-switch-cam" type="button" class="replay-ctrl-btn cam-btn morph-game-btn" title="Đổi góc máy quay chậm (Phím C)">
+                <span>ĐỔI GÓC MÁY</span>
+              </button>
+              <button id="btn-replay-skip" type="button" class="replay-ctrl-btn skip-btn morph-game-btn" title="Bỏ qua phát lại (Phím Space / Enter)">
+                <span>BỎ QUA REPLAY</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- YouTube-Style Red Timeline Progress Scrub Bar -->
+          <div class="replay-youtube-timeline">
+            <div class="replay-yt-track">
+              <div id="replay-youtube-scrub-fill" class="replay-yt-fill" style="width: 0%;">
+                <span class="replay-yt-playhead"></span>
+              </div>
+            </div>
+            <div class="replay-yt-meta">
+              <span>HIGHLIGHT PHA GHI ĐIỂM VỪA RỒI</span>
+              <span id="replay-yt-time-label">00:00 / 00:03</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Pre-Match Versus Animation Overlay -->
