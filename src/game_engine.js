@@ -1151,6 +1151,7 @@ export class ArgonTennisEngine {
       "pwa-install-modal",
       "character-shop-modal",
       "addictive-hub-modal",
+      "landscape-settings-modal",
     ];
     return e.some((t) => {
       const i = document.getElementById(t);
@@ -5838,15 +5839,16 @@ export class ArgonTennisEngine {
         i.set(0, 0.8, -1.5));
     } else if (e === "SHOWCASE_CAM")
       (t.set(1.15, 1.54, 7.55), i.set(1.15, 1.12, 11.2));
-    else if (e === "SERVE_CAM")
+    else if (e === "SERVE_CAM") {
+      const preset = this._getLandscapeCamOffsets();
       if (this.playerRole === "p2") {
         const a = this.opponent.pos.x;
-        (t.set(a * 0.16, 7.8, -22.8), i.set(a * 0.08, 0.35, -1.8));
+        (t.set(a * 0.16, preset.camY, -preset.camZ), i.set(a * 0.08, preset.lookY, -preset.lookZ));
       } else {
         const a = this.player.pos.x;
-        (t.set(a * 0.16, 7.8, 22.8), i.set(a * 0.08, 0.35, 1.8));
+        (t.set(a * 0.16, preset.camY, preset.camZ), i.set(a * 0.08, preset.lookY, preset.lookZ));
       }
-    else if (e === "REPLAY_CAM") {
+    } else if (e === "REPLAY_CAM") {
       if (this._activeBroadcastReplay && !this.persistentStateLock) {
         const angleIdx = this._replayCameraAngleIdx || 0,
           winSide = this._activeBroadcastReplay.winner === "opponent" ? -1 : 1,
@@ -5880,13 +5882,54 @@ export class ArgonTennisEngine {
       } else {
         (t.set(2.35, 1.48, 4.15), i.set(-1.45, 0.95, -1.35));
       }
-    } else
+    } else {
+      const preset = this._getLandscapeCamOffsets();
       this.playerRole === "p2"
-        ? (t.set(this.opponent.pos.x * 0.16, 7.8, -22.8),
-          i.set(this.ball.pos.x * 0.12, 0.35, -1.8))
-        : (t.set(this.player.pos.x * 0.16, 7.8, 22.8),
-          i.set(this.ball.pos.x * 0.12, 0.35, 1.8));
+        ? (t.set(this.opponent.pos.x * preset.trackX, preset.camY, -preset.camZ),
+          i.set(this.ball.pos.x * 0.14, preset.lookY, -preset.lookZ))
+        : (t.set(this.player.pos.x * preset.trackX, preset.camY, preset.camZ),
+          i.set(this.ball.pos.x * 0.14, preset.lookY, preset.lookZ));
+    }
     return { targetPos: t, targetLook: i };
+  }
+  _getEffectiveViewport() {
+    const forced90 =
+      typeof document !== "undefined" &&
+      document.body.classList.contains("force-landscape-rotate");
+    if (forced90) {
+      return {
+        width: Math.max(window.innerWidth, window.innerHeight),
+        height: Math.min(window.innerWidth, window.innerHeight),
+        forced90: !0,
+      };
+    }
+    return {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      forced90: !1,
+    };
+  }
+  _getLandscapeCamOffsets() {
+    const vp = this._getEffectiveViewport();
+    const isLandscape =
+      (typeof document !== "undefined" &&
+        document.body.classList.contains("is-landscape-mode")) ||
+      vp.width > vp.height * 1.12;
+    if (!isLandscape) {
+      return { camY: 7.8, camZ: 22.8, lookY: 0.35, lookZ: 1.8, trackX: 0.16 };
+    }
+    const mode =
+      this.landscapeCameraPreset ||
+      this.hud?.landscapeConfig?.cameraMode ||
+      "wide_16_9";
+    if (mode === "low_pro") {
+      return { camY: 5.55, camZ: 18.8, lookY: 0.72, lookZ: 0.35, trackX: 0.22 };
+    }
+    if (mode === "tactical_high") {
+      return { camY: 9.35, camZ: 22.1, lookY: 0.25, lookZ: 0.85, trackX: 0.14 };
+    }
+    // Default wide_16_9 stadium widescreen framing
+    return { camY: 6.85, camZ: 20.3, lookY: 0.48, lookZ: 0.95, trackX: 0.19 };
   }
   _snapCameraImmediate() {
     const { targetPos: e, targetLook: t } = this._computeTargetCameraPose();
@@ -5919,10 +5962,11 @@ export class ArgonTennisEngine {
       rollZ !== 0 && (this.camera.rotation.z += rollZ));
   }
   _projectToScreen(e) {
-    const t = this._tmpProjVec.copy(e).project(this.camera),
+    const vp = this._getEffectiveViewport(),
+      t = this._tmpProjVec.copy(e).project(this.camera),
       i = t.z >= -1 && t.z <= 1,
-      a = (t.x * 0.5 + 0.5) * window.innerWidth,
-      s = (-t.y * 0.5 + 0.5) * window.innerHeight;
+      a = (t.x * 0.5 + 0.5) * vp.width,
+      s = (-t.y * 0.5 + 0.5) * vp.height;
     return { x: a, y: s, visible: i };
   }
   _updateProjectedHUD() {
@@ -5937,10 +5981,29 @@ export class ArgonTennisEngine {
     } else this.hud.updateServerTag(null, !1);
   }
   _onResize() {
-    ((this.camera.aspect = window.innerWidth / window.innerHeight),
-      this.camera.updateProjectionMatrix(),
-      this.renderer.setSize(window.innerWidth, window.innerHeight),
-      (this._staticModalFrameRendered = !1));
+    const vp = this._getEffectiveViewport();
+    const isLandscape =
+      (typeof document !== "undefined" &&
+        document.body.classList.contains("is-landscape-mode")) ||
+      vp.width > vp.height * 1.12;
+    if (this.camera) {
+      if (isLandscape) {
+        const mode =
+          this.landscapeCameraPreset ||
+          this.hud?.landscapeConfig?.cameraMode ||
+          "wide_16_9";
+        this.camera.fov =
+          mode === "low_pro" ? 45.5 : mode === "tactical_high" ? 43 : 44;
+      } else {
+        this.camera.fov = vp.width < 600 ? 53 : 45;
+      }
+      this.camera.aspect = vp.width / Math.max(1, vp.height);
+      this.camera.updateProjectionMatrix();
+    }
+    if (this.renderer) {
+      this.renderer.setSize(vp.width, vp.height);
+    }
+    this._staticModalFrameRendered = !1;
   }
   render() {
     this.renderer.render(this.scene, this.camera);

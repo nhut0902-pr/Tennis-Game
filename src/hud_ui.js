@@ -586,7 +586,465 @@ export class HudUI {
       });
     }
 
+    this._initLandscapeProController();
     this._initUniversalButtonMorphEngine();
+  }
+
+  getEffectiveViewportSize() {
+    if (typeof window === "undefined") return { width: 1280, height: 720, forced90: false };
+    const forced90 = typeof document !== "undefined" && document.body.classList.contains("force-landscape-rotate");
+    if (forced90) {
+      return {
+        width: Math.max(window.innerWidth, window.innerHeight),
+        height: Math.min(window.innerWidth, window.innerHeight),
+        forced90: true
+      };
+    }
+    return {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      forced90: false
+    };
+  }
+
+  _loadLandscapeConfig() {
+    const defaults = {
+      orientMode: "auto", // "auto" | "force_landscape" | "portrait"
+      cameraMode: "wide_16_9", // "wide_16_9" | "low_pro" | "tactical_high"
+      handedness: "right", // "right" | "left"
+      padScale: 100,
+      padOpacity: 90,
+      compactHud: true,
+      floatingRotateBtn: true,
+      dockCollapsed: false,
+      taskbarPosition: "bottom" // "bottom" | "top"
+    };
+    try {
+      const raw = localStorage.getItem("argon_tennis_landscape_pro_v1");
+      if (raw) {
+        return { ...defaults, ...JSON.parse(raw) };
+      }
+    } catch {}
+    return defaults;
+  }
+
+  _saveLandscapeConfig() {
+    try {
+      localStorage.setItem("argon_tennis_landscape_pro_v1", JSON.stringify(this.landscapeConfig));
+    } catch {}
+  }
+
+  triggerTaskbarMorphPulse(mode = "expand") {
+    const tb = document.getElementById("argon-morph-taskbar");
+    if (!tb) return;
+    tb.classList.remove("morph-pulse-expand", "morph-pulse-collapse", "morph-pulse-reposition");
+    void tb.offsetWidth;
+    if (mode === "collapse") {
+      tb.classList.add("morph-pulse-collapse");
+    } else if (mode === "reposition") {
+      tb.classList.add("morph-pulse-reposition");
+    } else {
+      tb.classList.add("morph-pulse-expand");
+    }
+    triggerPhysicalHardwareVibration("button_tap", { intensity: 0.9 });
+  }
+
+  toggleMorphTaskbarDrawer() {
+    this.landscapeConfig.dockCollapsed = !this.landscapeConfig.dockCollapsed;
+    this._saveLandscapeConfig();
+    this.applyLandscapeModeState();
+    this.triggerTaskbarMorphPulse(this.landscapeConfig.dockCollapsed ? "collapse" : "expand");
+  }
+
+  toggleMorphTaskbarPosition() {
+    this.landscapeConfig.taskbarPosition =
+      this.landscapeConfig.taskbarPosition === "top" ? "bottom" : "top";
+    this._saveLandscapeConfig();
+    this.applyLandscapeModeState();
+    this.triggerTaskbarMorphPulse("reposition");
+  }
+
+  _initLandscapeProController() {
+    this.landscapeConfig = this._loadLandscapeConfig();
+
+    const openModalBtns = [
+      document.getElementById("btn-hud-landscape"),
+      document.getElementById("btn-dock-landscape"),
+      document.getElementById("btn-title-landscape"),
+      document.getElementById("btn-pause-landscape")
+    ];
+    openModalBtns.forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (btn.id === "btn-pause-landscape") {
+          this.closePauseModal();
+        }
+        this.openLandscapeModal();
+      });
+    });
+
+    const btnHudRotate90 = document.getElementById("btn-hud-rotate-90");
+    if (btnHudRotate90) {
+      btnHudRotate90.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleQuickLandscapeRotate();
+      });
+    }
+
+    const btnQuickRotate = document.getElementById("btn-landscape-quick-rotate");
+    if (btnQuickRotate) {
+      btnQuickRotate.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleQuickLandscapeRotate();
+      });
+    }
+
+    const btnFullscreen = document.getElementById("btn-landscape-fullscreen");
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleFullscreenLandscape();
+      });
+    }
+
+    // Unified Morph Taskbar Expand / Collapse Toggle Buttons
+    const morphToggleBtns = [
+      document.getElementById("btn-taskbar-morph-toggle"),
+      document.getElementById("btn-landscape-collapse-dock")
+    ];
+    morphToggleBtns.forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleMorphTaskbarDrawer();
+      });
+    });
+
+    // Taskbar Flexible Position Switcher (Bottom ⇅ Top under Scoreboard)
+    const btnPosToggle = document.getElementById("btn-taskbar-pos-toggle");
+    if (btnPosToggle) {
+      btnPosToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleMorphTaskbarPosition();
+      });
+    }
+
+    // Career & Missions Hub Button inside Taskbar
+    const btnCareerHub = document.getElementById("btn-taskbar-career-hub");
+    if (btnCareerHub) {
+      btnCareerHub.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.__argonTennis?.addictiveFeatures?.openHubModal) {
+          window.__argonTennis.addictiveFeatures.openHubModal();
+        } else {
+          document.getElementById("btn-title-addictive-hub")?.click();
+        }
+      });
+    }
+
+    // Smooth horizontal wheel scrolling on the Taskbar Drawer
+    const drawerRail = document.querySelector(".taskbar-pill-rail");
+    if (drawerRail) {
+      drawerRail.addEventListener(
+        "wheel",
+        (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            drawerRail.scrollLeft += e.deltaY * 0.85;
+          }
+        },
+        { passive: true }
+      );
+    }
+
+    // Keyboard shortcut Tab to morph-toggle the Taskbar anytime in-game
+    window.addEventListener("keydown", (e) => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      if (e.code === "Tab" && document.documentElement.classList.contains("autoplay-mode")) {
+        e.preventDefault();
+        this.toggleMorphTaskbarDrawer();
+      }
+    });
+
+    document.querySelectorAll("[data-orient-mode]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.landscapeConfig.orientMode = btn.getAttribute("data-orient-mode") || "auto";
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    });
+
+    document.querySelectorAll("[data-lcam-mode]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.landscapeConfig.cameraMode = btn.getAttribute("data-lcam-mode") || "wide_16_9";
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    });
+
+    document.querySelectorAll("[data-handedness]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.landscapeConfig.handedness = btn.getAttribute("data-handedness") || "right";
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    });
+
+    const scaleSlider = document.getElementById("landscape-pad-scale");
+    if (scaleSlider) {
+      scaleSlider.addEventListener("input", () => {
+        this.landscapeConfig.padScale = Number(scaleSlider.value) || 100;
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    }
+
+    const opacitySlider = document.getElementById("landscape-pad-opacity");
+    if (opacitySlider) {
+      opacitySlider.addEventListener("input", () => {
+        this.landscapeConfig.padOpacity = Number(opacitySlider.value) || 90;
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    }
+
+    const cbCompact = document.getElementById("landscape-compact-hud");
+    if (cbCompact) {
+      cbCompact.addEventListener("change", () => {
+        this.landscapeConfig.compactHud = !!cbCompact.checked;
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    }
+
+    const cbFloating = document.getElementById("landscape-floating-rotate-btn");
+    if (cbFloating) {
+      cbFloating.addEventListener("change", () => {
+        this.landscapeConfig.floatingRotateBtn = !!cbFloating.checked;
+        this._saveLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    }
+
+    const btnReset = document.getElementById("btn-landscape-reset");
+    if (btnReset) {
+      btnReset.addEventListener("click", () => {
+        localStorage.removeItem("argon_tennis_landscape_pro_v1");
+        this.landscapeConfig = this._loadLandscapeConfig();
+        this.applyLandscapeModeState();
+      });
+    }
+
+    const closeBtns = [
+      document.getElementById("btn-close-landscape"),
+      document.getElementById("btn-close-landscape-x")
+    ];
+    closeBtns.forEach((b) => {
+      if (b) {
+        b.addEventListener("click", () => this.closeLandscapeModal());
+      }
+    });
+
+    const modal = document.getElementById("landscape-settings-modal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) this.closeLandscapeModal();
+      });
+    }
+
+    window.addEventListener("resize", () => this.applyLandscapeModeState());
+    window.addEventListener("orientationchange", () => {
+      setTimeout(() => this.applyLandscapeModeState(), 80);
+    });
+
+    this.applyLandscapeModeState();
+  }
+
+  openLandscapeModal() {
+    const modal = document.getElementById("landscape-settings-modal");
+    if (!modal) return;
+    this.applyLandscapeModeState();
+    modal.classList.remove("hidden");
+  }
+
+  closeLandscapeModal() {
+    const modal = document.getElementById("landscape-settings-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+    }
+  }
+
+  toggleQuickLandscapeRotate() {
+    const isPhysicallyPortrait = window.innerHeight > window.innerWidth;
+    if (this.landscapeConfig.orientMode === "force_landscape") {
+      this.landscapeConfig.orientMode = "auto";
+    } else if (isPhysicallyPortrait) {
+      this.landscapeConfig.orientMode = "force_landscape";
+    } else {
+      this.landscapeConfig.orientMode = "force_landscape";
+    }
+    this._saveLandscapeConfig();
+    this.applyLandscapeModeState();
+    this.triggerTaskbarMorphPulse("reposition");
+
+    // Try locking orientation if supported in fullscreen
+    if (this.landscapeConfig.orientMode === "force_landscape" && screen.orientation?.lock) {
+      screen.orientation.lock("landscape").catch(() => {});
+    }
+  }
+
+  async toggleFullscreenLandscape() {
+    try {
+      const docEl = document.documentElement;
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (!isFs) {
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+        if (screen.orientation?.lock) {
+          await screen.orientation.lock("landscape").catch(() => {});
+        }
+        if (window.innerHeight > window.innerWidth) {
+          this.landscapeConfig.orientMode = "force_landscape";
+          this._saveLandscapeConfig();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    } catch {}
+    this.applyLandscapeModeState();
+  }
+
+  applyLandscapeModeState() {
+    if (typeof document === "undefined" || typeof window === "undefined") return;
+    const cfg = this.landscapeConfig || this._loadLandscapeConfig();
+    const isPhysicalLandscape = window.innerWidth > window.innerHeight;
+    const isForceRotate90 = cfg.orientMode === "force_landscape" && !isPhysicalLandscape;
+    const isLandscapeActive =
+      cfg.orientMode === "force_landscape" ||
+      (cfg.orientMode === "auto" && isPhysicalLandscape);
+
+    const isCollapsed = !!cfg.dockCollapsed;
+    const isTopDocked = cfg.taskbarPosition === "top";
+
+    document.body.classList.toggle("force-landscape-rotate", isForceRotate90);
+    document.body.classList.toggle("is-landscape-mode", isLandscapeActive);
+    document.body.classList.toggle("is-portrait-locked", cfg.orientMode === "portrait");
+    document.body.classList.toggle("landscape-left-handed", cfg.handedness === "left");
+    document.body.classList.toggle("landscape-compact-hud", !!cfg.compactHud && isLandscapeActive);
+    document.body.classList.toggle("landscape-dock-collapsed", isCollapsed);
+    document.body.classList.toggle("taskbar-docked-top", isTopDocked);
+
+    // Sync #argon-morph-taskbar classes
+    const taskbar = document.getElementById("argon-morph-taskbar");
+    if (taskbar) {
+      taskbar.classList.toggle("is-collapsed", isCollapsed);
+      taskbar.classList.toggle("is-expanded", !isCollapsed);
+      taskbar.classList.toggle("docked-top", isTopDocked);
+    }
+
+    const toggleLabel = document.getElementById("taskbar-morph-toggle-label");
+    if (toggleLabel) {
+      toggleLabel.textContent = isCollapsed ? "TASKBAR +" : "THU GỌN";
+    }
+
+    const posLabel = document.getElementById("taskbar-pos-label");
+    if (posLabel) {
+      posLabel.textContent = isTopDocked ? "Vị trí: Đỉnh ⇅" : "Vị trí: Đáy ⇅";
+    }
+
+    const scaleRatio = Math.max(0.75, Math.min(1.3, (Number(cfg.padScale) || 100) / 100));
+    const opacityRatio = Math.max(0.4, Math.min(1, (Number(cfg.padOpacity) || 90) / 100));
+    document.documentElement.style.setProperty("--landscape-pad-scale", scaleRatio.toFixed(2));
+    document.documentElement.style.setProperty("--landscape-pad-opacity", opacityRatio.toFixed(2));
+
+    // Sync HUD Quick Rotate button visibility & label
+    const btnHudRotate90 = document.getElementById("btn-hud-rotate-90");
+    if (btnHudRotate90) {
+      btnHudRotate90.classList.toggle("hidden", !cfg.floatingRotateBtn);
+      btnHudRotate90.classList.toggle("active", isForceRotate90 || isLandscapeActive);
+      const span = btnHudRotate90.querySelector("span");
+      if (span) {
+        span.textContent = isForceRotate90 ? "VỀ DỌC" : "XOAY 90°";
+      }
+    }
+
+    const hudLandLabel = document.getElementById("hud-landscape-btn-label");
+    if (hudLandLabel) {
+      hudLandLabel.textContent = isLandscapeActive ? "MÀN NGANG ✓" : "MÀN NGANG";
+    }
+    const btnHudLand = document.getElementById("btn-hud-landscape");
+    if (btnHudLand) btnHudLand.classList.toggle("active", isLandscapeActive);
+
+    const landDot = document.getElementById("landscape-status-dot");
+    if (landDot) landDot.classList.toggle("active", isLandscapeActive);
+
+    const drawerLabel = document.getElementById("landscape-drawer-toggle-label");
+    if (drawerLabel) {
+      drawerLabel.textContent = isCollapsed ? "Mở Menu +" : "Thu Gọn";
+    }
+
+    // Sync Modal Controls
+    document.querySelectorAll("[data-orient-mode]").forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-orient-mode") === cfg.orientMode);
+    });
+    document.querySelectorAll("[data-lcam-mode]").forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-lcam-mode") === cfg.cameraMode);
+    });
+    document.querySelectorAll("[data-handedness]").forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-handedness") === cfg.handedness);
+    });
+
+    const scaleInput = document.getElementById("landscape-pad-scale");
+    const scaleVal = document.getElementById("landscape-pad-scale-val");
+    if (scaleInput) scaleInput.value = String(cfg.padScale);
+    if (scaleVal) scaleVal.textContent = `${cfg.padScale}%`;
+
+    const opInput = document.getElementById("landscape-pad-opacity");
+    const opVal = document.getElementById("landscape-pad-opacity-val");
+    if (opInput) opInput.value = String(cfg.padOpacity);
+    if (opVal) opVal.textContent = `${cfg.padOpacity}%`;
+
+    const cbCompact = document.getElementById("landscape-compact-hud");
+    if (cbCompact) cbCompact.checked = !!cfg.compactHud;
+
+    const cbFloating = document.getElementById("landscape-floating-rotate-btn");
+    if (cbFloating) cbFloating.checked = !!cfg.floatingRotateBtn;
+
+    const statusText = document.getElementById("landscape-live-status-text");
+    if (statusText) {
+      if (isForceRotate90) {
+        statusText.textContent = "Đang Ép Xoay Ngang 90° (Full Widescreen 16:9)";
+      } else if (isLandscapeActive) {
+        statusText.textContent = "Đang ở Chế Độ Màn Hình Ngang Pro (Widescreen)";
+      } else {
+        statusText.textContent = "Đang ở Màn Hình Dọc (Bấm nút Xoay 90° trên Taskbar để xoay ngang)";
+      }
+    }
+
+    const quickRotText = document.getElementById("btn-landscape-quick-rotate-text");
+    if (quickRotText) {
+      quickRotText.textContent =
+        cfg.orientMode === "force_landscape" ? "TẮT ÉP XOAY 90° (VỀ TỰ ĐỘNG)" : "BẬT ÉP XOAY NGANG 90° NGAY";
+    }
+
+    const fsText = document.getElementById("btn-landscape-fullscreen-text");
+    if (fsText) {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      fsText.textContent = isFs ? "THOÁT TOÀN MÀN HÌNH" : "TOÀN MÀN HÌNH + KHÓA NGANG";
+    }
+
+    // Notify 3D engine of viewport / camera preset update
+    if (window.__argonTennis) {
+      window.__argonTennis.landscapeCameraPreset = isLandscapeActive ? cfg.cameraMode : null;
+      window.__argonTennis._onResize?.();
+    }
   }
 
   _initUniversalButtonMorphEngine() {
@@ -1787,8 +2245,9 @@ export class HudUI {
       this._serverTagVis = true;
       this.elServerTag.classList.remove("hidden");
     }
-    const cx = Math.round(Math.max(80, Math.min(window.innerWidth - 80, pos.x)));
-    const cy = Math.round(Math.max(95, Math.min(window.innerHeight - 90, pos.y)));
+    const vp = this.getEffectiveViewportSize();
+    const cx = Math.round(Math.max(80, Math.min(vp.width - 80, pos.x)));
+    const cy = Math.round(Math.max(70, Math.min(vp.height - 70, pos.y)));
     if (this._serverTagX !== cx) {
       this._serverTagX = cx;
       this.elServerTag.style.left = `${cx}px`;
@@ -1806,8 +2265,9 @@ export class HudUI {
       return;
     }
     this.elPlayerNameplate.classList.remove("hidden");
-    const cx = Math.max(90, Math.min(window.innerWidth - 90, pos.x));
-    const cy = Math.max(120, Math.min(window.innerHeight - 50, pos.y));
+    const vp = this.getEffectiveViewportSize();
+    const cx = Math.max(90, Math.min(vp.width - 90, pos.x));
+    const cy = Math.max(90, Math.min(vp.height - 45, pos.y));
     this.elPlayerNameplate.style.left = `${cx.toFixed(1)}px`;
     this.elPlayerNameplate.style.top = `${cy.toFixed(1)}px`;
   }
@@ -1824,8 +2284,9 @@ export class HudUI {
 
     this.elTimingDetail.textContent = detail;
     if (screenPos && screenPos.visible) {
-      const cx = Math.max(110, Math.min(window.innerWidth - 110, screenPos.x));
-      const cy = Math.max(110, Math.min(window.innerHeight - 120, screenPos.y));
+      const vp = this.getEffectiveViewportSize();
+      const cx = Math.max(110, Math.min(vp.width - 110, screenPos.x));
+      const cy = Math.max(80, Math.min(vp.height - 95, screenPos.y));
       this.elTimingPopup.style.left = `${cx.toFixed(1)}px`;
       this.elTimingPopup.style.top = `${cy.toFixed(1)}px`;
     } else {

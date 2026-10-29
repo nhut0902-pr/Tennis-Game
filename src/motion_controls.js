@@ -484,8 +484,9 @@ export class MotionController {
     };
 
     const updateJoystickPos = (clientX, clientY) => {
-      const dx = clientX - this.joystickState.startX;
-      const dy = clientY - this.joystickState.startY;
+      const rawDx = clientX - this.joystickState.startX;
+      const rawDy = clientY - this.joystickState.startY;
+      const { dx, dy } = this._transformDeltaForLandscape(rawDx, rawDy);
       const dist = Math.hypot(dx, dy);
       const maxR = this.joystickState.maxRadius;
       const clampedDist = Math.min(dist, maxR);
@@ -1208,6 +1209,13 @@ export class MotionController {
     }
   }
 
+  _transformDeltaForLandscape(rawDx, rawDy) {
+    if (typeof document !== "undefined" && document.body.classList.contains("force-landscape-rotate")) {
+      return { dx: rawDy, dy: -rawDx };
+    }
+    return { dx: rawDx, dy: rawDy };
+  }
+
   _isModalOpen() {
     if (typeof document === "undefined") return false;
     const modalIds = [
@@ -1215,9 +1223,12 @@ export class MotionController {
       "firebase-lobby-modal",
       "controls-modal",
       "victory-modal",
+      "pause-game-modal",
       "companion-modal",
       "pwa-install-modal",
-      "character-shop-modal"
+      "character-shop-modal",
+      "addictive-hub-modal",
+      "landscape-settings-modal"
     ];
     return modalIds.some((id) => {
       const el = document.getElementById(id);
@@ -1330,8 +1341,9 @@ export class MotionController {
 
       const clientX = e.clientX ?? drag.lastX;
       const clientY = e.clientY ?? drag.lastY;
-      const dx = clientX - drag.startX;
-      const dy = clientY - drag.startY;
+      const rawDx = clientX - drag.startX;
+      const rawDy = clientY - drag.startY;
+      const { dx, dy } = this._transformDeltaForLandscape(rawDx, rawDy);
       const dt = Math.max(16, performance.now() - drag.startTime);
       const dist = Math.hypot(dx, dy);
 

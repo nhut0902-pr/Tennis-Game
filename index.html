@@ -112,7 +112,7 @@
 
   <!-- Main HUD Layer -->
   <div id="hud-root">
-    <!-- Top HUD Bar: Score & Games Won -->
+    <!-- Top HUD Bar: Score & Games Won (100% Unobstructed Scoreboard) -->
     <header id="top-hud-bar">
       <div id="games-pill-player" class="wii-games-pill" title="Player Games Won">
         <span class="game-bubble" data-slot="0"></span>
@@ -148,16 +148,6 @@
         <span class="game-bubble" data-slot="0"></span>
         <span class="game-bubble" data-slot="1"></span>
         <span class="game-bubble extra-slot hidden" data-slot="2"></span>
-      </div>
-
-      <!-- In-Game Quick Pause & Exit Controls -->
-      <div id="in-game-match-controls" class="in-game-match-controls">
-        <button id="btn-hud-pause" type="button" class="hud-quick-ctrl-btn pause-btn morph-game-btn" title="Tạm dừng trận đấu (Phím P / Esc)">
-          <span>TẠM DỪNG</span>
-        </button>
-        <button id="btn-hud-exit-match" type="button" class="hud-quick-ctrl-btn exit-btn morph-game-btn" title="Thoát về màn hình chính">
-          <span>THOÁT</span>
-        </button>
       </div>
     </header>
 
@@ -440,95 +430,138 @@
       </div>
     </div>
 
-    <!-- Bottom Right Dock: Timing Gauge & Motion Controls -->
-    <div id="bottom-right-dock" class="hud-corner-dock bottom-right-dock">
-      <div id="timing-gauge-card" class="timing-gauge-card">
-        <div class="gauge-header">
-          <span id="gauge-mode-title">SWING TIMING</span>
-          <span id="gauge-speed-readout">READY</span>
-        </div>
-        <div class="timing-bar-track">
-          <div class="timing-zone zone-early">EARLY (Cross)</div>
-          <div class="timing-zone zone-sweet">SWEET SPOT</div>
-          <div class="timing-zone zone-late">LATE (Line)</div>
-          <div id="timing-cursor" class="timing-cursor" style="left: 50%;"></div>
-        </div>
+    <!-- Top-Center Compact Swing Timing Gauge (Positioned cleanly under Scoreboard) -->
+    <div id="timing-gauge-card" class="timing-gauge-card">
+      <div class="gauge-header">
+        <span id="gauge-mode-title">SWING TIMING</span>
+        <span id="gauge-speed-readout">READY</span>
       </div>
+      <div class="timing-bar-track">
+        <div class="timing-zone zone-early">EARLY (Cross)</div>
+        <div class="timing-zone zone-sweet">SWEET SPOT</div>
+        <div class="timing-zone zone-late">LATE (Line)</div>
+        <div id="timing-cursor" class="timing-cursor" style="left: 50%;"></div>
+      </div>
+    </div>
 
-      <div class="motion-controls-row">
-        <!-- Webcam PIP View -->
-        <div id="webcam-pip-card" class="webcam-pip-card hidden">
-          <video id="webcam-video" autoplay playsinline muted></video>
-          <canvas id="webcam-canvas" width="160" height="120"></canvas>
-          <div class="pip-badge">
-            <span class="pip-live-dot"></span>
-            <span id="pip-motion-label">Webcam Swing</span>
-          </div>
+    <!-- Webcam PIP Floating Card -->
+    <div id="webcam-pip-card" class="webcam-pip-card hidden">
+      <video id="webcam-video" autoplay playsinline muted></video>
+      <canvas id="webcam-canvas" width="160" height="120"></canvas>
+      <div class="pip-badge">
+        <span class="pip-live-dot"></span>
+        <span id="pip-motion-label">Webcam Swing</span>
+      </div>
+    </div>
+
+    <!-- Unified Morphing Game Taskbar (1 Thanh Taskbar Gọn Gàng Kèm Animation Morph) -->
+    <div id="bottom-right-dock" class="hud-corner-dock bottom-right-dock unified-taskbar-host">
+      <nav id="argon-morph-taskbar" class="argon-morph-taskbar is-expanded" aria-label="Thanh Taskbar Điều Khiển Nhanh">
+        <div class="taskbar-liquid-glow" aria-hidden="true"></div>
+
+        <!-- Primary Capsule Core: Morph Toggle + Quick Match Essentials -->
+        <div id="in-game-match-controls" class="taskbar-primary-core">
+          <button id="btn-taskbar-morph-toggle" type="button" class="taskbar-morph-toggle-btn morph-game-btn" title="Thu gọn / Mở rộng thanh Taskbar (Phím Tab)">
+            <span class="tb-morph-orb" aria-hidden="true">
+              <i class="orb-dot d1"></i>
+              <i class="orb-dot d2"></i>
+              <i class="orb-dot d3"></i>
+            </span>
+            <span id="taskbar-morph-toggle-label" class="tb-toggle-text">THU GỌN</span>
+          </button>
+
+          <button id="btn-hud-rotate-90" type="button" class="taskbar-chip-btn rotate-chip morph-game-btn" title="Ép xoay ngang 90 độ ngay trên màn hình dọc">
+            <span>XOAY 90°</span>
+          </button>
+
+          <button id="btn-hud-landscape" type="button" class="taskbar-chip-btn landscape-chip morph-game-btn" title="Mở Cài đặt Chế độ Chơi Màn Hình Ngang Pro (Phím L)">
+            <span class="btn-dot" id="landscape-status-dot"></span>
+            <span id="hud-landscape-btn-label">MÀN NGANG</span>
+          </button>
+
+          <button id="btn-hud-pause" type="button" class="taskbar-chip-btn pause-chip morph-game-btn" title="Tạm dừng trận đấu (Phím P / Esc)">
+            <span>TẠM DỪNG</span>
+          </button>
+
+          <button id="btn-hud-exit-match" type="button" class="taskbar-chip-btn exit-chip morph-game-btn" title="Thoát về màn hình chính">
+            <span>THOÁT</span>
+          </button>
         </div>
 
-        <!-- Controls Dock Buttons -->
-        <div class="motion-buttons-col">
-          <button id="btn-webcam-toggle" class="hud-mini-btn motion-btn" type="button">
-            <span class="btn-dot" id="webcam-status-dot"></span>
-            <span>Webcam Motion</span>
-          </button>
-          <button id="btn-phone-racket" class="hud-mini-btn motion-btn hidden" type="button">
-            <span class="btn-dot" id="phone-status-dot"></span>
-            <span id="phone-status-label">Pocket Racket</span>
-          </button>
-
-          <!-- Bottom Left Dock (Buttons Pill Row) -->
-          <div id="bottom-left-dock" class="hud-corner-dock bottom-left-dock">
-            <div class="dock-pill-row">
-              <button id="btn-dock-pause" class="hud-mini-btn highlight-pause" type="button" title="Tạm dừng trận đấu (P)">
-                <span>Dừng Game</span>
-              </button>
-              <button id="btn-dock-exit" class="hud-mini-btn highlight-exit" type="button" title="Thoát trận về sảnh chính">
-                <span>Thoát Trận</span>
-              </button>
-              <button id="btn-hud-shop" class="hud-mini-btn highlight-shop" type="button" title="Mở Cửa Hàng & Nâng Cấp Nhân Vật 3D">
+        <!-- Morphing Expandable Drawer: All Game Utilities in One Sleek Scrollable Track -->
+        <div id="taskbar-morph-drawer" class="taskbar-morph-drawer">
+          <div id="bottom-left-dock" class="taskbar-drawer-inner">
+            <div class="dock-pill-row taskbar-pill-rail">
+              <button id="btn-hud-shop" class="hud-mini-btn highlight-shop taskbar-item" style="--tb-i: 1" type="button" title="Mở Cửa Hàng &amp; Nâng Cấp Nhân Vật 3D">
                 <span>Cửa Hàng 3D</span>
                 <span class="shop-coin-mini"><span data-shop-coins>1,850</span> XU</span>
               </button>
-              <button id="btn-map-cycle" class="hud-mini-btn highlight-online" type="button" title="Đổi Sân Đấu 3D / Map (M)">
+
+              <button id="btn-map-cycle" class="hud-mini-btn highlight-online taskbar-item" style="--tb-i: 2" type="button" title="Đổi Sân Đấu 3D / Map (M)">
                 <span>Sân:</span>
                 <strong id="hud-map-label">Melbourne Blue</strong>
               </button>
-              <button id="btn-controls-guide" class="hud-mini-btn highlight-btn" type="button" title="Mở bảng hướng dẫn & cài đặt điều khiển PC & Mobile">
+
+              <button id="btn-taskbar-career-hub" class="hud-mini-btn highlight-career taskbar-item" style="--tb-i: 3" type="button" title="Mở Trung Tâm Nhiệm Vụ, Battle Pass &amp; Tháp Boss">
+                <span>Nhiệm Vụ &amp; Sự Nghiệp</span>
+              </button>
+
+              <button id="btn-controls-guide" class="hud-mini-btn highlight-btn taskbar-item" style="--tb-i: 4" type="button" title="Mở bảng hướng dẫn &amp; cài đặt điều khiển PC &amp; Mobile">
                 <span>Điều khiển</span>
               </button>
-              <button id="btn-touch-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt phím cảm ứng trên màn hình">
+
+              <button id="btn-touch-toggle" class="hud-mini-btn taskbar-item" style="--tb-i: 5" type="button" title="Bật/Tắt phím cảm ứng trên màn hình">
                 <span class="btn-dot" id="touch-status-dot"></span>
                 <span>Phím ảo</span>
               </button>
-              <button id="btn-gyro-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt cảm biến lắc máy trên điện thoại">
+
+              <button id="btn-gyro-toggle" class="hud-mini-btn taskbar-item" style="--tb-i: 6" type="button" title="Bật/Tắt cảm biến lắc máy trên điện thoại">
                 <span class="btn-dot" id="gyro-status-dot"></span>
                 <span>Lắc máy</span>
               </button>
-              <button id="btn-audio-toggle" class="hud-mini-btn" type="button" title="Bật/Tắt âm nhạc & âm thanh">
+
+              <button id="btn-audio-toggle" class="hud-mini-btn taskbar-item" style="--tb-i: 7" type="button" title="Bật/Tắt âm nhạc &amp; âm thanh">
                 <span class="btn-dot music-on" id="audio-status-dot"></span>
                 <span id="audio-track-label">Lyria: Sunny Rally</span>
               </button>
-              <button id="btn-camera-cycle" class="hud-mini-btn" type="button" title="Đổi góc máy quay (C)">
+
+              <button id="btn-camera-cycle" class="hud-mini-btn taskbar-item" style="--tb-i: 8" type="button" title="Đổi góc máy quay (C)">
                 <span>Cam:</span>
                 <strong id="camera-mode-label">Rally</strong>
               </button>
-              <button id="btn-replay-trigger" class="hud-mini-btn" type="button" title="Xem lại pha bóng vừa rồi (R)">
+
+              <button id="btn-replay-trigger" class="hud-mini-btn taskbar-item" style="--tb-i: 9" type="button" title="Xem lại pha bóng vừa rồi (R)">
                 <span>Replay</span>
               </button>
-              <button id="btn-online-lobby" class="hud-mini-btn highlight-online" type="button" title="Mở sảnh đấu trực tuyến 1v1">
+
+              <button id="btn-online-lobby" class="hud-mini-btn highlight-online taskbar-item" style="--tb-i: 10" type="button" title="Mở sảnh đấu trực tuyến 1v1">
                 <span>1v1 Online</span>
               </button>
-              <button id="btn-hud-install-pwa" class="hud-mini-btn pwa-install-trigger" type="button" title="Cài đặt game về máy như ứng dụng">
-                <span>Cài đặt App</span>
+
+              <button id="btn-webcam-toggle" class="hud-mini-btn motion-btn taskbar-item" style="--tb-i: 11" type="button" title="Bật/Tắt điều khiển bằng Webcam">
+                <span class="btn-dot" id="webcam-status-dot"></span>
+                <span>Webcam</span>
               </button>
-              <button id="btn-multiplayer-modal" class="hud-mini-btn hidden" type="button" title="Chơi 1v1 Nhiều Người">
-                <span>1v1</span>
+
+              <button id="btn-hud-install-pwa" class="hud-mini-btn pwa-install-trigger taskbar-item" style="--tb-i: 12" type="button" title="Cài đặt game về máy như ứng dụng">
+                <span>Cài App</span>
               </button>
+
+              <button id="btn-taskbar-pos-toggle" class="hud-mini-btn taskbar-pos-btn taskbar-item" style="--tb-i: 13" type="button" title="Đổi vị trí thanh Taskbar (Đáy sân ⇅ Dưới bảng điểm)">
+                <span id="taskbar-pos-label">Vị trí: Đáy ⇅</span>
+              </button>
+
+              <!-- Hidden compatibility aliases so legacy listeners stay bound cleanly -->
+              <button id="btn-landscape-collapse-dock" class="hidden" type="button"><span id="landscape-drawer-toggle-label">Thu Gọn</span></button>
+              <button id="btn-dock-landscape" class="hidden" type="button"><span>Màn Ngang Pro</span></button>
+              <button id="btn-dock-pause" class="hidden" type="button"><span>Dừng Game</span></button>
+              <button id="btn-dock-exit" class="hidden" type="button"><span>Thoát Trận</span></button>
+              <button id="btn-phone-racket" class="hidden" type="button"><span class="btn-dot" id="phone-status-dot"></span><span id="phone-status-label">Pocket Racket</span></button>
+              <button id="btn-multiplayer-modal" class="hidden" type="button"><span>1v1</span></button>
             </div>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
   </div>
 
@@ -676,11 +709,14 @@
         </button>
       </div>
 
-      <div class="title-controls-cta title-cta-dual">
-        <button id="btn-title-controls" type="button" class="wii-subtle-pill-btn">
-          <span>Hướng dẫn điều khiển & Cài đặt</span>
+      <div class="title-controls-cta title-cta-triple">
+        <button id="btn-title-landscape" type="button" class="wii-subtle-pill-btn highlight-landscape-cta morph-game-btn">
+          <span>Chế Độ Màn Hình Ngang Pro</span>
         </button>
-        <button id="btn-title-install-pwa" type="button" class="wii-subtle-pill-btn pwa-install-trigger">
+        <button id="btn-title-controls" type="button" class="wii-subtle-pill-btn morph-game-btn">
+          <span>Hướng dẫn điều khiển &amp; Cài đặt</span>
+        </button>
+        <button id="btn-title-install-pwa" type="button" class="wii-subtle-pill-btn pwa-install-trigger morph-game-btn">
           <span>Cài đặt App (Chơi Offline)</span>
         </button>
       </div>
@@ -1072,6 +1108,13 @@
           <span class="morph-btn-content">
             <span class="morph-btn-main">PHÒNG THAY ĐỒ &amp; NÂNG CẤP 3D</span>
             <span class="morph-btn-sub">Đổi cầu thủ, nâng cấp chỉ số &amp; gói VIP</span>
+          </span>
+        </button>
+
+        <button id="btn-pause-landscape" type="button" class="pause-action-btn landscape morph-game-btn">
+          <span class="morph-btn-content">
+            <span class="morph-btn-main">CHẾ ĐỘ MÀN HÌNH NGANG PRO</span>
+            <span class="morph-btn-sub">Xoay ngang 90°, Toàn màn hình, Đảo tay cầm &amp; Góc máy 16:9</span>
           </span>
         </button>
 
@@ -1761,6 +1804,154 @@
       <div class="pwa-card-footer">
         <button id="btn-close-pwa-modal" type="button" class="wii-ok-btn">
           <span>ĐÃ HIỂU</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Landscape Pro Mode Suite Modal (Các Tính Năng Cho Phép Chơi Màn Hình Ngang) -->
+  <div id="landscape-settings-modal" class="wii-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="landscape-modal-title">
+    <div class="landscape-pro-card">
+      <div class="landscape-card-header">
+        <div class="landscape-title-group">
+          <span class="landscape-kicker">TRẢI NGHIỆM CONSOLE WIDESCREEN 16:9 • MOBILE &amp; TABLET</span>
+          <h2 id="landscape-modal-title" class="landscape-card-title">TRUNG TÂM CHƠI MÀN HÌNH NGANG PRO</h2>
+        </div>
+        <button id="btn-close-landscape-x" type="button" class="controls-close-x morph-game-btn" aria-label="Đóng">Đóng</button>
+      </div>
+
+      <div class="landscape-status-strip">
+        <div class="landscape-status-info">
+          <span class="landscape-status-label">TRẠNG THÁI HIỆN TẠI:</span>
+          <strong id="landscape-live-status-text" class="landscape-status-val">Tự động nhận diện khung hình</strong>
+        </div>
+        <div class="landscape-quick-actions">
+          <button id="btn-landscape-quick-rotate" type="button" class="landscape-top-action-btn rotate morph-game-btn">
+            <span id="btn-landscape-quick-rotate-text">BẬT XOAY NGANG 90° NGAY</span>
+          </button>
+          <button id="btn-landscape-fullscreen" type="button" class="landscape-top-action-btn fullscreen morph-game-btn">
+            <span id="btn-landscape-fullscreen-text">TOÀN MÀN HÌNH + KHÓA NGANG</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="landscape-pro-body">
+        <!-- Feature 1: Orientation Lock / Force 90deg Rotate -->
+        <div class="landscape-feature-section">
+          <div class="lf-header">
+            <span class="lf-title">01. CHẾ ĐỘ XOAY KHUNG HÌNH (ORIENTATION &amp; FORCE ROTATE 90°)</span>
+            <span class="lf-badge">HỖ TRỢ CẢ KHI ĐIỆN THOẠI KHÓA XOAY</span>
+          </div>
+          <p class="lf-desc">Chọn <strong>Ép Xoay Ngang 90°</strong> nếu điện thoại của bạn đang bật khóa xoay dọc hoặc trình duyệt không tự xoay ngang — toàn bộ sân 3D và cần gạt sẽ tự động xoay ngang chuẩn 100%.</p>
+          <div class="lf-choice-grid cols-3" id="landscape-orientation-group">
+            <button type="button" class="lf-choice-btn active morph-game-btn" data-orient-mode="auto">
+              <span class="lf-choice-title">Tự Động Theo Máy</span>
+              <span class="lf-choice-sub">Tự chuyển bố cục khi quay ngang điện thoại</span>
+            </button>
+            <button type="button" class="lf-choice-btn morph-game-btn" data-orient-mode="force_landscape">
+              <span class="lf-choice-title">Ép Xoay Ngang 90°</span>
+              <span class="lf-choice-sub">Xoay ngang toàn bộ sân &amp; tay cầm ngay lập tức</span>
+            </button>
+            <button type="button" class="lf-choice-btn morph-game-btn" data-orient-mode="portrait">
+              <span class="lf-choice-title">Khóa Giao Diện Dọc</span>
+              <span class="lf-choice-sub">Giữ bố cục màn hình dọc tiêu chuẩn</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature 2: Widescreen 3D Camera FOV & Angle -->
+        <div class="landscape-feature-section">
+          <div class="lf-header">
+            <span class="lf-title">02. GÓC MÁY QUAY SÂN ĐẤU MÀN HÌNH NGANG (WIDESCREEN CAMERA FOV)</span>
+            <span class="lf-badge">TỐI ƯU TẦM NHÌN 2 BIÊN DỌC</span>
+          </div>
+          <div class="lf-choice-grid cols-3" id="landscape-camera-group">
+            <button type="button" class="lf-choice-btn active morph-game-btn" data-lcam-mode="wide_16_9">
+              <span class="lf-choice-title">Sân Vận Động Rộng 16:9</span>
+              <span class="lf-choice-sub">Mở rộng góc nhìn 2 hành lang biên &amp; lưới</span>
+            </button>
+            <button type="button" class="lf-choice-btn morph-game-btn" data-lcam-mode="low_pro">
+              <span class="lf-choice-title">Góc Thấp Sát Sân Pro</span>
+              <span class="lf-choice-sub">Cảm giác tốc độ bóng căng như máy Console</span>
+            </button>
+            <button type="button" class="lf-choice-btn morph-game-btn" data-lcam-mode="tactical_high">
+              <span class="lf-choice-title">Góc Cao Chiến Thuật</span>
+              <span class="lf-choice-sub">Bao quát toàn bộ mặt sân để điều bóng chéo góc</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature 3: Split-Thumb Ergonomic Layout & Left-Handed Mode -->
+        <div class="landscape-feature-section">
+          <div class="lf-header">
+            <span class="lf-title">03. BỐ CỤC TAY CẦM 2 NGÓN CÁI &amp; ĐẢO CHIỀU TRÁI/PHẢI</span>
+            <span class="lf-badge">ERGONOMIC SPLIT-PAD</span>
+          </div>
+          <div class="lf-choice-grid cols-2" id="landscape-handedness-group">
+            <button type="button" class="lf-choice-btn active morph-game-btn" data-handedness="right">
+              <span class="lf-choice-title">Chuẩn Console (Thuận Tay Phải)</span>
+              <span class="lf-choice-sub">Cần gạt di chuyển bên Trái • Cụm nút Đánh / Giao / Smash bên Phải</span>
+            </button>
+            <button type="button" class="lf-choice-btn morph-game-btn" data-handedness="left">
+              <span class="lf-choice-title">Đảo Tay Cầm (Thuận Tay Trái)</span>
+              <span class="lf-choice-sub">Cụm nút Đánh / Giao / Smash bên Trái • Cần gạt di chuyển bên Phải</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature 4: Gamepad Size, Opacity & Compact Esports HUD -->
+        <div class="landscape-feature-section lf-sliders-grid">
+          <div class="lf-slider-box">
+            <div class="lf-slider-head">
+              <label for="landscape-pad-scale">KÍCH THƯỚC NÚT BẤM &amp; CẦN GẠT</label>
+              <strong id="landscape-pad-scale-val" class="lf-val-pill">100%</strong>
+            </div>
+            <input type="range" id="landscape-pad-scale" min="80" max="125" step="5" value="100" class="wii-range-slider" />
+            <div class="speed-slider-labels">
+              <span>Nhỏ gọn (80%)</span>
+              <span>Chuẩn (100%)</span>
+              <span>Cỡ lớn (125%)</span>
+            </div>
+          </div>
+
+          <div class="lf-slider-box">
+            <div class="lf-slider-head">
+              <label for="landscape-pad-opacity">ĐỘ TRONG SUỐT TAY CẦM ẢO</label>
+              <strong id="landscape-pad-opacity-val" class="lf-val-pill">90%</strong>
+            </div>
+            <input type="range" id="landscape-pad-opacity" min="45" max="100" step="5" value="90" class="wii-range-slider" />
+            <div class="speed-slider-labels">
+              <span>Mờ (45%)</span>
+              <span>Vừa (75%)</span>
+              <span>Rõ nét (100%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 5: Esports HUD Toggles -->
+        <div class="landscape-toggles-row">
+          <label class="lf-toggle-card" for="landscape-compact-hud">
+            <div class="lf-toggle-text">
+              <span class="lf-toggle-title">Giao Diện Thi Đấu Tinh Gọn (Esports Compact HUD)</span>
+              <span class="lf-toggle-sub">Đưa thanh căn lực lên đỉnh sân và thu gọn thanh menu phụ để giải phóng 90% tầm nhìn sân ngang.</span>
+            </div>
+            <input type="checkbox" id="landscape-compact-hud" class="wii-toggle-checkbox" checked />
+          </label>
+
+          <label class="lf-toggle-card" for="landscape-floating-rotate-btn">
+            <div class="lf-toggle-text">
+              <span class="lf-toggle-title">Nút Xoay Ngang Nhanh Nổi Trên Màn Hình</span>
+              <span class="lf-toggle-sub">Hiển thị nút chuyển nhanh Dọc ⇄ Ngang ngay trên góc sân để đổi tư thế cầm máy bất cứ lúc nào.</span>
+            </div>
+            <input type="checkbox" id="landscape-floating-rotate-btn" class="wii-toggle-checkbox" checked />
+          </label>
+        </div>
+      </div>
+
+      <div class="landscape-card-footer">
+        <button id="btn-landscape-reset" type="button" class="wii-footer-btn secondary morph-game-btn">Khôi Phục Mặc Định</button>
+        <button id="btn-close-landscape" type="button" class="wii-ok-btn primary morph-game-btn">
+          <span>ÁP DỤNG &amp; VÀO SÂN NGANG</span>
         </button>
       </div>
     </div>

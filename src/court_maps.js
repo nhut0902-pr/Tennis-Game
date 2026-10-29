@@ -998,8 +998,8 @@ export class CourtMapManager {
       el.textContent = `Trời Quang (+${totalBonusPct}% Xu)`;
       return;
     }
-    const dirArrow = wind.dirSign < 0 ? "<<< GIÓ TẠT TRÁI" : "GIÓ TẠT PHẢI >>>";
-    el.textContent = `${wCfg.name}: ${dirArrow} ${wind.speedKmh} KM/H (+${totalBonusPct}% XU)`;
+    const dirArrow = wind.dirSign < 0 ? "◀ Gió Trái" : "Gió Phải ▶";
+    el.textContent = `${wCfg.name}: ${dirArrow} ${wind.speedKmh}km/h (+${totalBonusPct}% Xu)`;
   }
 
   _buildThemeProps(mapCfg) {
@@ -1188,9 +1188,10 @@ export class CourtMapManager {
         const wBtn = document.createElement("button");
         wBtn.id = "btn-weather-cycle";
         wBtn.type = "button";
-        wBtn.className = "hud-mini-btn highlight-wind-storm";
+        wBtn.className = "hud-mini-btn highlight-wind-storm taskbar-item";
+        wBtn.style.setProperty("--tb-i", "2");
         wBtn.title = "Đổi chế độ Gió Lốc / Mưa Bão / Siêu Bão ngay trong trận";
-        wBtn.innerHTML = `<strong id="hud-weather-live-label">Mưa Bão: <<< GIÓ TẠT TRÁI 98 KM/H (+260% XU)</strong>`;
+        wBtn.innerHTML = `<strong id="hud-weather-live-label">Trời Quang (+10% Xu)</strong>`;
         wBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           this.cycleNextWeather();
